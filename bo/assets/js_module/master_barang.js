@@ -213,9 +213,9 @@ function save()
     });
 }
 
-function delete_user(id){
+function delete_barang(id){
     swalConfirmDelete.fire({
-        title: 'Hapus Data User ?',
+        title: 'Hapus Data ?',
         text: "Data Akan dihapus permanen ?",
         type: 'warning',
         showCancelButton: true,
@@ -225,13 +225,13 @@ function delete_user(id){
       }).then((result) => {
         if (result.value) {
             $.ajax({
-                url : base_url + 'master_user/delete_user',
+                url : base_url + 'master_barang/delete_barang',
                 type: "POST",
                 dataType: "JSON",
                 data : {id:id},
                 success: function(data)
                 {
-                    swalConfirm.fire('Berhasil Hapus User!', data.pesan, 'success');
+                    swalConfirm.fire('Berhasil Hapus Barang!', data.pesan, 'success');
                     table.ajax.reload();
                 },
                 error: function (jqXHR, textStatus, errorThrown)

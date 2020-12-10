@@ -69,7 +69,7 @@ class Master_barang extends CI_Controller {
 						<button class="dropdown-item" onclick="edit_barang(\''.$barang->id_barang.'\')">
 							<i class="la la-pencil"></i> Edit Barang
 						</button>
-						<button class="dropdown-item" onclick="delete_user(\''.$barang->id_barang.'\')">
+						<button class="dropdown-item" onclick="delete_barang(\''.$barang->id_barang.'\')">
 							<i class="la la-trash"></i> Hapus
 						</button>
 			';
@@ -288,16 +288,16 @@ class Master_barang extends CI_Controller {
 	 * Hanya melakukan softdelete saja
 	 * isi kolom updated_at dengan datetime now()
 	 */
-	public function delete_user()
+	public function delete_barang()
 	{
-		$id = $this->input->post('id');
-		$del = $this->m_user->softdelete_by_id($id);
+		$id_barang = $this->input->post('id');
+		$del = $this->m_barang->softdelete_by_id($id_barang);
 		if($del) {
 			$retval['status'] = TRUE;
-			$retval['pesan'] = 'Data Master User dihapus';
+			$retval['pesan'] = 'Data Master Barang berhasil dihapus';
 		}else{
 			$retval['status'] = FALSE;
-			$retval['pesan'] = 'Data Master User dihapus';
+			$retval['pesan'] = 'Data Master Barang berhasil dihapus';
 		}
 
 		echo json_encode($retval);

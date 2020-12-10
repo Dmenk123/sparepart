@@ -140,8 +140,8 @@ class M_barang extends CI_Model
 	{
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$where = ['id' => $id];
-		$data = ['deleted_at' => $timestamp, 'status' => null];
+		$where = ['id_barang' => $id];
+		$data = ['deleted_at' => $timestamp];
 		return $this->db->update($this->table, $data, $where);
 	}
 
