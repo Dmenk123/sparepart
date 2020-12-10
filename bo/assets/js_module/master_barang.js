@@ -88,13 +88,13 @@ function add_menu()
 	$('#modal_title').text('Tambah Master Barang'); 
 }
 
-function edit_user(id)
+function edit_barang(id)
 {
     reset_modal_form();
     save_method = 'update';
     //Ajax Load data from ajax
     $.ajax({
-        url : base_url + 'master_user/edit_user',
+        url : base_url + 'master_barang/edit_barang',
         type: "POST",
         dataType: "JSON",
         data : {id:id},
@@ -103,18 +103,17 @@ function edit_user(id)
             // data.data_menu.forEach(function(dataLoop) {
             //     $("#parent_menu").append('<option value = '+dataLoop.id+' class="append-opt">'+dataLoop.nama+'</option>');
             // });
-            $('#div_pass_lama').css("display","block");
-            $('#div_preview_foto').css("display","block");
-            $('#div_skip_password').css("display", "block");
-            $('[name="id_user"]').val(data.old_data.id);
-            $('[name="username"]').val(data.old_data.username).attr('disabled', true);
-            $('[name="role"]').val(data.old_data.id_role);
-            $('[name="status"]').val(data.old_data.status);
+            $('[name="id_barang"]').val(data.old_data.id_barang);
+            $('[name="nama"]').val(data.old_data.nama);
+            $('[name="sku"]').val(data.old_data.sku);
+            $('[name="kategori"]').val(data.old_data.id_kategori);
+            $('[name="harga"]').val(data.old_data.harga);
+            $('[name="kategori"]').val(data.old_data.id_kategori);
             // $("#pegawai").val(data.old_data.id_pegawai).trigger("change");
             $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
-            $('#modal_user_form').modal('show');
-	        $('#modal_title').text('Edit User'); 
-
+            $('#modal_barang_form').modal('show');
+	        $('#modal_title').text('Edit Master Barang'); 
+            // console.log(data.foto_encoded);
         },
         error: function (jqXHR, textStatus, errorThrown)
         {
@@ -137,8 +136,8 @@ function save()
         url = base_url + 'master_barang/add_data_barang';
         txtAksi = 'Tambah master Barang';
     }else{
-        url = base_url + 'master_user/update_data_user';
-        txtAksi = 'Edit User';
+        url = base_url + 'master_barang/update_data_barang';
+        txtAksi = 'Edit Master Barang';
     }
     
     var form = $('#form-user')[0];
@@ -146,50 +145,71 @@ function save()
     
     $("#btnSave").prop("disabled", true);
     $('#btnSave').text('Menyimpan Data'); //change button text
-    $.ajax({
-        type: "POST",
-        enctype: 'multipart/form-data',
-        url: url,
-        data: data,
-        dataType: "JSON",
-        processData: false, // false, it prevent jQuery form transforming the data into a query string
-        contentType: false, 
-        cache: false,
-        timeout: 600000,
-        success: function (data) {
-            if(data.status) {
-                swal.fire("Sukses!!", "Aksi "+txtAksi+" Berhasil", "success");
-                $("#btnSave").prop("disabled", false);
-                $('#btnSave').text('Simpan');
-                
-                reset_modal_form();
-                $(".modal").modal('hide');
-                
-                reload_table();
-            }else {
-                for (var i = 0; i < data.inputerror.length; i++) 
-                {
-                    if (data.inputerror[i] != 'pegawai') {
-                        $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
-                        $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
-                    }else{
-                        //ikut style global
-                        $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
+    swalConfirmDelete.fire({
+        title: 'Ubah Status Data Pegawai ?',
+        text: "Apakah Anda Yakin ?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Ubah Status!',
+        cancelButtonText: 'Tidak, Batalkan!',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                type: "POST",
+                enctype: 'multipart/form-data',
+                url: url,
+                data: data,
+                dataType: "JSON",
+                processData: false, // false, it prevent jQuery form transforming the data into a query string
+                contentType: false, 
+                cache: false,
+                timeout: 600000,
+                success: function (data) {
+                    if(data.status) {
+                        swal.fire("Sukses!!", "Aksi "+txtAksi+" Berhasil", "success");
+                        $("#btnSave").prop("disabled", false);
+                        $('#btnSave').text('Simpan');
+                        
+                        reset_modal_form();
+                        $(".modal").modal('hide');
+                        
+                        reload_table();
+                    }else {
+                        for (var i = 0; i < data.inputerror.length; i++) 
+                        {
+                            if (data.inputerror[i] != 'pegawai') {
+                                $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
+                                $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
+                            }else{
+                                //ikut style global
+                                $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
+                            }
+                        }
+
+                        $("#btnSave").prop("disabled", false);
+                        $('#btnSave').text('Simpan');
                     }
+                },
+                error: function (e) {
+                    console.log("ERROR : ", e);
+                    $("#btnSave").prop("disabled", false);
+                    $('#btnSave').text('Simpan');
+
+                    reset_modal_form();
+                    $(".modal").modal('hide');
                 }
-
-                $("#btnSave").prop("disabled", false);
-                $('#btnSave').text('Simpan');
-            }
-        },
-        error: function (e) {
-            console.log("ERROR : ", e);
-            $("#btnSave").prop("disabled", false);
-            $('#btnSave').text('Simpan');
-
-            reset_modal_form();
-            $(".modal").modal('hide');
-        }
+            });
+        }else if (
+            /* Read more about handling dismissals below */
+            result.dismiss === Swal.DismissReason.cancel
+          ) {
+            swalConfirm.fire(
+              'Dibatalkan',
+              'Aksi Dibatalakan',
+              'error'
+            )
+          }
     });
 }
 

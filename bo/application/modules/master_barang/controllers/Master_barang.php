@@ -66,8 +66,8 @@ class Master_barang extends CI_Controller {
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_user(\''.$barang->id_barang.'\')">
-							<i class="la la-pencil"></i> Edit User
+						<button class="dropdown-item" onclick="edit_barang(\''.$barang->id_barang.'\')">
+							<i class="la la-pencil"></i> Edit Barang
 						</button>
 						<button class="dropdown-item" onclick="delete_user(\''.$barang->id_barang.'\')">
 							<i class="la la-trash"></i> Hapus
@@ -90,7 +90,7 @@ class Master_barang extends CI_Controller {
 		echo json_encode($output);
 	}
 
-	public function edit_user()
+	public function edit_barang()
 	{
 		$this->load->library('Enkripsi');
 		$id_user = $this->session->userdata('id_user');
@@ -99,26 +99,26 @@ class Master_barang extends CI_Controller {
 		$id = $this->input->post('id');
 		//$oldData = $this->m_user->get_by_id($id);
 
-		$select = "m_user.*, m_role.nama as nama_role";
-		$where = ['m_user.id' => $id];
-		$table = 'm_user';
-		$join = [ 
-			[
-				'table' => 'm_role',
-				'on'	=> 'm_user.id_role = m_role.id'
-			]
-		];
+		$select = "m_barang.*";
+		$where = ['m_barang.id_barang' => $id];
+		$table = 'm_barang';
+		// $join = [ 
+		// 	[
+		// 		'table' => 'm_role',
+		// 		'on'	=> 'm_user.id_role = m_role.id'
+		// 	]
+		// ];
 
-		$oldData = $this->m_global->single_row($select, $where, $table, $join, 'm_user.kode_user');
+		$oldData = $this->m_global->single_row($select, $where, $table);
 		
 		if(!$oldData){
 			return redirect($this->uri->segment(1));
 		}
 		// var_dump($oldData);exit;
-		if($oldData->foto) {
-			$url_foto = base_url('files/img/user_img/').$oldData->foto;
+		if($oldData->gambar) {
+			$url_foto = base_url('files/img/barang_img/').$oldData->gambar;
 		}else{
-			$url_foto = base_url('files/img/user_img/user_default.png');
+			$url_foto = base_url('files/img/barang_img/user_default.png');
 		}
 		
 		$foto = base64_encode(file_get_contents($url_foto));  
@@ -199,64 +199,34 @@ class Master_barang extends CI_Controller {
 		echo json_encode($retval);
 	}
 
-	public function update_data_user()
+	public function update_data_barang()
 	{
 		$sesi_id_user = $this->session->userdata('id_user'); 
-		$id_user = $this->input->post('id_user');
+		$id_barang = $this->input->post('id_barang');
 		$this->load->library('Enkripsi');
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		
-		if($this->input->post('skip_pass') != null){
-			$skip_pass = true;
-		}else{
-			$skip_pass = false;
-		}
+		// if($this->input->post('skip_pass') != null){
+		// 	$skip_pass = true;
+		// }else{
+		// 	$skip_pass = false;
+		// }
 		
-		$arr_valid = $this->rule_validasi(true, $skip_pass);
+		$arr_valid = $this->rule_validasi(true);
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
 		}
 
-		$password = trim($this->input->post('password'));
-		$repassword = trim($this->input->post('repassword'));
-		$role = $this->input->post('role');
-		$status = $this->input->post('status');
+		$nama = $this->input->post('nama');
+		$harga = $this->input->post('harga');
+		$kategori = $this->input->post('kategori');
+		$sku      = $this->input->post('sku');
 		
-		$q = $this->m_user->get_by_id($id_user);
-		$namafileseo = $this->seoUrl($q->username.' '.time());
-
-		if($skip_pass == false) {
-			if ($password != $repassword) {
-				$data['inputerror'][] = 'password';
-				$data['error_string'][] = 'Password Tidak Cocok';
-				$data['status'] = FALSE;
-			
-				$data['inputerror'][] = 'repassword';
-				$data['error_string'][] = 'Password Tidak Cocok';
-				$data['status'] = FALSE;
-	
-				echo json_encode($data);
-				return;
-			}
-		}
-		
-		$hash_password = $this->enkripsi->enc_dec('encrypt', $password);
-		$hash_password_lama = $this->enkripsi->enc_dec('encrypt', trim($this->input->post('password_lama')));
-		$dataOld = $this->m_user->get_by_id($this->input->post('id_user'));
-		
-		if($skip_pass == false) {
-			if($hash_password_lama != $dataOld->password) {
-				$data['inputerror'][] = 'password_lama';
-				$data['error_string'][] = 'Password lama salah';
-				$data['status'] = FALSE;
-	
-				echo json_encode($data);
-				return;
-			}
-		}
+		$q = $this->m_barang->get_by_id($id_barang);
+		$namafileseo = $this->seoUrl($q->nama.' '.time());
 		
 		$this->db->trans_begin();
 
@@ -276,7 +246,7 @@ class Master_barang extends CI_Controller {
 				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti);
 				$this->image_lib->clear();
 				## replace nama file + ext
-				$namafileseo = $this->seoUrl($q->username.' '.time()).'.'.$extDet;
+				$namafileseo = $this->seoUrl($q->nama.' '.time()).'.'.$extDet;
 				$foto = $namafileseo;
 			} else {
 				$error = array('error' => $this->file_obj->display_errors());
@@ -286,31 +256,29 @@ class Master_barang extends CI_Controller {
 			$foto = null;
 		}
 
-		$data_user = [
-			'id_role' => $role,
-			'status' => $status,
+		$data_barang = [
+			'nama' => $nama,
+			'sku' => $sku,
+			'harga' => $harga,
+			'id_kategori' => $kategori,
 			'updated_at' => $timestamp
 		];
-
-		if($skip_pass == false) {
-			$data_user['password'] = $hash_password;
-		}
 		
 		if($foto != null) {
-			$data_user['foto'] = $foto;
+			$data_barang['gambar'] = $foto;
 		}
 
-		$where = ['id' => $id_user];
-		$update = $this->m_user->update($where, $data_user);
+		$where = ['id_barang' => $id_barang];
+		$update = $this->m_barang->update($where, $data_barang);
 
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
 			$data['status'] = false;
-			$data['pesan'] = 'Gagal update Master User';
+			$data['pesan'] = 'Gagal update Master Barang';
 		}else{
 			$this->db->trans_commit();
 			$data['status'] = true;
-			$data['pesan'] = 'Sukses update Master User';
+			$data['pesan'] = 'Sukses update Master Barang';
 		}
 		
 		echo json_encode($data);
