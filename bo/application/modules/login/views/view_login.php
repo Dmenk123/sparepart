@@ -6,7 +6,7 @@
 	<head>
 		<base href="../../../">
 		<meta charset="utf-8" />
-		<title>Halaman Login</title>
+		<title>Halaman Logi</title>
 		<meta name="description" content="Login page example">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
