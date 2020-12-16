@@ -88,13 +88,13 @@ function add_menu()
 	$('#modal_title').text('Tambah Master Agen'); 
 }
 
-function edit_barang(id)
+function edit_agen(id)
 {
     reset_modal_form();
     save_method = 'update';
     //Ajax Load data from ajax
     $.ajax({
-        url : base_url + 'master_barang/edit_barang',
+        url : base_url + 'master_agen/edit_agen',
         type: "POST",
         dataType: "JSON",
         data : {id:id},
@@ -103,16 +103,14 @@ function edit_barang(id)
             // data.data_menu.forEach(function(dataLoop) {
             //     $("#parent_menu").append('<option value = '+dataLoop.id+' class="append-opt">'+dataLoop.nama+'</option>');
             // });
-            $('[name="id_barang"]').val(data.old_data.id_barang);
-            $('[name="nama"]').val(data.old_data.nama);
-            $('[name="sku"]').val(data.old_data.sku);
-            $('[name="kategori"]').val(data.old_data.id_kategori);
-            $('[name="harga"]').val(data.old_data.harga);
-            $('[name="kategori"]').val(data.old_data.id_kategori);
-            // $("#pegawai").val(data.old_data.id_pegawai).trigger("change");
-            $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
-            $('#modal_barang_form').modal('show');
-	        $('#modal_title').text('Edit Master Barang'); 
+            $('[name="id_agen"]').val(data.old_data.id_agen);
+            $('[name="nama_pers"]').val(data.old_data.nama_perusahaan);
+            $('[name="produk"]').val(data.old_data.produk);
+            $('[name="alamat"]').val(data.old_data.alamat);
+            $('[name="telp"]').val(data.old_data.telp);
+    
+            $('#modal_agen_form').modal('show');
+	        $('#modal_title').text('Edit Master Agen'); 
             // console.log(data.foto_encoded);
         },
         error: function (jqXHR, textStatus, errorThrown)
@@ -137,8 +135,8 @@ function save()
         txtAksi = 'Tambah master Agen';
         var alert = "Menambah";
     }else{
-        url = base_url + 'master_barang/update_data_barang';
-        txtAksi = 'Edit Master Barang';
+        url = base_url + 'master_agen/update_data_agen';
+        txtAksi = 'Edit Master Agen';
         var alert = "Mengubah";
     }
     
@@ -215,7 +213,7 @@ function save()
     });
 }
 
-function delete_barang(id){
+function delete_agen(id){
     swalConfirmDelete.fire({
         title: 'Hapus Data ?',
         text: "Data Akan dihapus permanen ?",
@@ -227,13 +225,13 @@ function delete_barang(id){
       }).then((result) => {
         if (result.value) {
             $.ajax({
-                url : base_url + 'master_barang/delete_barang',
+                url : base_url + 'master_agen/delete_agen',
                 type: "POST",
                 dataType: "JSON",
                 data : {id:id},
                 success: function(data)
                 {
-                    swalConfirm.fire('Berhasil Hapus Barang!', data.pesan, 'success');
+                    swalConfirm.fire('Berhasil Hapus Data Agen!', data.pesan, 'success');
                     table.ajax.reload();
                 },
                 error: function (jqXHR, textStatus, errorThrown)

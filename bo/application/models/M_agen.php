@@ -108,7 +108,7 @@ class M_agen extends CI_Model
 	public function get_by_id($id)
 	{
 		$this->db->from($this->table);
-		$this->db->where('id_barang',$id);
+		$this->db->where('id_agen',$id);
 		$query = $this->db->get();
 
 		return $query->row();
@@ -140,7 +140,7 @@ class M_agen extends CI_Model
 	{
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$where = ['id_barang' => $id];
+		$where = ['id_agen'=> $id];
 		$data = ['deleted_at' => $timestamp];
 		return $this->db->update($this->table, $data, $where);
 	}

@@ -66,10 +66,10 @@ class Master_agen extends CI_Controller {
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_barang(\''.$agen->id_agen.'\')">
+						<button class="dropdown-item" onclick="edit_agen(\''.$agen->id_agen.'\')">
 							<i class="la la-pencil"></i> Edit Agen
 						</button>
-						<button class="dropdown-item" onclick="delete_barang(\''.$agen->id_agen.'\')">
+						<button class="dropdown-item" onclick="delete_agen(\''.$agen->id_agen.'\')">
 							<i class="la la-trash"></i> Hapus
 						</button>
 			';
@@ -90,7 +90,7 @@ class Master_agen extends CI_Controller {
 		echo json_encode($output);
 	}
 
-	public function edit_barang()
+	public function edit_agen()
 	{
 		$this->load->library('Enkripsi');
 		$id_user = $this->session->userdata('id_user');
@@ -99,9 +99,9 @@ class Master_agen extends CI_Controller {
 		$id = $this->input->post('id');
 		//$oldData = $this->m_user->get_by_id($id);
 
-		$select = "m_barang.*";
-		$where = ['m_barang.id_barang' => $id];
-		$table = 'm_barang';
+		$select = "m_agen.*";
+		$where = ['m_agen.id_agen' => $id];
+		$table = 'm_agen';
 		// $join = [ 
 		// 	[
 		// 		'table' => 'm_role',
@@ -115,18 +115,11 @@ class Master_agen extends CI_Controller {
 			return redirect($this->uri->segment(1));
 		}
 		// var_dump($oldData);exit;
-		if($oldData->gambar) {
-			$url_foto = base_url('files/img/barang_img/').$oldData->gambar;
-		}else{
-			$url_foto = base_url('files/img/barang_img/user_default.png');
-		}
-		
-		$foto = base64_encode(file_get_contents($url_foto));  
+	
 		
 		$data = array(
 			'data_user' => $data_user,
 			'old_data'	=> $oldData,
-			'foto_encoded' => $foto
 		);
 		
 		echo json_encode($data);
@@ -173,10 +166,10 @@ class Master_agen extends CI_Controller {
 		echo json_encode($retval);
 	}
 
-	public function update_data_barang()
+	public function update_data_agen()
 	{
 		$sesi_id_user = $this->session->userdata('id_user'); 
-		$id_barang = $this->input->post('id_barang');
+		$id_agen = $this->input->post('id_agen');
 		$this->load->library('Enkripsi');
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
@@ -194,65 +187,35 @@ class Master_agen extends CI_Controller {
 			return;
 		}
 
-		$nama = $this->input->post('nama');
-		$harga = $this->input->post('harga');
-		$kategori = $this->input->post('kategori');
-		$sku      = $this->input->post('sku');
+		$nama_pers		= $this->input->post('nama_pers');
+		$produk 		= $this->input->post('produk');
+		$alamat			= $this->input->post('alamat');
+		$telp     		= $this->input->post('telp');
 		
-		$q = $this->m_barang->get_by_id($id_barang);
-		$namafileseo = $this->seoUrl($q->nama.' '.time());
+		$q = $this->m_agen->get_by_id($id_agen);
 		
 		$this->db->trans_begin();
 
-		$file_mimes = ['image/png', 'image/x-citrix-png', 'image/x-png', 'image/x-citrix-jpeg', 'image/jpeg', 'image/pjpeg'];
-
-		if(isset($_FILES['foto']['name']) && in_array($_FILES['foto']['type'], $file_mimes)) {
-			$this->konfigurasi_upload_img($namafileseo);
-			//get detail extension
-			$pathDet = $_FILES['foto']['name'];
-			$extDet = pathinfo($pathDet, PATHINFO_EXTENSION);
-			
-			if ($this->file_obj->do_upload('foto')) 
-			{
-				$gbrBukti = $this->file_obj->data();
-				$nama_file_foto = $gbrBukti['file_name'];
-				$this->konfigurasi_image_resize($nama_file_foto);
-				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti);
-				$this->image_lib->clear();
-				## replace nama file + ext
-				$namafileseo = $this->seoUrl($q->nama.' '.time()).'.'.$extDet;
-				$foto = $namafileseo;
-			} else {
-				$error = array('error' => $this->file_obj->display_errors());
-				var_dump($error);exit;
-			}
-		}else{
-			$foto = null;
-		}
-
-		$data_barang = [
-			'nama' => $nama,
-			'sku' => $sku,
-			'harga' => $harga,
-			'id_kategori' => $kategori,
+		$data_agen = [
+			'nama_perusahaan' => $nama_pers,
+			'produk' => $produk,
+			'alamat' => $alamat,
+			'telp' 	=> $telp,
 			'updated_at' => $timestamp
 		];
 		
-		if($foto != null) {
-			$data_barang['gambar'] = $foto;
-		}
 
-		$where = ['id_barang' => $id_barang];
-		$update = $this->m_barang->update($where, $data_barang);
+		$where = ['id_agen' => $id_agen];
+		$update = $this->m_agen->update($where, $data_agen);
 
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
 			$data['status'] = false;
-			$data['pesan'] = 'Gagal update Master Barang';
+			$data['pesan'] = 'Gagal update Master Agen';
 		}else{
 			$this->db->trans_commit();
 			$data['status'] = true;
-			$data['pesan'] = 'Sukses update Master Barang';
+			$data['pesan'] = 'Sukses update Master Agen';
 		}
 		
 		echo json_encode($data);
@@ -262,16 +225,16 @@ class Master_agen extends CI_Controller {
 	 * Hanya melakukan softdelete saja
 	 * isi kolom updated_at dengan datetime now()
 	 */
-	public function delete_barang()
+	public function delete_agen()
 	{
-		$id_barang = $this->input->post('id');
-		$del = $this->m_barang->softdelete_by_id($id_barang);
+		$id_agen = $this->input->post('id');
+		$del = $this->m_agen->softdelete_by_id($id_agen);
 		if($del) {
 			$retval['status'] = TRUE;
-			$retval['pesan'] = 'Data Master Barang berhasil dihapus';
+			$retval['pesan'] = 'Data Master Agen berhasil dihapus';
 		}else{
 			$retval['status'] = FALSE;
-			$retval['pesan'] = 'Data Master Barang berhasil dihapus';
+			$retval['pesan'] = 'Data Master Agen berhasil dihapus';
 		}
 
 		echo json_encode($retval);
