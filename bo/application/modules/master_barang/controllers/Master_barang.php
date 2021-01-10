@@ -120,11 +120,16 @@ class Master_barang extends CI_Controller {
 		// var_dump($oldData);exit;
 		if($oldData->gambar) {
 			$url_foto = base_url('files/img/barang_img/').$oldData->gambar;
-		}else{
-			$url_foto = base_url('files/img/barang_img/user_default.png');
 		}
-		
-		$foto = base64_encode(file_get_contents($url_foto));  
+		// else{
+		// 	$url_foto = base_url('files/img/barang_img/user_default.png');
+		// }
+		if ($oldData->gambar) {
+			$foto = base64_encode(file_get_contents($url_foto));
+		}else{
+			$foto = '';
+		}
+		  
 		
 		$data = array(
 			'data_user' => $data_user,

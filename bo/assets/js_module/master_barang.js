@@ -111,7 +111,10 @@ function edit_barang(id)
             $('[name="harga"]').val(data.old_data.harga);
             $('[name="kategori"]').val(data.old_data.id_kategori);
             // $("#pegawai").val(data.old_data.id_pegawai).trigger("change");
-            $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
+            if (data.foto_encoded != '') {
+                $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
+            }
+           
             $('#modal_barang_form').modal('show');
 	        $('#modal_title').text('Edit Master Barang'); 
             // console.log(data.foto_encoded);
