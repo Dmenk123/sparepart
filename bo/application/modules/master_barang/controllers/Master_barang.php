@@ -39,7 +39,7 @@ class Master_barang extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => 'modal_master_barang',
+			'modal' => ['modal_master_barang','modal_detail_gambar', ],
 			'js'	=> 'master_barang.js',
 			'view'	=> 'view_master_barang'
 		];
@@ -61,7 +61,7 @@ class Master_barang extends CI_Controller {
 			$row[] = $barang->nama;
 			$row[] = $barang->harga;
 			$row[] = $barang->id_kategori;
-			
+			$row[] = ' <img src='.base_url().'files/img/barang_img/'.$barang->gambar.' style="width:60px;" height="auto" class="center">';
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
@@ -71,6 +71,9 @@ class Master_barang extends CI_Controller {
 						</button>
 						<button class="dropdown-item" onclick="delete_barang(\''.$barang->id_barang.'\')">
 							<i class="la la-trash"></i> Hapus
+						</button>
+						<button class="dropdown-item" onclick="detail_gambar(\''.$barang->id_barang.'\')">
+							<i class="fa fa-images"></i> Detail Gambar
 						</button>
 			';
 
