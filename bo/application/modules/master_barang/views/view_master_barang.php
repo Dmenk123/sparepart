@@ -39,6 +39,7 @@
               <th>Nama Barang</th>
               <th>Harga</th>
               <th>Kategori</th>
+              <th>Stok</th>
               <th>Gambar</th>
               <th style="width: 5%;">Aksi</th>
             </tr>

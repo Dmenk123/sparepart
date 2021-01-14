@@ -31,6 +31,11 @@
             <span class="help-block"></span>
           </div>
           <div class="form-group">
+            <label for="lbl_kategori" class="form-control-label">Shopee Link :</label>
+            <input type="text" class="form-control" id="shopee" name="shopee" autocomplete="off">
+            <span class="help-block"></span>
+          </div>
+          <div class="form-group">
             <label>Foto Barang</label>
             <div></div>
             <div class="custom-file">

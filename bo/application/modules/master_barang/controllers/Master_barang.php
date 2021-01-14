@@ -61,6 +61,7 @@ class Master_barang extends CI_Controller {
 			$row[] = $barang->nama;
 			$row[] = $barang->harga;
 			$row[] = $barang->id_kategori;
+			$row[] = $barang->stok.' Pcs';
 			$row[] = ' <img src='.base_url().'files/img/barang_img/'.$barang->gambar.' style="width:60px;" height="auto" class="center">';
 			$str_aksi = '
 				<div class="btn-group">

@@ -10,6 +10,7 @@ class M_barang extends CI_Model
 		'm_barang.sku',
 		'm_barang.nama',
 		'm_barang.harga',
+		'm_barang.stok',
 		'm_barang.id_kategori',
 		null
 	];
