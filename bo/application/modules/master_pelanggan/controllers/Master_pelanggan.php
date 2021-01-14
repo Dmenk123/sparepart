@@ -27,9 +27,11 @@ class Master_pelanggan extends CI_Controller {
 		 * data passing ke halaman view content
 		 */
 		$data = array(
-			'title' => 'Pengelolaan Data Master Agen',
+			'title' => 'Pengelolaan Data Master Pelanggan',
 			'data_user' => $data_user,
-			'data_role'	=> $data_role
+			'data_role'	=> $data_role,
+			'provinsi'  => $this->m_global->getSelectedData('t_provinsi', NULL),
+			'kota'  => $this->m_global->getSelectedData('t_kota', NULL),
 		);
 
 		/**
@@ -60,8 +62,8 @@ class Master_pelanggan extends CI_Controller {
 			$row[] = $no;
 			$row[] = $pembeli->nama_pembeli;
 			$row[] = $pembeli->alamat;
-			$row[] = $pembeli->provinsi;
-			$row[] = $pembeli->kota;
+			$row[] = $pembeli->nama_provinsi;
+			$row[] = $pembeli->nama_kota;
 			$row[] = $pembeli->kecamatan;
 			$row[] = $pembeli->no_telp;
 			$row[] = $pembeli->email;
@@ -156,8 +158,8 @@ class Master_pelanggan extends CI_Controller {
 		$data_pelanggan = [
 			'nama_pembeli' => $nama_pembeli,
 			'alamat' => $alamat,
-			'provinsi' => $provinsi,
-			'kota' => $kota,
+			'id_provinsi' => $provinsi,
+			'id_kota' => $kota,
 			'kecamatan' => $kecamatan,
 			'no_telp' => $no_telp,
 			'email' => $email,
@@ -217,8 +219,8 @@ class Master_pelanggan extends CI_Controller {
 		$data_pelanggan = [
 			'nama_pembeli' => $nama_pembeli,
 			'alamat' => $alamat,
-			'provinsi' => $provinsi,
-			'kota' 	=> $kota,
+			'id_provinsi' => $provinsi,
+			'id_kota' 	=> $kota,
 			'kecamatan' 	=> $kecamatan,
 			'no_telp' 	=> $no_telp,
 			'email' 	=> $email,
@@ -396,5 +398,13 @@ class Master_pelanggan extends CI_Controller {
 	    //Convert whitespaces and underscore to dash
 	    $string = preg_replace("/[\s_]/", "-", $string);
 	    return $string;
+	}
+
+	public function get_kota()
+	{
+		$id = $this->input->post('id');
+		$data_where = array('id_provinsi' => $id);
+		$data       = $this->m_global->getSelectedData('t_kota', $data_where)->result();
+		echo json_encode($data);
 	}
 }

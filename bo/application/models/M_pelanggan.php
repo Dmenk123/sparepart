@@ -6,8 +6,8 @@ class M_pelanggan extends CI_Model
 	var $column_search = [
         'm_pelanggan.nama_pembeli',
         'm_pelanggan.alamat',
-        'm_pelanggan.provinsi', 
-        'm_pelanggan.kota',
+        'm_pelanggan.id_provinsi', 
+        'm_pelanggan.id_kota',
         'm_pelanggan.kecamatan',
         'm_pelanggan.no_telp',
         'm_pelanggan.email',
@@ -18,8 +18,8 @@ class M_pelanggan extends CI_Model
 		null, 
 		'm_pelanggan.nama_pembeli',
 		'm_pelanggan.alamat',
-		'm_pelanggan.provinsi',
-        'm_pelanggan.kota',
+		'm_pelanggan.id_provinsi',
+        'm_pelanggan.id_kota',
         'm_pelanggan.kecamatan',
         'm_pelanggan.no_telp',
         'm_pelanggan.email',
@@ -39,9 +39,12 @@ class M_pelanggan extends CI_Model
 	private function _get_datatables_query($term='')
 	{
 		$this->db->select('
-			m_pelanggan.*
+			m_pelanggan.*, 
+			t_provinsi.nama_provinsi, 
+			t_kota.nama_kota
 		');
-
+		$this->db->join('t_provinsi', 't_provinsi.id_provinsi=m_pelanggan.id_provinsi', 'left');
+		$this->db->join('t_kota', 't_kota.id_kota=m_pelanggan.id_kota', 'left');
 		$this->db->from('m_pelanggan');	
 		$this->db->where('m_pelanggan.deleted_at is null');
 		

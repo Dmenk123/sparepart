@@ -64,49 +64,8 @@ img {
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         </button>
       </div>
-      <div class="modal-body">
-        <div class="mySlides col-sm-12">
-        <div class="numbertext">1 / 4</div>
-        <img src="<?php echo base_url();?>files/img/barang_img/coba-1604410559.jpg" style="width:70%" height="auto" class="center">
-        </div>
-
-        <div class="mySlides  col-sm-12">
-        <div class="numbertext">2 / 4</div>
-        <img src="<?php echo base_url();?>files/img/barang_img/coba-1602775328.jpg" style="width:70%" height="auto" class="center">
-        </div>
-
-        <div class="mySlides  col-sm-12">
-        <div class="numbertext">3 / 4</div>
-        <img src="<?php echo base_url();?>files/img/barang_img/coba-1604410559.jpg" style="width:70%" height="auto" class="center">
-        </div>
+      <div class="modal-body" id="modal_body">
         
-        <div class="mySlides  col-sm-12">
-        <div class="numbertext">4 / 4</div>
-        <img src="<?php echo base_url();?>files/img/barang_img/coba-1602775328.jpg" style="width:70%" height="auto"  class="center">
-        </div>
-        
-        <a class="prev-gambar" onclick="plusSlides(-1)">&#10094;</a>
-        <a class="next-gambar" onclick="plusSlides(1)">&#10095;</a>
-
-        <div class="caption-container">
-        <p id="caption"></p>
-        </div>
-
-
-        <div cass="row">
-            <div class="column col-sm-3">
-            <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/coba-1604410559.jpg" style="width:100%" onclick="currentSlide(1)" alt="">
-            </div>
-            <div class="column col-sm-3">
-            <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/coba-1602775328.jpg" style="width:100%" onclick="currentSlide(2)" alt="">
-            </div>
-            <div class="column col-sm-3">
-            <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/coba-1604410559.jpg" style="width:100%" onclick="currentSlide(3)" alt="">
-            </div>
-            <div class="column col-sm-3">
-            <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/coba-1602775328.jpg" style="width:100%" onclick="currentSlide(4)" alt="">
-            </div>
-        </div>
       </div>
      
     </div>

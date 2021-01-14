@@ -135,7 +135,7 @@ img.hover-shadow {
 </style>
 <div id="modal_detail_gambar" class="modal-gambar">
   <span class="close cursor" onclick="closeModal()">&times;</span>
-  <div class="modal-gambar-content">
+  <div class="modal-gambar-content" id="content">
 
     <div class="mySlides">
       <div class="numbertext">1 / 4</div>

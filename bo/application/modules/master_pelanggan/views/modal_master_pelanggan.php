@@ -23,12 +23,22 @@
           <div class="row">
             <div class="form-group col-sm-4">
               <label for="lbl_hargabarang" class="form-control-label">Provinsi :</label>
-              <input type="text" class="form-control" id="provinsi" name="provinsi" autocomplete="off">
+                <select name="provinsi" id="provinsi" class="form-control">
+                    <option value="0">-PILIH-</option>
+                    <?php foreach($provinsi->result() as $row):?>
+                        <option value="<?php echo $row->id_provinsi;?>"><?php echo $row->nama_provinsi;?></option>
+                    <?php endforeach;?>
+                </select>
               <span class="help-block"></span>
             </div>
             <div class="form-group col-sm-4">
               <label for="lbl_kategori" class="form-control-label">Kota :</label>
-              <input type="text" class="form-control" id="kota" name="kota" autocomplete="off">
+                <select name="kota" class="kota form-control">
+                    <option value="0">-PILIH-</option>
+                    <?php foreach($kota->result() as $row):?>
+                        <option value="<?php echo $row->id_kota;?>"><?php echo $row->nama_kota;?></option>
+                    <?php endforeach;?>
+                </select>
               <span class="help-block"></span>
             </div>
             <div class="form-group col-sm-4">

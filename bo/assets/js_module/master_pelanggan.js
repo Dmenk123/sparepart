@@ -106,8 +106,8 @@ function edit_pelanggan(id)
             $('[name="id_pelanggan"]').val(data.old_data.id_pelanggan);
             $('[name="nama_pembeli"]').val(data.old_data.nama_pembeli);
             $('[name="alamat"]').val(data.old_data.alamat);
-            $('[name="provinsi"]').val(data.old_data.provinsi);
-            $('[name="kota"]').val(data.old_data.kota);
+            $('[name="provinsi"]').val(data.old_data.id_provinsi);
+            $('[name="kota"]').val(data.old_data.id_kota);
             $('[name="kecamatan"]').val(data.old_data.kecamatan);
             $('[name="telp"]').val(data.old_data.no_telp);
             $('[name="email"]').val(data.old_data.email);
@@ -334,3 +334,25 @@ function readURL(input) {
         $('#preview_img').attr('src', '');
     }
 }
+
+$(document).ready(function(){
+    $('#provinsi').change(function(){
+        var id=$(this).val();
+        $.ajax({
+            url : base_url +"master_pelanggan/get_kota",
+            method : "POST",
+            data : {id: id},
+            async : false,
+            dataType : 'json',
+            success: function(data){
+                var html = '';
+                var i;
+                for(i=0; i<data.length; i++){
+                    html += '<option value='+data[i].id_kota+ '>'+data[i].nama_kota+'</option>';
+                }
+                $('.kota').html(html);
+                 
+            }
+        });
+    });
+});

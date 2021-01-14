@@ -342,7 +342,19 @@ function detail_gambar(id_gambar)
 {
 
     reset_modal_form();
-    $('#modal_detail_gambar').modal('show');
+    $.ajax({
+        type: "post",
+        url: base_url + 'master_barang/modal_detail_gambar',
+        data: "id="+id_gambar,
+        dataType: "html",
+        success: function (response) {
+            console.log(response);
+            $('#modal_detail_gambar').modal('show');
+            $('#modal_body').empty();
+            $('#modal_body').append(response);
+        }
+    });
+    
     // document.getElementById("modal_detail_gambar").style.display = "block";
 }
 var slideIndex = 1;
@@ -373,3 +385,4 @@ function showSlides(n) {
   dots[slideIndex-1].className += " active";
   captionText.innerHTML = dots[slideIndex-1].alt;
 }
+
