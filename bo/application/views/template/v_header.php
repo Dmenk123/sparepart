@@ -27,6 +27,8 @@
 		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/header/menu/light.css" rel="stylesheet" type="text/css" />
 		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/brand/dark.css" rel="stylesheet" type="text/css" />
 		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/aside/dark.css" rel="stylesheet" type="text/css" />
+		<!-- <link href="<?= base_url('assets/'); ?>loader/main.css" rel="stylesheet" type="text/css" />
+		<link href="<?= base_url('assets/'); ?>loader/normalize.css" rel="stylesheet" type="text/css" /> -->
 
 		<!--end::Layout Skins -->
     	<link rel="shortcut icon" href="<?= base_url('assets/template/'); ?>assets/media/logos/favicon.ico" />
@@ -145,6 +147,32 @@
 				visibility: hidden !important;
 			}
 
+			#loading-circle {
+				display: none;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				margin: auto;
+				width: 40px;
+				height: 40px;
+				border: 4px solid #f3f3f3;
+				border-top: 4px solid #3498db;
+				border-radius: 50%;
+				animation: spin 0.6s ease-in infinite;
+				z-index: 9999;
+				}
+
+				@keyframes spin {
+				0% {
+					transform: rotate(0deg);
+				}
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+
 		</style>
 		<!-- load file css per modul -->
 		<?php if(isset($link_css)){ ?>
@@ -159,6 +187,10 @@
 		<div id="CssLoader" class="hidden">
 			<div class='loader'></div>
 		</div>
+		<div id="loading-circle"></div>
+		<!-- <div id="loader-wrapper" class="hidden">
+			<div id="loader"></div>
+		</div> -->
 		<!-- begin:: Page -->
 
 		<!-- begin:: Header Mobile -->

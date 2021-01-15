@@ -190,7 +190,11 @@ class Master_barang extends CI_Controller {
 			'nama' => $nama,
 			'harga' => $harga,
 			'id_kategori' => $kategori,
-			'gambar'	=> $namafileseo
+			'gambar'	=> $namafileseo,
+			'shopee_link' => $this->input->post('shopee'),
+			'tokopedia_link' => $this->input->post('tokopedia'),
+			'bukalapak_link' => $this->input->post('bukalapak'),
+			'lazada_link' => $this->input->post('lazada'),
 		];
 		
 		$insert = $this->m_barang->save($data_barang);

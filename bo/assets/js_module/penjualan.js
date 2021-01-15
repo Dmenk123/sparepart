@@ -9,13 +9,13 @@ $(document).ready(function() {
     });
 
 	//datatables
-	table = $('#tabel_user').DataTable({
+	table = $('#tabel_penjualan').DataTable({
 		responsive: true,
         searchDelay: 500,
         processing: true,
         serverSide: true,
 		ajax: {
-			url  : base_url + "master_barang/list_barang",
+			url  : base_url + "Penjualan/list_penjualan",
 			type : "POST" 
 		},
 
@@ -82,20 +82,20 @@ $(document).ready(function() {
 
 function add_menu()
 {
+    
     reset_modal_form();
     save_method = 'add';
-	$('#modal_barang_form').modal('show');
-	$('#modal_title').text('Tambah Master Barang'); 
+	$('#modal_agen_form').modal('show');
+	$('#modal_title').text('Tambah Master Agen'); 
 }
 
-
-function edit_barang(id)
+function edit_agen(id)
 {
     reset_modal_form();
     save_method = 'update';
     //Ajax Load data from ajax
     $.ajax({
-        url : base_url + 'master_barang/edit_barang',
+        url : base_url + 'master_agen/edit_agen',
         type: "POST",
         dataType: "JSON",
         data : {id:id},
@@ -104,23 +104,14 @@ function edit_barang(id)
             // data.data_menu.forEach(function(dataLoop) {
             //     $("#parent_menu").append('<option value = '+dataLoop.id+' class="append-opt">'+dataLoop.nama+'</option>');
             // });
-            $('[name="id_barang"]').val(data.old_data.id_barang);
-            $('[name="nama"]').val(data.old_data.nama);
-            $('[name="sku"]').val(data.old_data.sku);
-            $('[name="kategori"]').val(data.old_data.id_kategori);
-            $('[name="harga"]').val(data.old_data.harga);
-            $('[name="kategori"]').val(data.old_data.id_kategori);
-            $('[name="shopee"]').val(data.old_data.shopee_link);
-            $('[name="tokopedia"]').val(data.old_data.tokopedia_link);
-            $('[name="bukalapak"]').val(data.old_data.bukalapak_link);
-            $('[name="lazada"]').val(data.old_data.lazada_link);
-            // $("#pegawai").val(data.old_data.id_pegawai).trigger("change");
-            if (data.foto_encoded != '') {
-                $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
-            }
-           
-            $('#modal_barang_form').modal('show');
-	        $('#modal_title').text('Edit Master Barang'); 
+            $('[name="id_agen"]').val(data.old_data.id_agen);
+            $('[name="nama_pers"]').val(data.old_data.nama_perusahaan);
+            $('[name="produk"]').val(data.old_data.produk);
+            $('[name="alamat"]').val(data.old_data.alamat);
+            $('[name="telp"]').val(data.old_data.telp);
+    
+            $('#modal_agen_form').modal('show');
+	        $('#modal_title').text('Edit Master Agen'); 
             // console.log(data.foto_encoded);
         },
         error: function (jqXHR, textStatus, errorThrown)
@@ -135,18 +126,16 @@ function reload_table()
     table.ajax.reload(null,false); //reload datatable ajax 
 }
 
-function save()
+function saveDataPenjualan()
 {
     var url;
     var txtAksi;
-
-    if(save_method == 'add') {
-        url = base_url + 'master_barang/add_data_barang';
-        txtAksi = 'Tambah master Barang';
-    }else{
-        url = base_url + 'master_barang/update_data_barang';
-        txtAksi = 'Edit Master Barang';
-    }
+    const loadingCircle = $("#loading-circle");
+ 
+    url = base_url + 'penjualan/add_new_invoice';
+    txtAksi = 'Tambah Invoice';
+    var alert = "Menambah";
+    
     
     var form = $('#form-user')[0];
     var data = new FormData(form);
@@ -154,12 +143,12 @@ function save()
     $("#btnSave").prop("disabled", true);
     $('#btnSave').text('Menyimpan Data'); //change button text
     swalConfirmDelete.fire({
-        title: 'Ubah Status Data Pegawai ?',
-        text: "Apakah Anda Yakin ?",
+        title: 'Perhatian',
+        text: "Apakah Anda ingin "+alert+" Data ini ?",
         type: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Ya, Ubah Status!',
-        cancelButtonText: 'Tidak, Batalkan!',
+        confirmButtonText: 'Ya !',
+        cancelButtonText: 'Tidak !',
         reverseButtons: true
       }).then((result) => {
         if (result.value) {
@@ -175,14 +164,15 @@ function save()
                 timeout: 600000,
                 success: function (data) {
                     if(data.status) {
-                        swal.fire("Sukses!!", "Aksi "+txtAksi+" Berhasil", "success");
+                        createAlert('','Berhasil!',''+data.pesan+'','success',true,true,'pageMessages');
+                        // swal.fire("Sukses!!", "Aksi "+txtAksi+" Berhasil", "success");
                         $("#btnSave").prop("disabled", false);
                         $('#btnSave').text('Simpan');
-                        
-                        reset_modal_form();
-                        $(".modal").modal('hide');
-                        
-                        reload_table();
+                        loadingCircle.css("display", "block");
+                        setTimeout(function(){
+                          ajax_send(data.order_id);
+                          loadingCircle.css("display", "none");
+                        }, 3000);
                     }else {
                         for (var i = 0; i < data.inputerror.length; i++) 
                         {
@@ -201,11 +191,12 @@ function save()
                 },
                 error: function (e) {
                     console.log("ERROR : ", e);
+                    createAlert('Opps!','Terjadi Kesalahan','Coba Lagi nanti','danger',true,false,'pageMessages');
                     $("#btnSave").prop("disabled", false);
                     $('#btnSave').text('Simpan');
 
-                    reset_modal_form();
-                    $(".modal").modal('hide');
+                    // reset_modal_form();
+                    // $(".modal").modal('hide');
                 }
             });
         }else if (
@@ -221,7 +212,7 @@ function save()
     });
 }
 
-function delete_barang(id){
+function delete_agen(id){
     swalConfirmDelete.fire({
         title: 'Hapus Data ?',
         text: "Data Akan dihapus permanen ?",
@@ -233,13 +224,13 @@ function delete_barang(id){
       }).then((result) => {
         if (result.value) {
             $.ajax({
-                url : base_url + 'master_barang/delete_barang',
+                url : base_url + 'master_agen/delete_agen',
                 type: "POST",
                 dataType: "JSON",
                 data : {id:id},
                 success: function(data)
                 {
-                    swalConfirm.fire('Berhasil Hapus Barang!', data.pesan, 'success');
+                    swalConfirm.fire('Berhasil Hapus Data Agen!', data.pesan, 'success');
                     table.ajax.reload();
                 },
                 error: function (jqXHR, textStatus, errorThrown)
@@ -339,54 +330,87 @@ function readURL(input) {
     }
 }
 
-// function closeModal() {
-//     document.getElementById("modal_detail_gambar").style.display = "none";
-// }
-function detail_gambar(id_gambar)
-{
-
-    reset_modal_form();
-    $.ajax({
-        type: "post",
-        url: base_url + 'master_barang/modal_detail_gambar',
-        data: "id="+id_gambar,
-        dataType: "html",
-        success: function (response) {
-            console.log(response);
-            $('#modal_detail_gambar').modal('show');
-            $('#modal_body').empty();
-            $('#modal_body').append(response);
-        }
+function createAlert(title, summary, details, severity, dismissible, autoDismiss, appendToId) {
+    var iconMap = {
+      info: "fa fa-info-circle",
+      success: "fa fa-thumbs-up",
+      warning: "fa fa-exclamation-triangle",
+      danger: "fa ffa fa-exclamation-circle"
+    };
+  
+    var iconAdded = false;
+  
+    var alertClasses = ["alert", "animated", "flipInX"];
+    alertClasses.push("alert-" + severity.toLowerCase());
+  
+    if (dismissible) {
+      alertClasses.push("alert-dismissible");
+    }
+  
+    var msgIcon = $("<i />", {
+      "class": iconMap[severity] // you need to quote "class" since it's a reserved keyword
     });
+  
+    var msg = $("<div />", {
+      "class": alertClasses.join(" ") // you need to quote "class" since it's a reserved keyword
+    });
+  
+    if (title) {
+      var msgTitle = $("<h4 />", {
+        html: title
+      }).appendTo(msg);
+      
+      if(!iconAdded){
+        msgTitle.prepend(msgIcon);
+        iconAdded = true;
+      }
+    }
+  
+    if (summary) {
+      var msgSummary = $("<strong />", {
+        html: summary
+      }).appendTo(msg);
+      
+      if(!iconAdded){
+        msgSummary.prepend(msgIcon);
+        iconAdded = true;
+      }
+    }
+  
+    if (details) {
+      var msgDetails = $("<p />", {
+        html: details
+      }).appendTo(msg);
+      
+      if(!iconAdded){
+        msgDetails.prepend(msgIcon);
+        iconAdded = true;
+      }
+    }
     
-    // document.getElementById("modal_detail_gambar").style.display = "block";
-}
-var slideIndex = 1;
-showSlides(slideIndex);
-
-function plusSlides(n) {
-  showSlides(slideIndex += n);
-}
-
-function currentSlide(n) {
-  showSlides(slideIndex = n);
-}
-
-function showSlides(n) {
-  var i;
-  var slides = document.getElementsByClassName("mySlides");
-  var dots = document.getElementsByClassName("demo");
-  var captionText = document.getElementById("caption");
-  if (n > slides.length) {slideIndex = 1}
-  if (n < 1) {slideIndex = slides.length}
-  for (i = 0; i < slides.length; i++) {
-      slides[i].style.display = "none";
-  }
-  for (i = 0; i < dots.length; i++) {
-      dots[i].className = dots[i].className.replace(" active", "");
-  }
-  slides[slideIndex-1].style.display = "block";
-  dots[slideIndex-1].className += " active";
-  captionText.innerHTML = dots[slideIndex-1].alt;
+  
+    if (dismissible) {
+      var msgClose = $("<span />", {
+        "class": "close", // you need to quote "class" since it's a reserved keyword
+        "data-dismiss": "alert",
+        html: "<i class='fa fa-times-circle'></i>"
+      }).appendTo(msg);
+    }
+    
+    $('#' + appendToId).prepend(msg);
+    
+    if(autoDismiss){
+      setTimeout(function(){
+        msg.addClass("flipOutX");
+        setTimeout(function(){
+          msg.remove();
+        },1000);
+      }, 5000);
+    }
 }
 
+function ajax_send(order_id)
+{
+    window.location.href = base_url+'penjualan/add_order?order_id='+order_id;
+}
+  

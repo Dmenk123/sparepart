@@ -433,14 +433,22 @@ class Template_view extends CI_Controller {
 			if($dataButton->add_button == 1 ){
 				if($is_modal) {
 					if($method_js) {
-						echo "<button type='button' class='btn btn-bold btn-label-brand btn-sm' data-toggle='modal' onclick='".$method_js."()'><i class='la la-plus'></i>Tambah Data</button>";
+						echo "<button type='button' class='btn btn-bold btn-label-brand btn-sm' data-toggle='modal' onclick='".$method_js."()'><i class='la la-plus'></i>Tambah Data tes</button>";
 					}else{
 						echo "<button type='button' class='btn btn-bold btn-label-brand btn-sm' data-toggle='modal'><i class='la la-plus'></i>Tambah Data</button>";
 					}
 					
 				}else{
-					echo "<a href='".base_url().$this->_ci->uri->segment(1)."/add' class='btn btn-bold btn-label-brand btn-sm'><i class='la la-plus'></i>Tambah Data</a>
-				";
+					if ($this->_ci->uri->segment(1) == 'penjualan') {
+						echo "<a href='".base_url().$this->_ci->uri->segment(1)."/new_invoice' class='btn btn-bold btn-label-brand btn-sm'><i class='la la-plus'></i>Tambah Invoice</a>
+					";
+					}else{
+						echo "<a href='".base_url().$this->_ci->uri->segment(1)."/add' class='btn btn-bold btn-label-brand btn-sm'><i class='la la-plus'></i>Tambah Invoice</a>
+					";
+					}
+					
+					
+					
 				}
 			}
 		}

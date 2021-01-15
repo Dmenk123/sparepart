@@ -9,31 +9,54 @@
       </div>
       <div class="modal-body">
         <form id="form-user" name="form-user">
-          <div class="form-group">
-            <input type="hidden" class="form-control" id="id_barang" name="id_barang">
-            <label for="lbl_username" class="form-control-label">Kode SKU:</label>
-            <input type="text" class="form-control" id="sku" name="sku" autocomplete="off">
-            <span class="help-block"></span>
-          </div>
-          <div class="form-group">
+          <div class="row">
+            <div class="form-group col-sm-4">
+              <input type="hidden" class="form-control" id="id_barang" name="id_barang">
+              <label for="lbl_username" class="form-control-label">Kode SKU:</label>
+              <input type="text" class="form-control" id="sku" name="sku" autocomplete="off">
+              <span class="help-block"></span>
+            </div>
+            <div class="form-group col-sm-8">
             <label for="lbl_namabarang" class="form-control-label">Nama Barang:</label>
             <input type="text" class="form-control" id="nama" name="nama" autocomplete="off">
             <span class="help-block"></span>
           </div>
-          <div class="form-group">
-            <label for="lbl_hargabarang" class="form-control-label">Harga Barang :</label>
-            <input type="text" class="form-control" id="harga" name="harga" autocomplete="off">
-            <span class="help-block"></span>
           </div>
-          <div class="form-group">
+          <div class="row">
+            <div class="form-group col-sm-4">
+              <label for="lbl_hargabarang" class="form-control-label">Harga Barang :</label>
+              <input type="text" class="form-control" id="harga" name="harga" autocomplete="off">
+              <span class="help-block"></span>
+            </div>
+            <div class="form-group col-sm-8">
             <label for="lbl_kategori" class="form-control-label">Kategori :</label>
             <input type="text" class="form-control" id="kategori" name="kategori" autocomplete="off">
             <span class="help-block"></span>
           </div>
-          <div class="form-group">
-            <label for="lbl_kategori" class="form-control-label">Shopee Link :</label>
-            <input type="text" class="form-control" id="shopee" name="shopee" autocomplete="off">
-            <span class="help-block"></span>
+          </div>
+          <div class="row">
+            <div class="form-group col-sm-6">
+              <label for="lbl_kategori" class="form-control-label">Shopee Link :</label>
+              <input type="text" class="form-control" id="shopee" name="shopee" autocomplete="off">
+              <span class="help-block"></span>
+            </div>
+            <div class="form-group col-sm-6">
+              <label for="lbl_kategori" class="form-control-label">Tokopedia Link :</label>
+              <input type="text" class="form-control" id="tokopedia" name="tokopedia" autocomplete="off">
+              <span class="help-block"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group col-sm-6">
+              <label for="lbl_kategori" class="form-control-label">Bukalapak Link :</label>
+              <input type="text" class="form-control" id="bukalapak" name="bukalapak" autocomplete="off">
+              <span class="help-block"></span>
+            </div>
+            <div class="form-group col-sm-6">
+              <label for="lbl_kategori" class="form-control-label">Lazada Link :</label>
+              <input type="text" class="form-control" id="lazada" name="lazada" autocomplete="off">
+              <span class="help-block"></span>
+            </div>
           </div>
           <div class="form-group">
             <label>Foto Barang</label>
