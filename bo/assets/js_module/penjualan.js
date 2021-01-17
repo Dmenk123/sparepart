@@ -1,7 +1,9 @@
 var save_method;
 var table;
+var id_pen;
 
 $(document).ready(function() {
+  
 
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {
@@ -412,5 +414,111 @@ function createAlert(title, summary, details, severity, dismissible, autoDismiss
 function ajax_send(order_id)
 {
     window.location.href = base_url+'penjualan/add_order?order_id='+order_id;
+}
+ 
+  
+$(document).ready(function(){
+  
+  // console.log(id);
+    getTable();
+    getTotal();
+
+    $('#regForm').submit(function(e){
+        e.preventDefault();
+        // var url = '<?php echo base_url(); ?>';
+        var reg = $('#regForm').serialize();
+        $.ajax({
+            type: 'POST',
+            data: reg,
+            dataType: 'json',
+            url: base_url + 'penjualan/save_order',
+            success: function(data)
+            {
+                swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
+                $('#regForm')[0].reset();
+                getTable();
+                getTotal();
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+                Swal.fire('Terjadi Kesalahan');
+            }
+           
+        });
+    });
+
+    // $(document).on('click', '#clearMsg', function(){
+    //     $('#responseDiv').hide();
+    // });
+
+});
+function getTable(){
+    var id = $('#id_penjualan').val();
+    console.log(id);
+    $.ajax({
+        type: 'POST',
+        url: base_url + 'penjualan/fetch',
+        data: {id:id},
+        success:function(response){
+            $('#tbody').html(response);
+        }
+    });
+}
+
+function getTotal(){
+  var id = $('#id_penjualan').val();
+  console.log(id);
+  $.ajax({
+      type: 'POST',
+      url: base_url + 'penjualan/total_order',
+      data: {id:id},
+      dataType: "json",
+      success:function(data){
+        $('#total').html(data.total);
+      }
+  });
+}
+
+function hapus_order(id)
+{
+  // alert('kesini'); exit;
+  swalConfirm.fire({
+    title: 'Apakah Anda Yakin ?',
+    text: "ingin menghapus daftar order ini ?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya !',
+    cancelButtonText: 'Tidak !',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.value) {
+        $.ajax({
+            url : base_url + 'penjualan/hapus_order',
+            type: "POST",
+            dataType: "JSON",
+            data : {id : id},
+            success: function(data)
+            {
+                swalConfirm.fire('Berhasil !', data.pesan, 'success');
+                getTable();
+                getTotal();
+                
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+                Swal.fire('Terjadi Kesalahan');
+            }
+        });
+    } else if (
+      /* Read more about handling dismissals below */
+      result.dismiss === Swal.DismissReason.cancel
+    ) {
+      swalConfirm.fire(
+        'Dibatalkan',
+        'Aksi Dibatalakan',
+        'error'
+      )
+    }
+  });
 }
   

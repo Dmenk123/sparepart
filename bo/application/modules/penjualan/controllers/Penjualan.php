@@ -59,10 +59,10 @@ class Penjualan extends CI_Controller {
 			$row[] = $no;
 			$row[] = $invoice->order_id;
 			$row[] = $invoice->no_faktur;
-			$row[] = $invoice->id_pelanggan;
-			$row[] = $invoice->id_pelanggan;
+			$row[] = $invoice->nama_toko;
+			$row[] = $invoice->alamat;
 			$row[] = $invoice->tgl_jatuh_tempo;
-			$row[] = $invoice->id_sales;
+			$row[] = $invoice->username;
 			
 			$str_aksi = '
 				<div class="btn-group">
@@ -92,155 +92,10 @@ class Penjualan extends CI_Controller {
 		echo json_encode($output);
 	}
 
-	public function edit_agen()
-	{
-		$this->load->library('Enkripsi');
-		$id_user = $this->session->userdata('id_user');
-		$data_user = $this->m_user->get_by_id($id_user);
-	
-		$id = $this->input->post('id');
-		//$oldData = $this->m_user->get_by_id($id);
-
-		$select = "m_agen.*";
-		$where = ['m_agen.id_agen' => $id];
-		$table = 'm_agen';
-		// $join = [ 
-		// 	[
-		// 		'table' => 'm_role',
-		// 		'on'	=> 'm_user.id_role = m_role.id'
-		// 	]
-		// ];
-
-		$oldData = $this->m_global->single_row($select, $where, $table);
-		
-		if(!$oldData){
-			return redirect($this->uri->segment(1));
-		}
-		// var_dump($oldData);exit;
-	
-		
-		$data = array(
-			'data_user' => $data_user,
-			'old_data'	=> $oldData,
-		);
-		
-		echo json_encode($data);
-	}
-
-	public function add_data_agen()
-	{
-		$this->load->library('Enkripsi');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$arr_valid = $this->rule_validasi();
-		
-		$nama_perusahaan 	= $this->input->post('nama_pers');
-		$produk 			= $this->input->post('produk');
-		$alamat				= $this->input->post('alamat');
-		$telp				= $this->input->post('telp');
-
-		if ($arr_valid['status'] == FALSE) {
-			echo json_encode($arr_valid);
-			return;
-		}
-
-		$this->db->trans_begin();
-		
-		$data_agen = [
-			'nama_perusahaan' => $nama_perusahaan,
-			'produk' => $produk,
-			'alamat' => $alamat,
-			'telp' => $telp,
-		];
-		
-		$insert = $this->m_agen->save($data_agen);
-		
-		if ($this->db->trans_status() === FALSE){
-			$this->db->trans_rollback();
-			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan master agen';
-		}else{
-			$this->db->trans_commit();
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses menambahkan master agen';
-		}
-
-		echo json_encode($retval);
-	}
-
-	public function update_data_agen()
-	{
-		$sesi_id_user = $this->session->userdata('id_user'); 
-		$id_agen = $this->input->post('id_agen');
-		$this->load->library('Enkripsi');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		
-		// if($this->input->post('skip_pass') != null){
-		// 	$skip_pass = true;
-		// }else{
-		// 	$skip_pass = false;
-		// }
-		
-		$arr_valid = $this->rule_validasi(true);
-
-		if ($arr_valid['status'] == FALSE) {
-			echo json_encode($arr_valid);
-			return;
-		}
-
-		$nama_pers		= $this->input->post('nama_pers');
-		$produk 		= $this->input->post('produk');
-		$alamat			= $this->input->post('alamat');
-		$telp     		= $this->input->post('telp');
-		
-		$q = $this->m_agen->get_by_id($id_agen);
-		
-		$this->db->trans_begin();
-
-		$data_agen = [
-			'nama_perusahaan' => $nama_pers,
-			'produk' => $produk,
-			'alamat' => $alamat,
-			'telp' 	=> $telp,
-			'updated_at' => $timestamp
-		];
-		
-
-		$where = ['id_agen' => $id_agen];
-		$update = $this->m_agen->update($where, $data_agen);
-
-		if ($this->db->trans_status() === FALSE){
-			$this->db->trans_rollback();
-			$data['status'] = false;
-			$data['pesan'] = 'Gagal update Master Agen';
-		}else{
-			$this->db->trans_commit();
-			$data['status'] = true;
-			$data['pesan'] = 'Sukses update Master Agen';
-		}
-		
-		echo json_encode($data);
-	}
-
 	/**
 	 * Hanya melakukan softdelete saja
 	 * isi kolom updated_at dengan datetime now()
 	 */
-	public function delete_agen()
-	{
-		$id_agen = $this->input->post('id');
-		$del = $this->m_agen->softdelete_by_id($id_agen);
-		if($del) {
-			$retval['status'] = TRUE;
-			$retval['pesan'] = 'Data Master Agen berhasil dihapus';
-		}else{
-			$retval['status'] = FALSE;
-			$retval['pesan'] = 'Data Master Agen berhasil dihapus';
-		}
-
-		echo json_encode($retval);
-	}
 
 	public function edit_status_user($id)
 	{
@@ -304,6 +159,38 @@ class Penjualan extends CI_Controller {
 
         return $data;
 	}
+
+		// ===============================================
+		private function rule_validasi_order($is_update=false, $skip_pass=false)
+		{
+			$data = array();
+			$data['error_string'] = array();
+			$data['inputerror'] = array();
+			$data['status'] = TRUE;
+	
+			
+			
+			// if ($this->input->post('icon_menu') == '') {
+			// 	$data['inputerror'][] = 'icon_menu';
+			//     $data['error_string'][] = 'Wajib mengisi icon menu';
+			//     $data['status'] = FALSE;
+			// }
+	
+			if ($this->input->post('id_barang') == '') {
+				$data['inputerror'][] = 'id_barang';
+				$data['error_string'][] = 'Wajib Memilih Barang yang akan diorder';
+				$data['status'] = FALSE;
+			}
+	
+			if ($this->input->post('qty') == '') {
+				$data['inputerror'][] = 'qty';
+				$data['error_string'][] = 'Wajib Menginputkan Jumlag Quantity';
+				$data['status'] = FALSE;
+			}
+	
+	
+			return $data;
+		}
 
 	private function konfigurasi_upload_img($nmfile)
 	{ 
@@ -413,6 +300,7 @@ class Penjualan extends CI_Controller {
 		$date = str_replace('/', '-', $tgl_jatuh_tempo);
 		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date) );
 		$order_id           = rand();
+		$no_faktur          = $this->generateRandomString();
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
@@ -423,6 +311,7 @@ class Penjualan extends CI_Controller {
 		
 		$data = [
 			'order_id' 			=> $order_id,
+			'no_faktur'         => $no_faktur,
 			'id_pelanggan' 		=> $id_pelanggan,
 			'id_sales' 			=> $id_sales,
 			'tgl_jatuh_tempo'	=> $jatuh_tempo,
@@ -461,6 +350,9 @@ class Penjualan extends CI_Controller {
 			'data_role'	=> $data_role,
 		);
 
+		$data['invoice'] = $this->m_penjualan->getPenjualan($order_id)->row();
+		$data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL));
+
 		/**
 		 * content data untuk template
 		 * param (css : link css pada direktori assets/css_module)
@@ -475,5 +367,114 @@ class Penjualan extends CI_Controller {
 		];
 
 		$this->template_view->load_view($content, $data);
+	}
+
+	public function save_order()
+	{
+		$this->load->library('Enkripsi');
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$arr_valid = $this->rule_validasi_order();
+		
+		$id_penjualan 	= $this->input->post('id_penjualan');
+		$id_barang      = $this->input->post('id_barang');
+		$data_where     = array('id_barang'=> $id_barang);
+		$barang         = $this->m_global->getSelectedData('m_barang', $data_where)->row();
+		$qty            = $this->input->post('qty');
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		$sub_total = $barang->harga * $qty;
+		$this->db->trans_begin();
+		
+		$data_order = [
+			'id_penjualan'  => $id_penjualan,
+			'id_barang' 	=> $id_barang,
+			'harga_awal' 	=> $barang->harga,
+			'harga_diskon' 	=> $barang->harga,
+			'besaran_diskon'=> 0,
+			'sub_total'     => $sub_total,
+			'qty'           => $qty
+		];
+		
+		$insert = $this->m_global->save($data_order, 't_penjualan_det');
+		
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal menambahkan Order';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses menambahkan Order';
+		}
+
+		echo json_encode($retval);
+	}
+
+	public function fetch()
+	{
+		// $order_id  = $this->input->get('order_id');
+		// $penjualan = $this->m_global->getSelectedData('t_penjualan', array('order_id'=>$order_id))->row();
+		// $id        = $penjualan->id_penjualan;
+		$id = $this->input->post('id');
+        $data = $this->m_penjualan->getPenjualanDet($id)->result();
+        foreach($data as $row){
+            ?>
+            <tr>
+                <td><?php echo $row->qty; ?></td>
+                <td><?php echo $row->nama; ?></td>
+                <td><?php echo $row->harga_diskon; ?></td>
+                <td><?php echo $row->sub_total; ?></td>
+				<td><button class="btn-danger" alt="batalkan" onclick="hapus_order(<?php echo $row->id_penjualan_det; ?>)"><i class="fa fa-times"></i></button></td>
+            </tr>
+            <?php
+        }
+	}
+	
+	public function total_order()
+	{
+		
+		$id = $this->input->post('id');
+		$hasil = $this->m_penjualan->getTotalOrder($id)->row();
+		$data = array();
+		if (!empty($hasil)) {
+			// var_dump($data->total);
+			$data['total'] = $hasil->total;
+		} else {
+			$data['total'] = 0;
+		}
+
+		echo json_encode($data);
+		
+	}
+	
+	function generateRandomString($length = 6) {
+		$characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		$charactersLength = strlen($characters);
+		$randomString = '';
+		for ($i = 0; $i < $length; $i++) {
+			$randomString .= $characters[rand(0, $charactersLength - 1)];
+		}
+		return $randomString;
+	}
+
+	public function hapus_order()
+	{
+		$id = $this->input->post('id');
+		$data_where = array('id_penjualan_det' => $id);
+		$del = $this->m_global->force_delete($data_where, 't_penjualan_det');
+		if($del) {
+			$retval['status'] = TRUE;
+			$retval['pesan'] = 'Data Order berhasil dihapus';
+		}else{
+			$retval['status'] = FALSE;
+			$retval['pesan'] = 'Data Order berhasil dihapus';
+		}
+
+		echo json_encode($retval);
+
 	}
 }

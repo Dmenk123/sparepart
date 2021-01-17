@@ -398,10 +398,10 @@ class Master_barang extends CI_Controller {
 	{
 		//konfigurasi image lib
 	    $config['image_library'] = 'gd2';
-	    $config['source_image'] = './files/img/user_img/'.$filename;
+	    $config['source_image'] = './files/img/barang_img/'.$filename;
 	    $config['create_thumb'] = FALSE;
 	    $config['maintain_ratio'] = FALSE;
-	    $config['new_image'] = './files/img/user_img/'.$filename;
+	    $config['new_image'] = './files/img/barang_img/thumbs/'.$filename;
 	    $config['overwrite'] = TRUE;
 	    $config['width'] = 450; //resize
 	    $config['height'] = 500; //resize
@@ -489,4 +489,6 @@ class Master_barang extends CI_Controller {
 		
 		
 	}
+
+	
 }

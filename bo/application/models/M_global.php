@@ -30,6 +30,12 @@ class M_global extends CI_Model
         return $this->db->affected_rows(); 
     }
 
+    function force_delete($array_where=NULL, $table=NULL){
+        $this->db->where($array_where);
+        $this->db->delete($table);
+        // return $this->db->affected_rows(); 
+    }
+
     function single_row($select=NULL,$array_where=NULL,$table=NULL, $join=NULL, $order_by=NULL){
         $this->db->select($select);
 		$this->db->from($table);

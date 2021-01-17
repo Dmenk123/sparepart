@@ -76,24 +76,48 @@
                             <div class="col-sm-4 invoice-col">
                                 To
                                 <address>
-                                    <strong>
-                                        Shahid                                    </strong>
+                                    <strong><?php echo $invoice->nama_toko;?></strong>
                                     <br>
                                     Address:
-                                    Kollanpur                                    <br>
+                                    <?= (isset($invoice->alamat))?$invoice->alamat:"";?><br>
                                     Phone:
-                                    123456789                                   <br>
-                                    Email:ggggg@gmail.com                                </address>
+                                    <?= (isset($invoice->no_telp))?$invoice->no_telp:"";?><br>
+                                    <?= (isset($invoice->email))?$invoice->email:"";?>
+                                </address>
                             </div><!-- /.col -->
                             <div class="col-sm-4 invoice-col">
-                                <b>Invoice #007612</b><br>
+                                <b>Invoice #<?= (isset($invoice->order_id))?$invoice->order_id:"";?></b><br>
                                 <br>
-                                <b>Order ID:</b> 4F3S8J<br>
-                                <b>Payment Due:</b> 2/22/2014<br>
-                                <b>Account:</b> 968-34567
+                                <b>No. Faktur:</b> <?= (isset($invoice->no_faktur))?$invoice->no_faktur:"";?><br>
+                                <b>Payment Due:</b>  <?= (isset($invoice->tgl_jatuh_tempo))?$invoice->tgl_jatuh_tempo:"";?><br>
+                                <b>Sales Name:</b>  <?= (isset($invoice->username))?$invoice->username:"";?>
                             </div><!-- /.col -->
                         </div><!-- /.row -->
 
+                        <form id="regForm">
+                        <div class="row">
+                            <div class="form-group col-sm-3">
+                                <label for="lbl_namabarang" class="form-control-label">Barang :</label>
+                                <input type="hidden" value="<?= (isset($invoice->id_penjualan))?$invoice->id_penjualan:"";?>" name="id_penjualan" id="id_penjualan">
+                                <select name="id_barang" id="id_barang" class="form-control">
+                                    <option value="0">-PILIH-</option>
+                                    <?php foreach($barang->result() as $row):?>
+                                        <option value="<?php echo $row->id_barang;?>"><?php echo $row->nama;?></option>
+                                    <?php endforeach;?>
+                                </select>
+                                <span class="help-block"></span>
+                            </div>
+                            <div class="form-group col-sm-3">
+                                <label for="lbl_hargabarang" class="form-control-label">Qty :</label>
+                                <input type="number" class="form-control" id="qty" name="qty" autocomplete="off">
+                                <span class="help-block"></span>
+                            </div>
+                            <div class="form-group col-sm-3" style="padding-top:25px;">
+                              <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                        </div>
+                        </form>
+                        <br />
                         <!-- Table row -->
                         <div class="row">
                             <div class="col-xs-12 table-responsive">
@@ -104,18 +128,11 @@
                                             <th>Product</th>
                                              <th>Price</th>
                                             <th>Sub Total</th>
+                                            <th>&nbsp;</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        
-                                        
-                                                                                <tr>
-                                            <td>2</td>
-                                            <td>18</td>
-                                            <td>12500</td>
-                                            <td>25000</td>
-                                        </tr>
-                                                                            </tbody>
+                                    <tbody id="tbody">
+				                            </tbody>
                                 </table>
                             </div><!-- /.col -->
                         </div><!-- /.row -->
@@ -123,7 +140,7 @@
                         <div class="row">
                             <!-- accepted payments column -->
                             <div class="col-md-12">
-                                <p class="lead">Amount Due 2/22/2014</p>
+                                <p class="lead">Amount Due <?php echo $invoice->tgl_jatuh_tempo;?></p>
                                 <div class="table-responsive">
                                     <table class="table">
                                         <tbody>
@@ -131,7 +148,7 @@
                                             
                                             <tr>
                                                 <th>Total:</th>
-                                                <td> 50000</td>
+                                                <td id="total">0</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -141,10 +158,12 @@
 
                         <!-- this row will not appear when printing -->
                         <div class="row no-print">
-                            <div class="col-xs-12">
-                                <a href="" class="btn btn-default"><i class="fa fa-print"></i> Print</a>
-                                <button class="btn btn-success pull-right"><i class="fa fa-credit-card"></i> Submit Payment</button>
-                                <button class="btn btn-primary pull-right" style="margin-right: 5px;"><i class="fa fa-download"></i> Generate PDF</button>
+                            <div class="col-sm-6">
+                                <!-- <a href="" class="btn btn-default"><i class="fa fa-print"></i> Print</a>
+                                <button class="btn btn-primary center" style="margin-right: 5px;"><i class="fa fa-download"></i> Generate PDF</button>
+                                 -->
+                                
+                                <button class="btn btn-success pull-right" ><i class="fa fa-credit-card"></i> Submit Payment</button>
                             </div>
                         </div>
         <!--end: Form Invoice -->

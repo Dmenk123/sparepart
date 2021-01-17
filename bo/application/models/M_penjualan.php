@@ -26,10 +26,21 @@ class M_penjualan extends CI_Model
 	private function _get_datatables_query($term='')
 	{
 		$this->db->select('
-			pj.*
-		');
-
-		$this->db->from('t_penjualan pj');	
+				pj.id_penjualan,
+				pj.order_id,
+				pj.no_faktur,
+				pj.tgl_jatuh_tempo,
+				pj.created_at,
+				mu.username,
+				pl.nama_pembeli,
+				pl.alamat,
+				pl.no_telp,
+				pl.email,
+				pl.nama_toko
+				');
+		$this->db->from('t_penjualan pj');
+		$this->db->join('m_user mu', 'mu.id=pj.id_sales');
+		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=pj.id_pelanggan');
 		$this->db->where('pj.deleted_at is null');
 		
 		$i = 0;
@@ -218,5 +229,57 @@ class M_penjualan extends CI_Model
 	public function trun_master_user()
 	{
 		$this->db->query("truncate table m_user");
+	}
+
+	public function getPenjualan($order_id)
+	{
+		$this->db->select('
+						pj.id_penjualan,
+						pj.order_id,
+						pj.no_faktur,
+						pj.tgl_jatuh_tempo,
+						pj.created_at,
+						mu.username,
+						pl.nama_pembeli,
+						pl.alamat,
+						pl.no_telp,
+						pl.email,
+						pl.nama_toko
+						');
+		$this->db->from('t_penjualan pj');
+		$this->db->join('m_user mu', 'mu.id=pj.id_sales');
+		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=pj.id_pelanggan');
+		$this->db->where('pj.order_id', $order_id);
+		$q = $this->db->get();
+		return $q;
+	}
+
+	function getTotalOrder($id)
+	{
+		$query = "
+				SELECT SUM(sub_total) as total
+				FROM t_penjualan_det
+				WHERE id_penjualan = $id
+				";
+		return $this->db->query($query);
+	}
+
+	function getPenjualanDet($id)
+	{
+		$this->db->select('
+				pd.id_penjualan_det,
+				pd.id_penjualan,
+				pd.harga_awal,
+				pd.harga_diskon,
+				pd.qty,
+				pd.sub_total,
+				mb.nama
+				');
+		$this->db->from('t_penjualan_det pd');
+		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
+		$this->db->where('pd.id_penjualan', $id);
+		$this->db->order_by('pd.id_penjualan_det', 'ASC');
+		$q = $this->db->get();
+		return $q;
 	}
 }
