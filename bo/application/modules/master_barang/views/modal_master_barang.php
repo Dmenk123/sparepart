@@ -72,6 +72,20 @@
             <img id="preview_img" src="#" alt="Preview Foto" height="200" width="200"/>
             <span class="help-block"></span>
           </div>
+          <div class="form-group">
+            <label>Foto Barang Kedua</label>
+            <div></div>
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="foto_kedua" name="foto_kedua" accept=".jpg,.jpeg,.png">
+              <label class="custom-file-label" id="label_foto" for="customFile">Pilih gambar yang akan diupload</label>
+            </div>
+          </div>
+          <div class="form-group" id="div_preview_foto_kedua" style="display: none;">
+            <label for="lbl_password_lama" class="form-control-label">Preview Foto:</label>
+            <div></div>
+            <img id="preview_img_kedua" src="#" alt="Preview Foto" height="200" width="200"/>
+            <span class="help-block"></span>
+          </div>
          
         </form>
       </div>

@@ -32,6 +32,10 @@ $(document).ready(function() {
         readURL(this);
     });
 
+    $("#foto_kedua").change(function() {
+        readURL_kedua(this);
+    });
+
     //change menu status
     $(document).on('click', '.btn_edit_status', function(){
         var id = $(this).attr('id');
@@ -104,6 +108,8 @@ function edit_barang(id)
             // data.data_menu.forEach(function(dataLoop) {
             //     $("#parent_menu").append('<option value = '+dataLoop.id+' class="append-opt">'+dataLoop.nama+'</option>');
             // });
+            $('#div_preview_foto').css("display","block");
+            $('#div_preview_foto_kedua').css("display","block");
             $('[name="id_barang"]').val(data.old_data.id_barang);
             $('[name="nama"]').val(data.old_data.nama);
             $('[name="sku"]').val(data.old_data.sku);
@@ -115,9 +121,12 @@ function edit_barang(id)
             $('[name="bukalapak"]').val(data.old_data.bukalapak_link);
             $('[name="lazada"]').val(data.old_data.lazada_link);
             // $("#pegawai").val(data.old_data.id_pegawai).trigger("change");
-            if (data.foto_encoded != '') {
-                $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
-            }
+            // if (data.foto_encoded != '') {
+            //     $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
+            // }
+            
+            $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
+            $('#preview_img_kedua').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded_kedua);
            
             $('#modal_barang_form').modal('show');
 	        $('#modal_title').text('Edit Master Barang'); 
@@ -158,8 +167,8 @@ function save()
         text: "Apakah Anda Yakin ?",
         type: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Ya, Ubah Status!',
-        cancelButtonText: 'Tidak, Batalkan!',
+        confirmButtonText: 'Ya !',
+        cancelButtonText: 'Tidak !',
         reverseButtons: true
       }).then((result) => {
         if (result.value) {
@@ -336,6 +345,20 @@ function readURL(input) {
     } else {
         $('#div_preview_foto').css("display","none");
         $('#preview_img').attr('src', '');
+    }
+}
+
+function readURL_kedua(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        $('#div_preview_foto_kedua').css("display","block");
+        $('#preview_img_kedua').attr('src', e.target.result);
+      }
+      reader.readAsDataURL(input.files[0]);
+    } else {
+        $('#div_preview_foto_kedua').css("display","none");
+        $('#preview_img_kedua').attr('src', '');
     }
 }
 
