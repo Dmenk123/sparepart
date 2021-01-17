@@ -61,7 +61,7 @@
                 <div class="form-group col-sm-4">
                     <input type="hidden" class="form-control" id="id_agen" name="id_agen">
                     <label for="lbl_username" class="form-control-label">Nama Pelanggan:</label>
-                        <select name="pelanggan" id="pelanggan" class="form-control">
+                        <select name="pelanggan" id="pelanggan" class="form-control select2">
                             <option value="0">-PILIH-</option>
                             <?php foreach($pelanggan->result() as $row):?>
                                 <option value="<?php echo $row->id_pelanggan;?>"><?php echo $row->nama_toko;?></option>
@@ -71,7 +71,7 @@
                 </div>
                 <div class="form-group col-sm-4">
                     <label for="lbl_namabarang" class="form-control-label">Nama Sales :</label>
-                        <select name="sales" id="sales" class="form-control">
+                        <select name="sales" id="sales" class="form-control select2">
                             <option value="0">-PILIH-</option>
                             <?php foreach($sales->result() as $row):?>
                                 <option value="<?php echo $row->id;?>"><?php echo $row->username;?></option>
