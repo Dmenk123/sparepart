@@ -66,13 +66,13 @@ class Penjualan extends CI_Controller {
 			
 			$str_aksi = '
 				<div class="btn-group">
-					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" invoice-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
+					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_agen(\''.$invoice->id_penjualan.'\')">
-							<i class="la la-pencil"></i> Edit Invoice Penjualan
+						<button class="dropdown-item" onclick="edit_penjualan(\''.$invoice->order_id.'\')">
+							<i class="la la-pencil"></i> Edit Barang
 						</button>
-						<button class="dropdown-item" onclick="delete_agen(\''.$invoice->id_penjualan.'\')">
-							<i class="la la-trash"></i> Hapus Invoice Penjualan
+						<button class="dropdown-item" onclick="delete_penjualan(\''.$invoice->order_id.'\')">
+							<i class="la la-trash"></i> Hapus
 						</button>
 			';
 
@@ -476,5 +476,39 @@ class Penjualan extends CI_Controller {
 
 		echo json_encode($retval);
 
+	}
+
+	public function menu_edit()
+	{
+		$id_user = $this->session->userdata('id_user'); 
+		$data_user = $this->m_user->get_detail_user($id_user);
+		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
+			
+		/**
+		 * data passing ke halaman view content
+		 */
+		$data = array(
+			'title' => 'NEW INVOICE',
+			'data_user' => $data_user,
+			'data_role'	=> $data_role,
+		);
+
+		$order_id = $this->input->get('order_id');
+		$data['invoice'] = $this->m_penjualan->getPenjualan($order_id)->row();
+
+		/**
+		 * content data untuk template
+		 * param (css : link css pada direktori assets/css_module)
+		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
+		 * param (js : link js pada direktori assets/js_module)
+		 */
+		$content = [
+			'css' 	=> null,
+			'modal' => null,
+			'js'	=> 'penjualan.js',
+			'view'	=> 'view_menu_edit'
+		];
+
+		$this->template_view->load_view($content, $data);
 	}
 }

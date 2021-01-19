@@ -123,6 +123,43 @@ function edit_agen(id)
     });
 }
 
+function edit_penjualan(order_id)
+{
+  window.location.href = base_url +'penjualan/menu_edit?order_id='+order_id;
+}
+
+function editorder(order_id)
+{
+  window.location.href = base_url +'penjualan/add_order?order_id='+order_id+'&mode=edit';
+}
+
+function simpanedit()
+{
+  swalConfirmDelete.fire({
+    title: 'Perhatian',
+    text: "Apakah Anda ingin Menyimpan Invoice ini ?",
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya !',
+    cancelButtonText: 'Tidak !',
+    reverseButtons: true
+  }).then((result) => {
+      if (result.value) {
+        window.location.href = base_url +'penjualan/';
+      }else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        ) {
+          swalConfirm.fire(
+            'Dibatalkan',
+            'Aksi Dibatalakan',
+            'error'
+          )
+        }
+  });
+  
+}
+
 function reload_table()
 {
     table.ajax.reload(null,false); //reload datatable ajax 

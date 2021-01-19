@@ -97,12 +97,12 @@
                         <form id="regForm">
                         <div class="row">
                             <div class="form-group col-sm-3">
-                                <label for="lbl_namabarang" class="form-control-label">Barang :</label>
+                                <label for="lbl_namabarang" class="form-control-label">Nama Barang :</label>
                                 <input type="hidden" value="<?= (isset($invoice->id_penjualan))?$invoice->id_penjualan:"";?>" name="id_penjualan" id="id_penjualan">
-                                <select name="id_barang" id="id_barang" class="form-control">
+                                <select name="id_barang" id="id_barang" class="form-control select2">
                                     <option value="0">-PILIH-</option>
                                     <?php foreach($barang->result() as $row):?>
-                                        <option value="<?php echo $row->id_barang;?>"><?php echo $row->nama;?></option>
+                                        <option value="<?php echo $row->id_barang;?>"><?php echo $row->nama;?> | <?php echo $row->sku;?></option>
                                     <?php endforeach;?>
                                 </select>
                                 <span class="help-block"></span>

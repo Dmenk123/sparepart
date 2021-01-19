@@ -28,7 +28,7 @@ class Home extends CI_Controller {
 		// exit;
 
 		// $this->load->view('v_template', $data, FALSE);
-		$this->load->view('v_maintenance', $data, FALSE);
+		$this->load->view('v_home', $data, FALSE);
 	}
 
 	public function oops()
