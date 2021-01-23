@@ -69,10 +69,13 @@ class Penjualan extends CI_Controller {
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
 						<button class="dropdown-item" onclick="edit_penjualan(\''.$invoice->order_id.'\')">
-							<i class="la la-pencil"></i> Edit Barang
+							<i class="la la-pencil"></i> Edit Invoice
 						</button>
 						<button class="dropdown-item" onclick="delete_penjualan(\''.$invoice->order_id.'\')">
 							<i class="la la-trash"></i> Hapus
+						</button>
+						<button class="dropdown-item" onclick="cetak_invoice(\''.$invoice->order_id.'\')">
+							<i class="la la-trash"></i> Cetak
 						</button>
 			';
 
@@ -510,5 +513,13 @@ class Penjualan extends CI_Controller {
 		];
 
 		$this->template_view->load_view($content, $data);
+	}
+
+	public function cetak_invoice()
+	{
+		$order_id = $this->input->get('order_id');
+		$pen      = $this->m_global->getSelectedData('t_penjualan', array('order_id'=>$order_id))->row();
+		$data['invoice'] = $this->m_penjualan->getPenjualanDet($pen->id_penjualan)->result();
+		$this->load->view('view_cetak_invoice_penjualan', $data);
 	}
 }

@@ -271,9 +271,11 @@ class M_penjualan extends CI_Model
 				pd.id_penjualan,
 				pd.harga_awal,
 				pd.harga_diskon,
+				pd.besaran_diskon,
 				pd.qty,
 				pd.sub_total,
-				mb.nama
+				mb.nama,
+				mb.sku
 				');
 		$this->db->from('t_penjualan_det pd');
 		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');

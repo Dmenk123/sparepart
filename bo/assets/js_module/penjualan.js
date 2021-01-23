@@ -133,6 +133,11 @@ function editorder(order_id)
   window.location.href = base_url +'penjualan/add_order?order_id='+order_id+'&mode=edit';
 }
 
+function cetak_invoice(order_id)
+{
+  window.location.href = base_url +'penjualan/cetak_invoice?order_id='+order_id;
+}
+
 function simpanedit()
 {
   swalConfirmDelete.fire({
@@ -145,7 +150,7 @@ function simpanedit()
     reverseButtons: true
   }).then((result) => {
       if (result.value) {
-        window.location.href = base_url +'penjualan/';
+        window.location.href = base_url +'penjualan';
       }else if (
           /* Read more about handling dismissals below */
           result.dismiss === Swal.DismissReason.cancel
