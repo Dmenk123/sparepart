@@ -555,5 +555,11 @@ class Master_barang extends CI_Controller {
 		
 	}
 
+	function barcode_scanner()
+	{
+		$generator = new Picqer\Barcode\BarcodeGeneratorHTML();
+		echo $generator->getBarcode('A-001', $generator::TYPE_CODE_128);
+	}
+
 	
 }

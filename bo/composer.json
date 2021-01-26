@@ -13,7 +13,8 @@
 	"require": {
 		"php": ">=5.2.4",
 		"dompdf/dompdf": "^0.8.3",
-		"phpoffice/phpspreadsheet": "^1.14"
+		"phpoffice/phpspreadsheet": "^1.14",
+		"picqer/php-barcode-generator": "^2.1"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"

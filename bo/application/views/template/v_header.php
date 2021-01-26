@@ -256,14 +256,7 @@
 					<!-- end:: Aside -->
 
 					<!-- begin:: Aside Menu -->
-					<?php
-						if ($this->uri->segment(2) != '') {
-							$alamat = '../assets/images/sidebar-5.jpg';
-						}else{
-							$alamat = 'assets/images/sidebar-5.jpg';
-						}
-					?>
-					<div class="kt-aside-menu-wrapper kt-grid__item kt-grid__item--fluid" id="kt_aside_menu_wrapper" style="background-image: url(<?=$alamat;?>); z-index:2; width:100%; height:100%">
+					<div class="kt-aside-menu-wrapper kt-grid__item kt-grid__item--fluid" id="kt_aside_menu_wrapper" style="background-image: url(<?= base_url('assets/images/sidebar-5.jpg');?>); z-index:2; width:100%; height:100%">
 						<div id="kt_aside_menu" class="kt-aside-menu " data-ktmenu-vertical="1" data-ktmenu-scroll="1" data-ktmenu-dropdown-timeout="500" >
 							<ul class="kt-menu__nav ">
 								<li class="kt-menu__section ">
