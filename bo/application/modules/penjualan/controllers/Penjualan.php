@@ -272,7 +272,19 @@ class Penjualan extends CI_Controller {
 			'data_role'	=> $data_role,
 			'pelanggan' => $this->m_global->getSelectedData('m_pelanggan', array('deleted_at'=>NULL)),
 			'sales'     => $this->m_global->getSelectedData('m_user', array('id_role'=>6)),
+			'mode'		=> 'add',
 		);
+
+		$mode = $this->input->get('mode');
+		if ($mode == 'edit') {
+			$order_id = $this->input->get('order_id');
+			$invoice = $this->m_global->getSelectedData('t_penjualan', array('order_id'=>$order_id))->row();
+			$data['invoice'] = $invoice;
+			$data['mode'] = $mode;
+			$data['title'] = "EDIT INVOICE";
+			$data['id_penjualan'] = $invoice->id_penjualan;
+			$data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
+		}
 
 		/**
 		 * content data untuk template
@@ -336,6 +348,58 @@ class Penjualan extends CI_Controller {
 
 		echo json_encode($retval);
 	}
+
+
+	public function update_new_invoice()
+	{
+		$this->load->library('Enkripsi');
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$arr_valid = $this->rule_validasi();
+		
+		$id_penjualan       = $this->input->post('id_penjualan');
+		$id_pelanggan 		= $this->input->post('pelanggan');
+		$id_sales 			= $this->input->post('sales');
+		$tgl_jatuh_tempo	= $this->input->post('tgl_jatuh_tempo');
+		$date = str_replace('/', '-', $tgl_jatuh_tempo);
+		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date) );
+		// $order_id           = rand();
+		// $no_faktur          = $this->generateRandomString();
+
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		$this->db->trans_begin();
+		
+		$data = [
+			// 'order_id' 			=> $order_id,
+			// 'no_faktur'         => $no_faktur,
+			'id_pelanggan' 		=> $id_pelanggan,
+			'id_sales' 			=> $id_sales,
+			'tgl_jatuh_tempo'	=> $jatuh_tempo,
+			'updated_at'		=> $timestamp
+		];
+
+		$data_where = array('id_Penjualan'=>$id_penjualan);
+		
+		$update = $this->m_penjualan->update($data_where, $data);
+		
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Mengubah Data Invoice';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses Mengubah Data Invoice';
+			// $retval['order_id'] = $order_id;
+		}
+
+		echo json_encode($retval);
+	}
+
 
 	public function add_order()
 	{

@@ -94,7 +94,7 @@
                         </div>
                         
                         <div class="col-lg-10" style="text-align: left">
-                            <button type="button" class="btn btn-success editkepala">Edit Data Invoice</button>
+                            <button type="button" class="btn btn-success" onclick="editinvoice(<?php echo $invoice->order_id;?>)">Edit Data Invoice</button>
                             <button type="button" class="btn btn-success" onclick="editorder(<?php echo $invoice->order_id;?>)">Edit Order</button>
                             <button type="button" class="btn btn-danger" onclick="simpanedit()">Simpan Perubahan</button>
                         </div>

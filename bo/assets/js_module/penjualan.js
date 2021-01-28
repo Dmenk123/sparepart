@@ -133,6 +133,11 @@ function editorder(order_id)
   window.location.href = base_url +'penjualan/add_order?order_id='+order_id+'&mode=edit';
 }
 
+function editinvoice(order_id)
+{
+  window.location.href = base_url +'penjualan/new_invoice?order_id='+order_id+'&mode=edit';
+}
+
 function cetak_invoice(order_id)
 {
   window.location.href = base_url +'penjualan/cetak_invoice?order_id='+order_id;
@@ -217,6 +222,90 @@ function saveDataPenjualan()
                           ajax_send(data.order_id);
                           loadingCircle.css("display", "none");
                         }, 3000);
+                    }else {
+                        for (var i = 0; i < data.inputerror.length; i++) 
+                        {
+                            if (data.inputerror[i] != 'pegawai') {
+                                $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
+                                $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
+                            }else{
+                                //ikut style global
+                                $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
+                            }
+                        }
+
+                        $("#btnSave").prop("disabled", false);
+                        $('#btnSave').text('Simpan');
+                    }
+                },
+                error: function (e) {
+                    console.log("ERROR : ", e);
+                    createAlert('Opps!','Terjadi Kesalahan','Coba Lagi nanti','danger',true,false,'pageMessages');
+                    $("#btnSave").prop("disabled", false);
+                    $('#btnSave').text('Simpan');
+
+                    // reset_modal_form();
+                    // $(".modal").modal('hide');
+                }
+            });
+        }else if (
+            /* Read more about handling dismissals below */
+            result.dismiss === Swal.DismissReason.cancel
+          ) {
+            swalConfirm.fire(
+              'Dibatalkan',
+              'Aksi Dibatalakan',
+              'error'
+            )
+          }
+    });
+}
+
+function editDataPenjualan()
+{
+    var url;
+    var txtAksi;
+    const loadingCircle = $("#loading-circle");
+ 
+    url = base_url + 'penjualan/update_new_invoice';
+    txtAksi = 'Edit Invoice';
+    var alert = "Mengupdate";
+    
+    
+    var form = $('#form-user')[0];
+    var data = new FormData(form);
+    
+    $("#btnSave").prop("disabled", true);
+    $('#btnSave').text('Menyimpan Data'); //change button text
+    swalConfirmDelete.fire({
+        title: 'Perhatian',
+        text: "Apakah Anda ingin "+alert+" Data ini ?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya !',
+        cancelButtonText: 'Tidak !',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                type: "POST",
+                enctype: 'multipart/form-data',
+                url: url,
+                data: data,
+                dataType: "JSON",
+                processData: false, // false, it prevent jQuery form transforming the data into a query string
+                contentType: false, 
+                cache: false,
+                timeout: 600000,
+                success: function (data) {
+                    if(data.status) {
+                        createAlert('','Berhasil!',''+data.pesan+'','success',true,true,'pageMessages');
+                        swal.fire("Sukses!!", "Aksi "+txtAksi+" Berhasil", "success");
+                        $("#btnSave").prop("disabled", false);
+                        $('#btnSave').text('Simpan');
+
+                        window.location.href = base_url+'penjualan';
+                        
                     }else {
                         for (var i = 0; i < data.inputerror.length; i++) 
                         {

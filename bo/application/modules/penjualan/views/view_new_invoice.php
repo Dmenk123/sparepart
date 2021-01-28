@@ -47,7 +47,7 @@
         <div class="kt-portlet__head-toolbar" >
           <div class="kt-portlet__head-wrapper">
             <div class="row" style="text-align:left!important;">
-              <h2>NEW INVOICE</h>
+              <h2><?php echo $title;?></h>
             </div>
           </div>
         </div>
@@ -60,11 +60,13 @@
             <div class="row">
                 <div class="form-group col-sm-4">
                     <input type="hidden" class="form-control" id="id_agen" name="id_agen">
+                    <input type="hidden" class="form-control" id="id_penjualan" name="id_penjualan"  value="<?php $value = (isset($id_penjualan))?$id_penjualan:''; echo $value; ?>">
+                    <input type="hidden" class="form-control" id="mode" name="mode" value="<?php echo $mode;?>">
                     <label for="lbl_username" class="form-control-label">Nama Pelanggan:</label>
                         <select name="pelanggan" id="pelanggan" class="form-control select2">
                             <option value="0">-PILIH-</option>
                             <?php foreach($pelanggan->result() as $row):?>
-                                <option value="<?php echo $row->id_pelanggan;?>"><?php echo $row->nama_toko;?></option>
+                                <option value="<?php echo $row->id_pelanggan;?>" <?php echo $invoice->id_pelanggan == $row->id_pelanggan ? 'selected' : ''?>><?php echo $row->nama_toko;?></option>
                             <?php endforeach;?>
                         </select>
                     <span class="help-block"></span>
@@ -74,21 +76,29 @@
                         <select name="sales" id="sales" class="form-control select2">
                             <option value="0">-PILIH-</option>
                             <?php foreach($sales->result() as $row):?>
-                                <option value="<?php echo $row->id;?>"><?php echo $row->username;?></option>
+                                <option value="<?php echo $row->id;?>" <?php echo $invoice->id_sales == $row->id ? 'selected' : ''?>><?php echo $row->username;?></option>
                             <?php endforeach;?>
                         </select>
                     <span class="help-block"></span>
                 </div>
                 <div class="form-group col-sm-4">
                     <label for="lbl_hargabarang" class="form-control-label">Tgl Jatuh Tempo :</label>
-                    <input type="text" class="form-control kt_datepicker" id="tgl_jatuh_tempo" name="tgl_jatuh_tempo" autocomplete="off">
+                    <input type="text" class="form-control kt_datepicker" id="tgl_jatuh_tempo" name="tgl_jatuh_tempo" autocomplete="off" value="<?php $value = (isset($tgl_jatuh_tempo))?$tgl_jatuh_tempo:''; echo $value; ?>">
                     <span class="help-block"></span>
                 </div>
             </div>
          
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            <button type="button" class="btn btn-primary" id="btnSave" onclick="saveDataPenjualan()">Selanjutnya <i class="fa fa-angle-double-right"></i></button>
+            <?php 
+              if ($mode == 'edit') { ?>
+                <button type="button" class="btn btn-primary" id="btnSave" onclick="editDataPenjualan()">Simpan
+            <?php } else { ?>
+                <button type="button" class="btn btn-primary" id="btnSave" onclick="saveDataPenjualan()">Selanjutnya <i class="fa fa-angle-double-right"></i></button>
+            <?php   }
+              
+            ?>
+           
         </div>
          
         </form>
