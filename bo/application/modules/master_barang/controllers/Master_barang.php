@@ -160,6 +160,7 @@ class Master_barang extends CI_Controller {
 		$nama 	= trim($this->input->post('nama'));
 		$harga 	= trim($this->input->post('harga'));
 		$kategori 	= $this->input->post('kategori');
+		$stok       = $this->input->post('stok');
 		$namafileseo = $this->seoUrl($nama.' '.time());
 		$namafileseo_2 = $this->seoUrl($nama.' '.time().'_2');
 
@@ -224,6 +225,7 @@ class Master_barang extends CI_Controller {
 			'nama' => $nama,
 			'harga' => $harga,
 			'id_kategori' => $kategori,
+			'stok'      => $stok,
 			'gambar'	=> $namafileseo,
 			'gambar_kedua' => $namafileseo_2,
 			'shopee_link' => $this->input->post('shopee'),
@@ -562,7 +564,7 @@ class Master_barang extends CI_Controller {
 		// $generated = $generator->getBarcode('081231723897', $generator::TYPE_CODE_128);
 		// $this->assertEquals('PNG', substr($generated, 1, 3));
 		file_put_contents('../files/img/barcode/barcode1.jpg', $generator->getBarcode('081231723897', $generator::TYPE_EAN_13, 4, 100));
-		echo "<img src='barcode1.jpg' alt=''>";
+		// echo "<img src='barcode1.jpg' alt=''>";
 	}
 
 	

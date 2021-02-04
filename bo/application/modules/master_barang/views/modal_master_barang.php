@@ -28,11 +28,16 @@
               <input type="text" class="form-control" id="harga" name="harga" autocomplete="off">
               <span class="help-block"></span>
             </div>
-            <div class="form-group col-sm-8">
-            <label for="lbl_kategori" class="form-control-label">Kategori :</label>
-            <input type="text" class="form-control" id="kategori" name="kategori" autocomplete="off">
-            <span class="help-block"></span>
-          </div>
+            <div class="form-group col-sm-4">
+              <label for="lbl_kategori" class="form-control-label">Kategori :</label>
+              <input type="text" class="form-control" id="kategori" name="kategori" autocomplete="off">
+              <span class="help-block"></span>
+            </div>
+            <div class="form-group col-sm-4">
+              <label for="lbl_kategori" class="form-control-label">Stok :</label>
+              <input type="number" class="form-control" id="stok" name="stok" autocomplete="off">
+              <span class="help-block"></span>
+            </div>
           </div>
           <div class="row">
             <div class="form-group col-sm-6">
