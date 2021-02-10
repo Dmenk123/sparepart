@@ -28,7 +28,7 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'root',
+	'hostname' => '',
 	'username' => 'jmpmotor_user',
 	'password' => 'nurcahyo123',
 	'database' => 'jmpmotor_db',
