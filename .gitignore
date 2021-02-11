@@ -9,6 +9,7 @@ application/logs/*
 !application/logs/.htaccess
 
 application/config/database.php
+bo/application/config/database.php
 /index.php
 
 user_guide_src/build/*
