@@ -36,6 +36,10 @@ $(document).ready(function() {
         readURL_kedua(this);
     });
 
+    $("#foto_ketiga").change(function() {
+        readURL_ketiga(this);
+    });
+
     //change menu status
     $(document).on('click', '.btn_edit_status', function(){
         var id = $(this).attr('id');
@@ -110,6 +114,7 @@ function edit_barang(id)
             // });
             $('#div_preview_foto').css("display","block");
             $('#div_preview_foto_kedua').css("display","block");
+            $('#div_preview_foto_ketiga').css("display","block");
             $('[name="id_barang"]').val(data.old_data.id_barang);
             $('[name="nama"]').val(data.old_data.nama);
             $('[name="sku"]').val(data.old_data.sku);
@@ -120,6 +125,7 @@ function edit_barang(id)
             $('[name="tokopedia"]').val(data.old_data.tokopedia_link);
             $('[name="bukalapak"]').val(data.old_data.bukalapak_link);
             $('[name="lazada"]').val(data.old_data.lazada_link);
+            $('[name="stok"]').val(data.old_data.stok);
             // $("#pegawai").val(data.old_data.id_pegawai).trigger("change");
             // if (data.foto_encoded != '') {
             //     $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
@@ -127,6 +133,7 @@ function edit_barang(id)
             
             $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
             $('#preview_img_kedua').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded_kedua);
+            $('#preview_img_ketiga').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded_ketiga);
            
             $('#modal_barang_form').modal('show');
 	        $('#modal_title').text('Edit Master Barang'); 
@@ -359,6 +366,20 @@ function readURL_kedua(input) {
     } else {
         $('#div_preview_foto_kedua').css("display","none");
         $('#preview_img_kedua').attr('src', '');
+    }
+}
+
+function readURL_ketiga(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        $('#div_preview_foto_ketiga').css("display","block");
+        $('#preview_img_ketiga').attr('src', e.target.result);
+      }
+      reader.readAsDataURL(input.files[0]);
+    } else {
+        $('#div_preview_foto_ketiga').css("display","none");
+        $('#preview_img_ketiga').attr('src', '');
     }
 }
 
