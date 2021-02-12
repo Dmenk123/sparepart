@@ -9,27 +9,83 @@ class Home extends CI_Controller {
 		$this->load->model('m_global');
 	}
 
+	protected $data_passing = [];
+
 	public function index()
 	{	
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$tanggal = $obj_date->format('Y-m-d');
 		
-		
 		/**
-		 * data passing ke halaman view content
+		 * set properti data passing, untuk view
 		 */
-		$data = [];
+		$this->get_temp_container_header();
+		$this->get_temp_container_menu();
+		$this->get_temp_container_slider();
+		$this->get_temp_container_feature();
+		$this->get_temp_container_latest();
+		$this->get_temp_container_adv_big();
+		$this->get_temp_container_product_listing();
+		$this->get_temp_container_product_related();
+		$this->get_temp_container_blog();
+		$data = $this->data_passing;
+		$data['val'] = 'iki kirimen nng view';
 
-		
 		// echo "<pre>";
 		// print_r ($data);
 		// echo "</pre>";
 		// exit;
 
-		// $this->load->view('v_template', $data, FALSE);
-		$this->load->view('v_home', $data, FALSE);
+		$this->load->view('v_template', $data, FALSE);
+		// $this->load->view('v_home', $data, FALSE);
 	}
+
+	public function get_temp_container_header()
+	{
+		$this->data_passing['container_header'] = 'temp_component/v_container_header';
+	}
+
+	public function get_temp_container_menu()
+	{
+		$this->data_passing['container_menu'] = 'temp_component/v_container_menu';
+	}
+
+	public function get_temp_container_slider()
+	{
+		$this->data_passing['container_slider'] = 'temp_component/v_container_slider';
+	}
+
+	public function get_temp_container_feature()
+	{
+		$this->data_passing['container_feature'] = 'temp_component/v_container_feature';
+	}
+
+	public function get_temp_container_latest()
+	{
+		$this->data_passing['container_latest'] = 'temp_component/v_container_latest';
+	}
+
+	public function get_temp_container_adv_big()
+	{
+		$this->data_passing['container_adv_big'] = 'temp_component/v_container_adv_big';
+	}
+
+	public function get_temp_container_product_listing()
+	{
+		$this->data_passing['container_product_listing'] = 'temp_component/v_container_product_listing';
+	}
+
+	public function get_temp_container_product_related()
+	{
+		$this->data_passing['container_product_related'] = 'temp_component/v_container_product_related';
+	}
+
+	public function get_temp_container_blog()
+	{
+		$this->data_passing['container_blog'] = 'temp_component/v_container_blog';
+	}
+
 
 	public function oops()
 	{	
