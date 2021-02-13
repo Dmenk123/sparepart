@@ -315,7 +315,7 @@ class Penjualan extends CI_Controller {
 		$date = str_replace('/', '-', $tgl_jatuh_tempo);
 		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date) );
 		$order_id           = rand();
-		$no_faktur          = $this->generateRandomString();
+		$no_faktur          = $this->generateRandomString($timestamp);
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
@@ -518,14 +518,35 @@ class Penjualan extends CI_Controller {
 		
 	}
 	
-	function generateRandomString($length = 6) {
-		$characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	function generateRandomString($tgl) {
+		$bulan      = date('m', strtotime($tgl));
+		$tgl_date   = date('d', strtotime($tgl));
+		$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	 	$length = 3;
 		$charactersLength = strlen($characters);
 		$randomString = '';
 		for ($i = 0; $i < $length; $i++) {
 			$randomString .= $characters[rand(0, $charactersLength - 1)];
 		}
-		return $randomString;
+
+		$nama_bulan = array(
+					"01"=>"A", 
+					"02"=>"B", 
+					"03"=>"C", 
+					"04"=>"D", 
+					"05"=>"E", 
+					"06"=>"F", 
+					"07"=>"G", 
+					"08"=>"H", 
+					"09"=>"I", 
+					"10"=>"J", 
+					"11"=>"K", 
+					"12"=>"L"
+				);
+		
+
+		$no_faktur = $nama_bulan[$bulan].''.$tgl_date.''.$randomString;
+		return $no_faktur;
 	}
 
 	public function hapus_order()
