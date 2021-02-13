@@ -58,6 +58,7 @@ class Master_barang extends CI_Controller {
 			//loop value tabel db
 			$row[] = $no;
 			$row[] = $barang->sku;
+			$row[] = ' <img src='.base_url().'files/img/barcode/'.$barang->sku.'.jpg style="width:100px;" height="auto" class="center">';
 			$row[] = $barang->nama;
 			$row[] = $barang->harga;
 			$row[] = $barang->id_kategori;
@@ -626,10 +627,10 @@ class Master_barang extends CI_Controller {
 	function barcode_scanner()
 	{
 		$path = 'assets/';
-		$generator = new Picqer\Barcode\BarcodeGeneratorJPG();
+		$generator = new Picqer\Barcode\BarcodeGeneratorPNG();
 		// $generated = $generator->getBarcode('081231723897', $generator::TYPE_CODE_128);
 		// $this->assertEquals('PNG', substr($generated, 1, 3));
-		file_put_contents('../files/img/barcode/barcode1.jpg', $generator->getBarcode('081231723897', $generator::TYPE_EAN_13, 4, 100));
+		file_put_contents('../bo/files/img/barcode/SK002.jpg', $generator->getBarcode('SK002', $generator::TYPE_CODE_128, 3, 50));
 		// echo "<img src='barcode1.jpg' alt=''>";
 	}
 
