@@ -49,6 +49,7 @@ class Penjualan extends CI_Controller {
 
 	public function list_penjualan()
 	{
+		var_dump('bisa'); die();
 		$list = $this->m_penjualan->get_datatable_user();
 		$data = array();
 		$no =$_POST['start'];
