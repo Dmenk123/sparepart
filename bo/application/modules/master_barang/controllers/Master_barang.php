@@ -60,8 +60,8 @@ class Master_barang extends CI_Controller {
 			$row[] = $barang->sku;
 			$row[] = ' <img src='.base_url().'files/img/barcode/'.$barang->sku.'.jpg style="width:100px;" height="auto" class="center">';
 			$row[] = $barang->nama;
-			$row[] = $barang->harga;
-			$row[] = $barang->id_kategori;
+			$row[] = 'Rp '.number_format($barang->harga);
+			$row[] = $barang->nama_kategori;
 			$row[] = $barang->stok.' Pcs';
 			$row[] = ' <img src='.base_url().'files/img/barang_img/'.$barang->gambar.' style="width:60px;" height="auto" class="center">';
 			$str_aksi = '
@@ -164,9 +164,9 @@ class Master_barang extends CI_Controller {
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$arr_valid = $this->rule_validasi();
 		
-		$sku 	= trim($this->input->post('sku'));
-		$nama 	= trim($this->input->post('nama'));
-		$harga 	= trim($this->input->post('harga'));
+		$sku 	    = trim($this->input->post('sku'));
+		$nama 	    = trim($this->input->post('nama'));
+		$harga 	    = trim($this->input->post('harga'));
 		$kategori 	= $this->input->post('kategori');
 		$stok       = $this->input->post('stok');
 		$namafileseo = $this->seoUrl($nama.' '.$sku);
@@ -179,7 +179,8 @@ class Master_barang extends CI_Controller {
 		}
 
 		$this->db->trans_begin();
-		
+
+		$this->barcode_scanner($sku);
 		$file_mimes = ['image/png', 'image/x-citrix-png', 'image/x-png', 'image/x-citrix-jpeg', 'image/jpeg', 'image/pjpeg'];
 
 		if(isset($_FILES['foto']['name']) && in_array($_FILES['foto']['type'], $file_mimes)) {
@@ -624,13 +625,14 @@ class Master_barang extends CI_Controller {
 		
 	}
 
-	function barcode_scanner()
+	function barcode_scanner($sku)
 	{
 		$path = 'assets/';
 		$generator = new Picqer\Barcode\BarcodeGeneratorPNG();
 		// $generated = $generator->getBarcode('081231723897', $generator::TYPE_CODE_128);
 		// $this->assertEquals('PNG', substr($generated, 1, 3));
-		file_put_contents('../bo/files/img/barcode/SK002.jpg', $generator->getBarcode('SK002', $generator::TYPE_CODE_128, 3, 50));
+		file_put_contents('../bo/files/img/barcode/'.$sku.'
+		.jpg', $generator->getBarcode($sku, $generator::TYPE_CODE_128, 3, 50));
 		// echo "<img src='barcode1.jpg' alt=''>";
 	}
 
