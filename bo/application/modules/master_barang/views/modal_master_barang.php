@@ -25,12 +25,17 @@
           <div class="row">
             <div class="form-group col-sm-4">
               <label for="lbl_hargabarang" class="form-control-label">Harga Barang :</label>
-              <input type="text" class="form-control" id="harga" name="harga" autocomplete="off">
+              <input type="text" class="form-control uang" id="harga" name="harga" autocomplete="off">
               <span class="help-block"></span>
             </div>
             <div class="form-group col-sm-4">
-              <label for="lbl_kategori" class="form-control-label">Kategori :</label>
-              <input type="text" class="form-control" id="kategori" name="kategori" autocomplete="off">
+              <label for="lbl_kategori" class="form-control-label">Merk Kategori :</label>
+              <select name="kategori" id="kategori" class="form-control">
+                  <option value="0">-PILIH-</option>
+                  <?php foreach($kategori->result() as $row):?>
+                      <option value="<?php echo $row->id_kategori;?>"><?php echo $row->nama_kategori;?></option>
+                  <?php endforeach;?>
+              </select>
               <span class="help-block"></span>
             </div>
             <div class="form-group col-sm-4">
@@ -103,6 +108,20 @@
             <label for="lbl_password_lama" class="form-control-label">Preview Foto:</label>
             <div></div>
             <img id="preview_img_ketiga" src="#" alt="Preview Foto" height="200" width="200"/>
+            <span class="help-block"></span>
+          </div>
+          <div class="form-group">
+            <label>Foto Barang Keempat</label>
+            <div></div>
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="foto_keempat" name="foto_keempat" accept=".jpg,.jpeg,.png">
+              <label class="custom-file-label" id="label_foto" for="customFile">Pilih gambar yang akan diupload</label>
+            </div>
+          </div>
+          <div class="form-group" id="div_preview_foto_keempat" style="display: none;">
+            <label for="lbl_password_lama" class="form-control-label">Preview Foto:</label>
+            <div></div>
+            <img id="preview_img_keempat" src="#" alt="Preview Foto" height="200" width="200"/>
             <span class="help-block"></span>
           </div>
          

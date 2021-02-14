@@ -40,6 +40,10 @@ $(document).ready(function() {
         readURL_ketiga(this);
     });
 
+    $("#foto_keempat").change(function() {
+        readURL_keempat(this);
+    });
+
     //change menu status
     $(document).on('click', '.btn_edit_status', function(){
         var id = $(this).attr('id');
@@ -115,6 +119,7 @@ function edit_barang(id)
             $('#div_preview_foto').css("display","block");
             $('#div_preview_foto_kedua').css("display","block");
             $('#div_preview_foto_ketiga').css("display","block");
+            $('#div_preview_foto_keempat').css("display","block");
             $('[name="id_barang"]').val(data.old_data.id_barang);
             $('[name="nama"]').val(data.old_data.nama);
             $('[name="sku"]').val(data.old_data.sku);
@@ -134,6 +139,7 @@ function edit_barang(id)
             $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);
             $('#preview_img_kedua').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded_kedua);
             $('#preview_img_ketiga').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded_ketiga);
+            $('#preview_img_keempat').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded_keempat);
            
             $('#modal_barang_form').modal('show');
 	        $('#modal_title').text('Edit Master Barang'); 
@@ -199,6 +205,13 @@ function save()
                         $(".modal").modal('hide');
                         
                         reload_table();
+                    }else if(data.status == false){
+                        swal.fire("Gagal!!", data.pesan, "error");
+                        // $("#btnSave").prop("disabled", false);
+                        // $('#btnSave').text('Simpan');
+                        
+                        reset_modal_form();
+                        $(".modal").modal('hide');
                     }else {
                         for (var i = 0; i < data.inputerror.length; i++) 
                         {
@@ -380,6 +393,20 @@ function readURL_ketiga(input) {
     } else {
         $('#div_preview_foto_ketiga').css("display","none");
         $('#preview_img_ketiga').attr('src', '');
+    }
+}
+
+function readURL_keempat(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        $('#div_preview_foto_keempat').css("display","block");
+        $('#preview_img_keempat').attr('src', e.target.result);
+      }
+      reader.readAsDataURL(input.files[0]);
+    } else {
+        $('#div_preview_foto_keempat').css("display","none");
+        $('#preview_img_keempat').attr('src', '');
     }
 }
 

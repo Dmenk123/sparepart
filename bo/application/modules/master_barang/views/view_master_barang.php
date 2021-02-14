@@ -36,6 +36,7 @@
             <tr>
               <th style="width: 5%;">No</th>
               <th>Kode SKU</th>
+              <th>Barcode</th>
               <th>Nama Barang</th>
               <th>Harga</th>
               <th>Kategori</th>

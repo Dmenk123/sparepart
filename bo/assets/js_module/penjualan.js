@@ -17,7 +17,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
 		ajax: {
-			url  : base_url + "Penjualan/list_penjualan",
+			url  : base_url + "penjualan/list_penjualan",
 			type : "POST" 
 		},
 

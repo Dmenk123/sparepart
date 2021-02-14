@@ -12,6 +12,7 @@ class M_barang extends CI_Model
 		'm_barang.harga',
 		'm_barang.stok',
 		'm_barang.id_kategori',
+		'm_kategori.nama_barang',
 		null
 	];
 
@@ -27,10 +28,12 @@ class M_barang extends CI_Model
 	private function _get_datatables_query($term='')
 	{
 		$this->db->select('
-			m_barang.*
+			m_barang.*,
+			m_kategori.nama_kategori
 		');
 
-		$this->db->from('m_barang');	
+		$this->db->from('m_barang');
+		$this->db->join('m_kategori', 'm_barang.id_kategori=m_kategori.id_kategori');	
 		$this->db->where('m_barang.deleted_at is null');
 		
 		$i = 0;

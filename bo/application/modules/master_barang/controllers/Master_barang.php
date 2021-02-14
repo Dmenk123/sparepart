@@ -44,6 +44,8 @@ class Master_barang extends CI_Controller {
 			'view'	=> 'view_master_barang'
 		];
 
+		$data['kategori'] = $this->m_global->getSelectedData('m_kategori', NULL);
+
 		$this->template_view->load_view($content, $data);
 	}
 
@@ -58,9 +60,10 @@ class Master_barang extends CI_Controller {
 			//loop value tabel db
 			$row[] = $no;
 			$row[] = $barang->sku;
+			$row[] = ' <img src='.base_url().'files/img/barcode/'.$barang->sku.'.jpg style="width:100px;" height="auto" class="center">';
 			$row[] = $barang->nama;
-			$row[] = $barang->harga;
-			$row[] = $barang->id_kategori;
+			$row[] = 'Rp '.number_format($barang->harga);
+			$row[] = $barang->nama_kategori;
 			$row[] = $barang->stok.' Pcs';
 			$row[] = ' <img src='.base_url().'files/img/barang_img/'.$barang->gambar.' style="width:60px;" height="auto" class="center">';
 			$str_aksi = '
@@ -140,17 +143,26 @@ class Master_barang extends CI_Controller {
 			$url_foto_ketiga = base_url('files/img/barang_img/user_default.png');
 		}
 
+		if($oldData->gambar_keempat) {
+			$url_foto_keempat = base_url('files/img/barang_img/').$oldData->gambar_keempat;
+		}
+		else{
+			$url_foto_keempat = base_url('files/img/barang_img/user_default.png');
+		}
+
 	
-		$foto = base64_encode(file_get_contents($url_foto));
-		$foto_kedua = base64_encode(file_get_contents($url_foto_kedua));
-		$foto_ketiga = base64_encode(file_get_contents($url_foto_ketiga));  
+		$foto 			= base64_encode(file_get_contents($url_foto));
+		$foto_kedua 	= base64_encode(file_get_contents($url_foto_kedua));
+		$foto_ketiga 	= base64_encode(file_get_contents($url_foto_ketiga));  
+		$foto_keempat	= base64_encode(file_get_contents($url_foto_keempat));  
 		
 		$data = array(
 			'data_user' => $data_user,
 			'old_data'	=> $oldData,
 			'foto_encoded' => $foto,
 			'foto_encoded_kedua' => $foto_kedua,
-			'foto_encoded_ketiga' => $foto_ketiga
+			'foto_encoded_ketiga' => $foto_ketiga,
+			'foto_encoded_keempat' => $foto_keempat
 		);
 		
 		echo json_encode($data);
@@ -163,21 +175,34 @@ class Master_barang extends CI_Controller {
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$arr_valid = $this->rule_validasi();
 		
-		$sku 	= trim($this->input->post('sku'));
-		$nama 	= trim($this->input->post('nama'));
-		$harga 	= trim($this->input->post('harga'));
+		$sku 	    = trim($this->input->post('sku'));
+		$nama 	    = trim($this->input->post('nama'));
+		$harga 	    = trim($this->input->post('harga'));
+		$harga      = str_replace('.', '', $harga);
 		$kategori 	= $this->input->post('kategori');
 		$stok       = $this->input->post('stok');
 		$namafileseo = $this->seoUrl($nama.' '.$sku);
 		$namafileseo_2 = $this->seoUrl($nama.' '.$sku.'_2');
 		$namafileseo_3 = $this->seoUrl($nama.' '.$sku.'_3');
+		$namafileseo_4 = $this->seoUrl($nama.' '.$sku.'_4');
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
 		}
 
+		$data_where = ['sku' => $sku];
+		$cek_sku    = $this->m_global->getSelectedData('m_barang', $data_where)->row();
+		if (!empty($cek_sku)) {
+			$retval['status'] = false;
+			$retval['pesan'] = 'Kode SKU telah ada di Master Barang !!';
+			echo json_encode($retval);
+			exit;
+		}
+
+		
 		$this->db->trans_begin();
+		$this->barcode_scanner($sku);
 		
 		$file_mimes = ['image/png', 'image/x-citrix-png', 'image/x-png', 'image/x-citrix-jpeg', 'image/jpeg', 'image/pjpeg'];
 
@@ -220,7 +245,7 @@ class Master_barang extends CI_Controller {
 				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 2);
 				$this->image_lib->clear();
 				## replace nama file + ext
-				$namafileseo_2 = $this->seoUrl($namafileseo_2.'.'.$extDet);
+				$namafileseo_2 = $this->seoUrl($namafileseo_2).'.'.$extDet;
 			} else {
 				$error = array('error' => $this->file_obj->display_errors());
 			}
@@ -245,7 +270,7 @@ class Master_barang extends CI_Controller {
 				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 3);
 				$this->image_lib->clear();
 				## replace nama file + ext
-				$namafileseo_3 = $this->seoUrl($namafileseo_3.'.'.$extDet);
+				$namafileseo_3 = $this->seoUrl($namafileseo_3).'.'.$extDet;
 			} else {
 				$error = array('error' => $this->file_obj->display_errors());
 			}
@@ -253,19 +278,45 @@ class Master_barang extends CI_Controller {
 			$namafileseo_3 = 'user_default.png';
 		}
 
+		if(isset($_FILES['foto_keempat']['name']) && in_array($_FILES['foto_keempat']['type'], $file_mimes)) {
+			$namafileseo_4 = $namafileseo_4;
+			// var_dump($namafileseo_2); die();
+			$this->konfigurasi_upload_img($namafileseo_4);
+			//get detail extension
+			$pathDet = $_FILES['foto_keempat']['name'];
+			$extDet = pathinfo($pathDet, PATHINFO_EXTENSION);
+			
+			if ($this->file_obj->do_upload('foto_keempat')) 
+			{
+
+				$gbrBukti = $this->file_obj->data();
+				$nama_file_foto = $gbrBukti['file_name'];
+				$this->konfigurasi_image_resize($nama_file_foto, 4);
+				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 4);
+				$this->image_lib->clear();
+				## replace nama file + ext
+				$namafileseo_4 = $this->seoUrl($namafileseo_4).'.'.$extDet;
+			} else {
+				$error = array('error' => $this->file_obj->display_errors());
+			}
+		}else{
+			$namafileseo_4 = 'user_default.png';
+		}
+
 		$data_barang = [
-			'sku' => $sku,
-			'nama' => $nama,
-			'harga' => $harga,
-			'id_kategori' => $kategori,
-			'stok'      => $stok,
-			'gambar'	=> $namafileseo,
-			'gambar_kedua' => $namafileseo_2,
-			'gambar_ketiga' => $namafileseo_3,
-			'shopee_link' => $this->input->post('shopee'),
-			'tokopedia_link' => $this->input->post('tokopedia'),
-			'bukalapak_link' => $this->input->post('bukalapak'),
-			'lazada_link' => $this->input->post('lazada'),
+			'sku' 				=> $sku,
+			'nama' 				=> $nama,
+			'harga' 			=> $harga,
+			'id_kategori' 		=> $kategori,
+			'stok'      		=> $stok,
+			'gambar'			=> $namafileseo,
+			'gambar_kedua' 		=> $namafileseo_2,
+			'gambar_ketiga' 	=> $namafileseo_3,
+			'gambar_keempat' 	=> $namafileseo_4,
+			'shopee_link'		=> $this->input->post('shopee'),
+			'tokopedia_link' 	=> $this->input->post('tokopedia'),
+			'bukalapak_link' 	=> $this->input->post('bukalapak'),
+			'lazada_link'		=> $this->input->post('lazada'),
 		];
 		
 		$insert = $this->m_barang->save($data_barang);
@@ -306,6 +357,7 @@ class Master_barang extends CI_Controller {
 
 		$nama = $this->input->post('nama');
 		$harga = $this->input->post('harga');
+		$harga    = str_replace('.', '', $harga);
 		$kategori = $this->input->post('kategori');
 		$sku      = $this->input->post('sku');
 		$stok     = $this->input->post('stok');
@@ -314,8 +366,16 @@ class Master_barang extends CI_Controller {
 		$namafileseo = $this->seoUrl($q->nama.' '.$sku);
 		$namafileseo_2 = $this->seoUrl($q->nama.' '.$sku.'_2');
 		$namafileseo_3 = $this->seoUrl($q->nama.' '.$sku.'_3');
+		$namafileseo_4 = $this->seoUrl($q->nama.' '.$sku.'_4');
 		
 		$this->db->trans_begin();
+
+		$data_where = array('sku' => $sku);
+		$cek_sku    = $this->m_global->getSelectedData('m_barang', $data_where)->row();
+
+		if (empty($cek_sku)) {
+			$this->barcode_scanner($sku);
+		}
 
 		$file_mimes = ['image/png', 'image/x-citrix-png', 'image/x-png', 'image/x-citrix-jpeg', 'image/jpeg', 'image/pjpeg'];
 
@@ -393,6 +453,31 @@ class Master_barang extends CI_Controller {
 			$namafileseo_3 = null;
 		}
 
+		if(isset($_FILES['foto_keempat']['name']) && in_array($_FILES['foto_keempat']['type'], $file_mimes)) {
+			$namafileseo_4 = $namafileseo_4;
+			// var_dump($namafileseo_2); die();
+			$this->konfigurasi_upload_img($namafileseo_4);
+			//get detail extension
+			$pathDet = $_FILES['foto_keempat']['name'];
+			$extDet = pathinfo($pathDet, PATHINFO_EXTENSION);
+			
+			if ($this->file_obj->do_upload('foto_keempat')) 
+			{
+
+				$gbrBukti = $this->file_obj->data();
+				$nama_file_foto = $gbrBukti['file_name'];
+				$this->konfigurasi_image_resize($nama_file_foto, 4);
+				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 4);
+				$this->image_lib->clear();
+				## replace nama file + ext
+				$namafileseo_4 = $this->seoUrl($namafileseo_4.'.'.$extDet);
+			} else {
+				$error = array('error' => $this->file_obj->display_errors());
+			}
+		}else{
+			$namafileseo_4 = null;
+		}
+
 		$data_barang = [
 			'nama' => $nama,
 			'sku' => $sku,
@@ -412,6 +497,10 @@ class Master_barang extends CI_Controller {
 
 		if ($namafileseo_3 != NULL) {
 			$data_barang['gambar_ketiga'] = $namafileseo_3;
+		}
+
+		if ($namafileseo_4 != NULL) {
+			$data_barang['gambar_keempat'] = $namafileseo_4;
 		}
 
 		$where = ['id_barang' => $id_barang];
@@ -623,13 +712,13 @@ class Master_barang extends CI_Controller {
 		
 	}
 
-	function barcode_scanner()
+	public function barcode_scanner($sku)
 	{
 		$path = 'assets/';
-		$generator = new Picqer\Barcode\BarcodeGeneratorJPG();
+		$generator = new Picqer\Barcode\BarcodeGeneratorPNG();
 		// $generated = $generator->getBarcode('081231723897', $generator::TYPE_CODE_128);
 		// $this->assertEquals('PNG', substr($generated, 1, 3));
-		file_put_contents('../files/img/barcode/barcode1.jpg', $generator->getBarcode('081231723897', $generator::TYPE_EAN_13, 4, 100));
+		file_put_contents('../bo/files/img/barcode/'.$sku.'.jpg', $generator->getBarcode($sku, $generator::TYPE_CODE_128, 3, 50));
 		// echo "<img src='barcode1.jpg' alt=''>";
 	}
 
