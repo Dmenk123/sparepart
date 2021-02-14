@@ -178,6 +178,7 @@ class Master_barang extends CI_Controller {
 		$sku 	    = trim($this->input->post('sku'));
 		$nama 	    = trim($this->input->post('nama'));
 		$harga 	    = trim($this->input->post('harga'));
+		$harga      = str_replace('.', '', $harga);
 		$kategori 	= $this->input->post('kategori');
 		$stok       = $this->input->post('stok');
 		$namafileseo = $this->seoUrl($nama.' '.$sku);
@@ -356,6 +357,7 @@ class Master_barang extends CI_Controller {
 
 		$nama = $this->input->post('nama');
 		$harga = $this->input->post('harga');
+		$harga    = str_replace('.', '', $harga);
 		$kategori = $this->input->post('kategori');
 		$sku      = $this->input->post('sku');
 		$stok     = $this->input->post('stok');

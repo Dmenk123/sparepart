@@ -25,7 +25,7 @@
           <div class="row">
             <div class="form-group col-sm-4">
               <label for="lbl_hargabarang" class="form-control-label">Harga Barang :</label>
-              <input type="text" class="form-control" id="harga" name="harga" autocomplete="off">
+              <input type="text" class="form-control uang" id="harga" name="harga" autocomplete="off">
               <span class="help-block"></span>
             </div>
             <div class="form-group col-sm-4">
