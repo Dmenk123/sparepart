@@ -55,7 +55,15 @@
 
 
     <!-- load js per modul -->
-    <?php if(isset($js)) { $this->load->view($js); }?>
+	<?php if(isset($js)) { ?>
+        <?php if(is_array($js)){ ?>
+        <?php foreach ($js as $keys => $values) { ?>
+        	<script src="<?= base_url('assets/js_module/'.$values); ?>" type="text/javascript"></script>
+        <?php } ?>
+        <?php }else{ ?>
+        	<script src="<?= base_url('assets/js_module/'.$js); ?>" type="text/javascript"></script>
+        <?php } ?> 
+	<?php } ?>
     
 </body>
 
