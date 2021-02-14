@@ -8,7 +8,7 @@ class Home extends CI_Controller {
 		parent::__construct();
 		$this->load->model('m_global');
 		$this->load->model('m_barang');
-		$this->load->library('custom_paging');
+		$this->load->library('Custom_paging');
 		
 	}
 
