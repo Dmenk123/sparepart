@@ -55,6 +55,7 @@ img {
   float: left;
   width: 25%;
 }
+
 </style>
 <div class="modal fade modal_add_form" tabindex="-2" role="dialog" aria-labelledby="add_menu" aria-hidden="true" id="modal_detail_gambar">
   <div class="modal-dialog modal-lg" role="document">
@@ -65,9 +66,15 @@ img {
         </button>
       </div>
       <div class="modal-body" id="modal_body">
-        
+     
       </div>
      
     </div>
   </div>
 </div>
+
+<script>
+$(document).ready(function(){
+  $("#modal_detail_gambar").modal("show");
+});
+</script>

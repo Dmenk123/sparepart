@@ -417,6 +417,7 @@ function detail_gambar(id_gambar)
 {
 
     reset_modal_form();
+    // alert(id_gambar);
     $.ajax({
         type: "post",
         url: base_url + 'master_barang/modal_detail_gambar',
@@ -429,6 +430,7 @@ function detail_gambar(id_gambar)
             $('#modal_body').append(response);
         }
     });
+    // $('#modal_detail_gambar').load(base_url + "master_barang/mod_detail_gambar/"+ id_gambar );
     
     // document.getElementById("modal_detail_gambar").style.display = "block";
 }
@@ -460,4 +462,18 @@ function showSlides(n) {
   dots[slideIndex-1].className += " active";
   captionText.innerHTML = dots[slideIndex-1].alt;
 }
+
+$('#tabel_user tbody').on('click', '.detail_gambar', function(e){
+    alert('kesini'); exit;
+//     var tr = $(this).parents('tr');
+//     if(tr.hasClass('child')) {
+//         var data = tabel.row( $(this).parents('tr').prev() ).data();
+//     }
+//     else {
+//         var data = tabel.row( $(this).parents('tr') ).data();
+//     }
+//     // form = "mode=nomor";
+//     // console.log('lalala '+data['ID_SURAT_KELUAR']);
+//    $('#modal').load("<?php echo base_url()?>ajax/view_mod_otorisasi/"+data['id_barang'] );
+});
 

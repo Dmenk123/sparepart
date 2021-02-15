@@ -665,25 +665,44 @@ class Master_barang extends CI_Controller {
 
 	public function modal_detail_gambar()
 	{
+		$id = $this->input->post('id');
+		$data_where = ['id_barang' => $id];
+		$barang = $this->m_global->getSelectedData('m_barang', $data_where)->row();
 		?>
 		<div class="mySlides col-sm-12">
         <div class="numbertext">1 / 4</div>
-        <img src="<?php echo base_url();?>files/img/barang_img/coba-1604410559.jpg" style="width:70%" height="auto" class="center">
+		<?php
+			if ($barang->gambar != NULL) { ?>
+				   <img src="<?php echo base_url();?>files/img/barang_img/<?php echo $barang->gambar;?>" style="width:70%" height="auto" class="center">
+			<?php }
+		?>
         </div>
 
         <div class="mySlides  col-sm-12">
         <div class="numbertext">2 / 4</div>
-        <img src="<?php echo base_url();?>files/img/barang_img/coba-1602775328.jpg" style="width:70%" height="auto" class="center">
+		<?php
+			if ($barang->gambar_kedua != NULL) { ?>
+				   <img src="<?php echo base_url();?>files/img/barang_img/<?php echo $barang->gambar_kedua;?>" style="width:70%" height="auto" class="center">
+			<?php }
+		?>
         </div>
 
         <div class="mySlides  col-sm-12">
         <div class="numbertext">3 / 4</div>
-        <img src="<?php echo base_url();?>files/img/barang_img/coba-1604410559.jpg" style="width:70%" height="auto" class="center">
+		<?php
+			if ($barang->gambar_ketiga != NULL) { ?>
+				   <img src="<?php echo base_url();?>files/img/barang_img/<?php echo $barang->gambar_ketiga;?>" style="width:70%" height="auto" class="center">
+			<?php }
+		?>
         </div>
         
         <div class="mySlides  col-sm-12">
         <div class="numbertext">4 / 4</div>
-        <img src="<?php echo base_url();?>files/img/barang_img/coba-1602775328.jpg" style="width:70%" height="auto"  class="center">
+		<?php
+			if ($barang->gambar_keempat != NULL) { ?>
+				   <img src="<?php echo base_url();?>files/img/barang_img/<?php echo $barang->gambar_keempat;?>" style="width:70%" height="auto" class="center">
+			<?php }
+		?>
         </div>
         
         <a class="prev-gambar" onclick="plusSlides(-1)">&#10094;</a>
@@ -695,16 +714,41 @@ class Master_barang extends CI_Controller {
 
         <div cass="row">
             <div class="column col-sm-3">
-            <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/coba-1604410559.jpg" style="width:100%" onclick="currentSlide(1)" alt="">
+			<?php
+				if ($barang->gambar != NULL) {
+			?>
+					 <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/<?php echo $barang->gambar;?>" style="width:100%" onclick="currentSlide(1)" alt="">
+			<?php
+				}
+			?>
+           
             </div>
             <div class="column col-sm-3">
-            <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/coba-1602775328.jpg" style="width:100%" onclick="currentSlide(2)" alt="">
+			<?php
+				if ($barang->gambar_kedua != NULL) {
+			?>
+					 <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/<?php echo $barang->gambar_kedua;?>" style="width:100%" onclick="currentSlide(1)" alt="">
+			<?php
+				}
+			?>
             </div>
             <div class="column col-sm-3">
-            <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/coba-1604410559.jpg" style="width:100%" onclick="currentSlide(3)" alt="">
+			<?php
+				if ($barang->gambar_ketiga != NULL) {
+			?>
+					 <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/<?php echo $barang->gambar_ketiga;?>" style="width:100%" onclick="currentSlide(1)" alt="">
+			<?php
+				}
+			?>
             </div>
             <div class="column col-sm-3">
-            <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/coba-1602775328.jpg" style="width:100%" onclick="currentSlide(4)" alt="">
+			<?php
+				if ($barang->gambar_keempat != NULL) {
+			?>
+					 <img class="demo cursor" src="<?php echo base_url();?>files/img/barang_img/<?php echo $barang->gambar_keempat;?>" style="width:100%" onclick="currentSlide(1)" alt="">
+			<?php
+				}
+			?>
             </div>
 		</div>
 	<?php 
@@ -720,6 +764,13 @@ class Master_barang extends CI_Controller {
 		// $this->assertEquals('PNG', substr($generated, 1, 3));
 		file_put_contents('../bo/files/img/barcode/'.$sku.'.jpg', $generator->getBarcode($sku, $generator::TYPE_CODE_128, 3, 50));
 		// echo "<img src='barcode1.jpg' alt=''>";
+	}
+
+	public function mod_detail_gambar($id_barang)
+	{
+		$data_where = ['id_barang' => $id_barang];
+		$data['barang'] = $this->m_global->getSelectedData('m_barang', $data_where)->row();
+		$this->load->view('modal_detail_gambar', $data);
 	}
 
 	
