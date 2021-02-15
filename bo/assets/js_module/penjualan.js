@@ -578,6 +578,7 @@ $(document).ready(function(){
         });
     });
 
+
     // $(document).on('click', '#clearMsg', function(){
     //     $('#responseDiv').hide();
     // });
@@ -651,5 +652,13 @@ function hapus_order(id)
       )
     }
   });
+}
+
+
+function tes(id)
+{
+  var tes = '#qty_order_'+id;
+  var qty = $(tes).val();
+  alert(qty);
 }
   

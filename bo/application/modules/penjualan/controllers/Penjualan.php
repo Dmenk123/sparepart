@@ -491,11 +491,11 @@ class Penjualan extends CI_Controller {
         foreach($data as $row){
             ?>
             <tr>
-                <td><?php echo $row->qty; ?></td>
-                <td><?php echo $row->nama; ?></td>
-                <td><?php echo $row->harga_diskon; ?></td>
-                <td><?php echo $row->sub_total; ?></td>
-				<td><button class="btn-danger" alt="batalkan" onclick="hapus_order(<?php echo $row->id_penjualan_det; ?>)"><i class="fa fa-times"></i></button></td>
+                <td width="10%"><input type="number" class="form-control" width="5" id="qty_order_<?php echo $row->id_penjualan_det;?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id_penjualan_det ?>)"></td>
+                <td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
+                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_diskon); ?></td>
+                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->sub_total); ?></td>
+				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_order(<?php echo $row->id_penjualan_det; ?>)"><i class="fa fa-times"></i></button></td>
             </tr>
             <?php
         }
