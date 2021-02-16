@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 15/02/2021 00:03:03
+ Date: 17/02/2021 00:00:54
 */
 
 SET NAMES utf8mb4;
@@ -74,6 +74,30 @@ INSERT INTO `m_barang` VALUES (4, 'SK004', 'Stang Protapper coba', 150000, 'stan
 INSERT INTO `m_barang` VALUES (7, 'SK005', 'Kaca Spion Racing', 35000, 'kaca-spion-racing-sk005.jpg', 2, NULL, '2021-02-12 23:40:14', NULL, 0, '', '', '', '', 'kaca-spion-racing-sk005-2jpg', 'kaca-spion-racing-sk005-3jpg', NULL);
 INSERT INTO `m_barang` VALUES (12, 'SK006', 'Piston Brt', 500000, 'piston-brt-sk006.jpg', 2, NULL, '2021-02-12 23:40:54', NULL, 0, '', '', '', '', 'piston-brt-sk006-2jpg', 'piston-brt-sk006-3jpg', NULL);
 INSERT INTO `m_barang` VALUES (15, 'SK007', 'Ban Motor Keren', 250000, 'ban-motor-keren-sk007.png', 2, NULL, '2021-02-12 23:41:18', NULL, 0, '', '', '', '', 'ban-motor-keren-sk007-2jpg', 'ban-motor-keren-sk007-3jpg', NULL);
+
+-- ----------------------------
+-- Table structure for m_kategori
+-- ----------------------------
+DROP TABLE IF EXISTS `m_kategori`;
+CREATE TABLE `m_kategori`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nama` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `keterangan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `created_at` datetime(0) NULL DEFAULT NULL,
+  `updated_at` datetime(0) NULL DEFAULT NULL,
+  `deleted_at` datetime(0) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of m_kategori
+-- ----------------------------
+INSERT INTO `m_kategori` VALUES (1, 'Ban', 'Ban', '2021-02-16 22:10:19', NULL, NULL);
+INSERT INTO `m_kategori` VALUES (2, 'Stang', 'Stang', '2021-02-16 22:10:19', NULL, NULL);
+INSERT INTO `m_kategori` VALUES (3, 'Knalpot', 'Knalpot', '2021-02-16 22:10:19', NULL, NULL);
+INSERT INTO `m_kategori` VALUES (4, 'Spion', 'Spion', '2021-02-16 22:10:19', NULL, NULL);
+INSERT INTO `m_kategori` VALUES (5, 'Handle', 'Handle', '2021-02-16 22:10:19', NULL, NULL);
+INSERT INTO `m_kategori` VALUES (6, 'Piston', 'Piston', '2021-02-16 22:10:19', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for m_menu
@@ -179,7 +203,7 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-02-12 23:35:28', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL);
+INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-02-16 21:42:27', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL);
 INSERT INTO `m_user` VALUES (2, 1, 'coba', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50');
 INSERT INTO `m_user` VALUES (3, 6, 'alsyafin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00003', 'user_default.png', '2021-01-15 09:07:51', NULL, NULL);
 INSERT INTO `m_user` VALUES (4, 6, 'zamroni', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00004', 'user_default.png', '2021-01-15 09:08:19', NULL, NULL);

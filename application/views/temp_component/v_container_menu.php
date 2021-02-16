@@ -7,65 +7,40 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav categories">
-                    <li class="nav-item">
-                        <select class="selectpicker">
-                            <option>Categories</option>
-                            <option>Categories 2</option>
-                            <option>Categories 3</option>
+                <div class="col-6">
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown submenu active">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Kategori Produk <i class="fa fa-angle-down" aria-hidden="true"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <?php
+                                    $kategori = $this->db->from('m_kategori')->where(['deleted_at' => null])->order_by('nama', 'ASC')->get();
+
+                                    foreach ($kategori->result() as $key => $value) {
+                                        echo '<li class="nav-item"><a class="nav-link" href="'.base_url('produk/kategori/').trim(strtolower($value->nama)).'">'.$value->nama.'</a></li>';
+                                    }
+                                ?>
+                            </ul>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="#">Blog</a></li>
+                        <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <select name="carikat" id="carikat" class="form-control">
+                            <option value="all">Semua Kategori</option>
+                            <?php foreach ($kategori->result() as $key => $value) { ?>
+                            <option value="<?=trim(strtolower($value->nama));?>"><?= $value->nama; ?></option>
+                            <?php } ?>
                         </select>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown submenu active">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Home <i class="fa fa-angle-down" aria-hidden="true"></i>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="nav-item"><a class="nav-link" href="index.html">Home Simple</a></li>
-                            <li class="nav-item"><a class="nav-link" href="home-carousel.html">Home Carousel</a></li>
-                            <li class="nav-item"><a class="nav-link" href="home-fullwidth.html">Home Full Width</a></li>
-                            <li class="nav-item"><a class="nav-link" href="home-parallax.html">Home Parallax</a></li>
-                            <li class="nav-item"><a class="nav-link" href="home-sidebar.html">Home Boxed</a></li>
-                            <li class="nav-item"><a class="nav-link" href="home-fixed-menu.html">Home Fixed</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown submenu">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Pages <i class="fa fa-angle-down" aria-hidden="true"></i>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="nav-item"><a class="nav-link" href="compare.html">Compare</a></li>
-                            <li class="nav-item"><a class="nav-link" href="checkout.html">Checkout Method</a></li>
-                            <li class="nav-item"><a class="nav-link" href="register.html">Checkout Register</a></li>
-                            <li class="nav-item"><a class="nav-link" href="track.html">Track</a></li>
-                            <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-                            <li class="nav-item"><a class="nav-link" href="404.html">404</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown submenu">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Shop <i class="fa fa-angle-down" aria-hidden="true"></i>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="nav-item"><a class="nav-link" href="categories-no-sidebar-2column.html">Prodcut No Sidebar</a></li>
-                            <li class="nav-item"><a class="nav-link" href="categories-no-sidebar-3column.html">Prodcut Two Column</a></li>
-                            <li class="nav-item"><a class="nav-link" href="categories-no-sidebar-4column.html">Product Grid</a></li>
-                            <li class="nav-item"><a class="nav-link" href="categories-left-sidebar.html">Categories Left Sidebar</a></li>
-                            <li class="nav-item"><a class="nav-link" href="categories-right-sidebar.html">Categories Right Sidebar</a></li>
-                            <li class="nav-item"><a class="nav-link" href="categories-grid-left-sidebar.html">Categories Grid Sidebar</a></li>
-                            <li class="nav-item"><a class="nav-link" href="product-details.html">Prodcut Details 01</a></li>
-                            <li class="nav-item"><a class="nav-link" href="product-details2.html">Prodcut Details 02</a></li>
-                            <li class="nav-item"><a class="nav-link" href="product-details3.html">Prodcut Details 03</a></li>
-                            <li class="nav-item"><a class="nav-link" href="shopping-cart.html">Shopping Cart 01</a></li>
-                            <li class="nav-item"><a class="nav-link" href="shopping-cart2.html">Shopping Cart 02</a></li>
-                            <li class="nav-item"><a class="nav-link" href="empty-cart.html">Empty Cart</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="#">Blog</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">lookbook</a></li>
-                    <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
-                </ul>
+                        <input type="text" class="form-control" placeholder="Search" aria-label="Search">
+                        <span class="input-group-btn">
+                        <button class="btn btn-secondary" type="button"><i class="icon-magnifier"></i></button>
+                        </span>
+                    </div>
+                </div>
             </div>
         </nav>
     </div>
