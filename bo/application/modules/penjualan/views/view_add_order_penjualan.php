@@ -96,7 +96,7 @@
 
                         <form id="regForm">
                         <div class="row">
-                            <div class="form-group col-sm-3">
+                            <div class="form-group col-sm-4">
                                 <label for="lbl_namabarang" class="form-control-label">Nama Barang :</label>
                                 <input type="hidden" value="<?= (isset($invoice->id_penjualan))?$invoice->id_penjualan:"";?>" name="id_penjualan" id="id_penjualan">
                                 <select name="id_barang" id="id_barang" class="form-control select2">
@@ -107,7 +107,7 @@
                                 </select>
                                 <span class="help-block"></span>
                             </div>
-                            <div class="form-group col-sm-3">
+                            <div class="form-group col-sm-1">
                                 <label for="lbl_hargabarang" class="form-control-label">Qty :</label>
                                 <input type="number" class="form-control" id="qty" name="qty" autocomplete="off">
                                 <span class="help-block"></span>

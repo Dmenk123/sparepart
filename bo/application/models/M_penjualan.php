@@ -147,6 +147,11 @@ class M_penjualan extends CI_Model
 		return $this->db->update($this->table, $data, $where);
 	}
 
+	public function updatePenjualandet($where, $data)
+	{
+		return $this->db->update('t_penjualan_det', $data, $where);
+	}
+
 	public function softdelete_by_id($id)
 	{
 		$obj_date = new DateTime();

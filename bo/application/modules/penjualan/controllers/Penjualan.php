@@ -607,4 +607,37 @@ class Penjualan extends CI_Controller {
 		$data['invoice'] = $this->m_penjualan->getPenjualanDet($pen->id_penjualan)->result();
 		$this->load->view('view_cetak_invoice_penjualan', $data);
 	}
+
+	public function change_qty()
+	{
+		$this->db->trans_begin();
+		$id_penjualan_det = $this->input->post('id');
+		$qty              = $this->input->post('qty');
+
+		$penjualan_det     = $this->m_global->getSelectedData('t_penjualan_det', array('id_penjualan_det' => $id_penjualan_det))->row();
+
+		
+		
+		$subtotal = $penjualan_det->harga_diskon * $qty; 
+		$data = array(
+				'qty' => $qty,
+				'sub_total' => $subtotal
+				);
+				
+		$data_where = array('id_penjualan_det' => $id_penjualan_det);
+		$update = $this->m_penjualan->updatePenjualandet($data_where, $data);
+		
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Mengubah Data';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses Mengubah Data ';
+			// $retval['order_id'] = $order_id;
+		}
+
+		echo json_encode($retval);
+	}
 }

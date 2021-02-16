@@ -659,6 +659,23 @@ function tes(id)
 {
   var tes = '#qty_order_'+id;
   var qty = $(tes).val();
-  alert(qty);
+  $.ajax({
+    url : base_url + 'penjualan/change_qty',
+    type: "POST",
+    dataType: "JSON",
+    data : {id : id, qty : qty},
+    success: function(data)
+    {
+        // swalConfirm.fire('Berhasil !', data.pesan, 'success');
+        getTable();
+        getTotal();
+        
+    },
+    error: function (jqXHR, textStatus, errorThrown)
+    {
+        Swal.fire('Terjadi Kesalahan');
+    }
+});
+  
 }
   
