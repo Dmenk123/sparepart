@@ -149,13 +149,19 @@ class M_barang extends CI_Model
         return $this->db->get($table);
     }
 
-	public function get_list_barang($limit, $start ,$sort)
+	public function get_list_barang($limit, $start ,$sort, $where = null)
 	{
         $offset = ((int)$start - 1) * $limit;
         
 		$this->db->select('*');	
 		$this->db->from($this->table);
-		$this->db->where('deleted_at', null);
+        
+        if($where != null) {
+            $this->db->where($where);
+        }else{
+            $this->db->where('deleted_at', null);
+        }
+		
 		$this->db->order_by($this->table.'.'.$sort);
 		$this->db->limit($limit, $offset);
 

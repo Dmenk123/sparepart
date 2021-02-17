@@ -12,8 +12,17 @@ class Produk extends CI_Controller {
 
 	protected $data_passing_content = [];
 
-	public function index()
+	public function kategori()
 	{	
+		if($this->input->get('kat')) {
+			$txt_kat = clean_string(trim(strtolower(str_ireplace('-', ' ', $this->input->get('kat')))));
+		}else{
+			$txt_kat = '';
+		}
+		
+		### kategori
+		$data_kat = $this->m_global->single_row('*',['trim(nama_kategori)' => $txt_kat],'m_kategori');
+
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$tanggal = $obj_date->format('Y-m-d');
@@ -39,15 +48,22 @@ class Produk extends CI_Controller {
 
 		## paging config
 		$page = 1;		
-		$per_page = ($this->input->get('per_page')) ? $this->input->get('per_page') : 2;
+		$per_page = ($this->input->get('per_page')) ? $this->input->get('per_page') : 3;
 		$sort_by = 'created_at desc';
 
-		$data_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
+		if($data_kat) {
+			$data_produk = $this->m_global->multi_row('*', ['id_kategori' => $data_kat->id_kategori, 'deleted_at' => null], 'm_barang');
+			$where_paging = ['deleted_at' => null, 'id_kategori' => $data_kat->id_kategori];
+		}else{
+			$data_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
+			$where_paging = ['deleted_at' => null];
+		}
+		
 		$str_links = $this->set_paging_config($data_produk, $per_page);
 
 		$data['links'] = $str_links;
 		$data['data_produk'] = $data_produk;
-		$data['results'] = $this->m_barang->get_list_barang($per_page, $page, $sort_by);
+		$data['results'] = $this->m_barang->get_list_barang($per_page, $page, $sort_by, $where_paging);
 		$data['js'] = 'home.js';
 
 		$this->load->view('v_template', $data, FALSE);
@@ -64,14 +80,29 @@ class Produk extends CI_Controller {
 		return $this->custom_paging->create_links_without_anchor();
 	}
 
-	public function get_temp_related()
+	public function get_temp_produk_item()
 	{
 		$page = $this->input->get('page');
-		$per_page = 2;
-		$sort_by = 'created_at desc';
-		// $jml_related_total = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
-		$all_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
-		$data_produk = $this->m_barang->get_list_barang($per_page, $page, $sort_by);
+		$per_page = ($this->input->get('perPage')) ? $this->input->get('perPage') : 3;
+		$sort_by = ($this->input->get('sortBy')) ? $this->input->get('sortBy') : 'created_at desc';
+		if($this->input->get('kat')) {
+			$txt_kat = clean_string(trim(strtolower(str_ireplace('-', ' ', $this->input->get('kat')))));
+		}else{
+			$txt_kat = '';
+		}
+
+		### kategori
+		$data_kat = $this->m_global->single_row('*',['trim(nama_kategori)' => $txt_kat],'m_kategori');
+
+		if($data_kat) {
+			$all_produk = $this->m_global->multi_row('*', ['id_kategori' => $data_kat->id_kategori, 'deleted_at' => null], 'm_barang');
+			$where_paging = ['deleted_at' => null, 'id_kategori' => $data_kat->id_kategori];
+		}else{
+			$all_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
+			$where_paging = ['deleted_at' => null];
+		}
+
+		$data_produk = $this->m_barang->get_list_barang($per_page, $page, $sort_by, $where_paging);
 		$this->paging_config(count($all_produk), $per_page, $page);
 		$str_links = $this->custom_paging->create_links_without_anchor();
 		
@@ -80,16 +111,14 @@ class Produk extends CI_Controller {
 		if($data_produk) {
 			$html = '';
 			foreach ($data_produk as $key => $value) {
-				$html .= '<div class="col-lg-3 col-sm-6">
+				$html .= '<div class="col-lg-4 col-sm-6">
 					<div class="l_product_item">
 						<div class="l_p_img">
 							<img class="img-fluid" src="'.base_url('bo/files/img/barang_img/resize_image/').$value->gambar.'" alt="">
 						</div>
 						<div class="l_p_text">
 							<ul>
-								<li class="p_icon"><a href="#"><i class="icon_piechart"></i></a></li>
-								<li><a class="add_cart_btn" href="#">Add To Cart</a></li>
-								<li class="p_icon"><a href="#"><i class="icon_heart_alt"></i></a></li>
+								<li><a class="add_cart_btn" href="'.base_url('produk/produk_detail/'.$value->sku).'">Lihat Detail</a></li>
 							</ul>
 							<h4>'.$value->nama.'</h4>
 							<h5>Rp '.number_format($value->harga,2,',','.').'</h5>
@@ -104,6 +133,47 @@ class Produk extends CI_Controller {
 			return;
 		}
 	}
+
+	// public function get_temp_related()
+	// {
+	// 	$page = $this->input->get('page');
+	// 	$per_page = 2;
+	// 	$sort_by = 'created_at desc';
+	// 	// $jml_related_total = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
+	// 	$all_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
+	// 	$data_produk = $this->m_barang->get_list_barang($per_page, $page, $sort_by);
+	// 	$this->paging_config(count($all_produk), $per_page, $page);
+	// 	$str_links = $this->custom_paging->create_links_without_anchor();
+		
+	// 	// var_dump($str_links);exit;
+
+	// 	if($data_produk) {
+	// 		$html = '';
+	// 		foreach ($data_produk as $key => $value) {
+	// 			$html .= '<div class="col-lg-3 col-sm-6">
+	// 				<div class="l_product_item">
+	// 					<div class="l_p_img">
+	// 						<img class="img-fluid" src="'.base_url('bo/files/img/barang_img/resize_image/').$value->gambar.'" alt="">
+	// 					</div>
+	// 					<div class="l_p_text">
+	// 						<ul>
+	// 							<li class="p_icon"><a href="#"><i class="icon_piechart"></i></a></li>
+	// 							<li><a class="add_cart_btn" href="#">Add To Cart</a></li>
+	// 							<li class="p_icon"><a href="#"><i class="icon_heart_alt"></i></a></li>
+	// 						</ul>
+	// 						<h4>'.$value->nama.'</h4>
+	// 						<h5>Rp '.number_format($value->harga,2,',','.').'</h5>
+	// 					</div>
+	// 				</div>
+	// 			</div>';
+	// 		}
+
+	// 		echo json_encode(['status' => true, 'html' => $html, 'links' => $str_links]);
+	// 	}else{
+	// 		echo json_encode(['status' => false]);
+	// 		return;
+	// 	}
+	// }
 
 	private function get_temp_container_header()
 	{

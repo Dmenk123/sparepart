@@ -43,9 +43,7 @@
                                     </div>
                                     <div class="l_p_text">
                                         <ul>
-                                            <li class="p_icon"><a href="#"><i class="icon_piechart"></i></a></li>
-                                            <li><a class="add_cart_btn" href="#">Lihat Detail</a></li>
-                                            <li class="p_icon"><a href="#"><i class="icon_heart_alt"></i></a></li>
+                                            <li><a class="add_cart_btn" href="<?= base_url('produk/produk_detail/'.$value->sku); ?>">Lihat Detail</a></li>
                                         </ul>
                                         <h4><?= $value->nama;?></h4>
                                         <!-- <h5><del>$45.50</del>  $40</h5> -->
@@ -174,11 +172,13 @@
   
     function getPaging(elem) {
         let page = ($(elem).attr('data-ci-pagination-page'));
-        
+        let perPage = "<?php echo $this->input->get('per_page');?>";
+        let kat = "<?php echo $this->input->get('kat');?>";
+        let sortBy = "<?php echo $this->input->get('sortBy');?>";
         $.ajax({
             type: "get",
-            url: baseUrl+"produk/get_temp_related",
-            data: {page:page},
+            url: baseUrl+"produk/get_temp_produk_item",
+            data: {page:page, perPage:perPage, kat:kat, sortBy:sortBy},
             dataType: "json",
             success: function (response) {
                 if(response.status) {

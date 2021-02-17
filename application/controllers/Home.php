@@ -135,9 +135,7 @@ class Home extends CI_Controller {
 						</div>
 						<div class="l_p_text">
 							<ul>
-								<li class="p_icon"><a href="#"><i class="icon_piechart"></i></a></li>
-								<li><a class="add_cart_btn" href="#">Add To Cart</a></li>
-								<li class="p_icon"><a href="#"><i class="icon_heart_alt"></i></a></li>
+								<li><a class="add_cart_btn" href="'.base_url('produk/produk_detail/'.$value->sku).'">Lihat Detail</a></li>
 							</ul>
 							<h4>'.$value->nama.'</h4>
 							<h5>Rp '.number_format($value->harga,2,',','.').'</h5>
