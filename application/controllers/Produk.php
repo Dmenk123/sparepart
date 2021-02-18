@@ -19,6 +19,39 @@ class Produk extends CI_Controller {
 		}else{
 			$txt_kat = '';
 		}
+
+		if($this->input->get('sort')) {
+			$txt_sort = clean_string(trim(strtolower(str_ireplace('-', ' ', $this->input->get('sort')))));
+			$cek_sort = $this->terjemahan_sorting($txt_sort);
+			
+			if($cek_sort != false) {
+				$sort_by = $cek_sort;
+			}else{
+				$sort_by = 'nama asc';
+			}
+		}else{
+			$sort_by = 'nama asc';
+		}
+
+		if($this->input->get('tampil')) {
+			$per_page = clean_string(trim(strtolower(str_ireplace('-', ' ', $this->input->get('tampil')))));
+			if(!is_numeric($per_page)) {
+				$per_page = 9;
+			}else{
+				if((int)$per_page < 9) {
+					$per_page = 9;
+				}else{
+					$hsl_bagi = (int)$per_page % 3;
+					if((int)$per_page > 24) {
+						$per_page = 24;
+					}else{
+						$per_page = (int)$per_page - $hsl_bagi;
+					}
+				}
+			}
+		}else{
+			$per_page = 3;
+		}
 		
 		### kategori
 		$data_kat = $this->m_global->single_row('*',['trim(nama_kategori)' => $txt_kat],'m_kategori');
@@ -48,8 +81,6 @@ class Produk extends CI_Controller {
 
 		## paging config
 		$page = 1;		
-		$per_page = ($this->input->get('per_page')) ? $this->input->get('per_page') : 3;
-		$sort_by = 'created_at desc';
 
 		if($data_kat) {
 			$data_produk = $this->m_global->multi_row('*', ['id_kategori' => $data_kat->id_kategori, 'deleted_at' => null], 'm_barang');
@@ -133,47 +164,6 @@ class Produk extends CI_Controller {
 			return;
 		}
 	}
-
-	// public function get_temp_related()
-	// {
-	// 	$page = $this->input->get('page');
-	// 	$per_page = 2;
-	// 	$sort_by = 'created_at desc';
-	// 	// $jml_related_total = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
-	// 	$all_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
-	// 	$data_produk = $this->m_barang->get_list_barang($per_page, $page, $sort_by);
-	// 	$this->paging_config(count($all_produk), $per_page, $page);
-	// 	$str_links = $this->custom_paging->create_links_without_anchor();
-		
-	// 	// var_dump($str_links);exit;
-
-	// 	if($data_produk) {
-	// 		$html = '';
-	// 		foreach ($data_produk as $key => $value) {
-	// 			$html .= '<div class="col-lg-3 col-sm-6">
-	// 				<div class="l_product_item">
-	// 					<div class="l_p_img">
-	// 						<img class="img-fluid" src="'.base_url('bo/files/img/barang_img/resize_image/').$value->gambar.'" alt="">
-	// 					</div>
-	// 					<div class="l_p_text">
-	// 						<ul>
-	// 							<li class="p_icon"><a href="#"><i class="icon_piechart"></i></a></li>
-	// 							<li><a class="add_cart_btn" href="#">Add To Cart</a></li>
-	// 							<li class="p_icon"><a href="#"><i class="icon_heart_alt"></i></a></li>
-	// 						</ul>
-	// 						<h4>'.$value->nama.'</h4>
-	// 						<h5>Rp '.number_format($value->harga,2,',','.').'</h5>
-	// 					</div>
-	// 				</div>
-	// 			</div>';
-	// 		}
-
-	// 		echo json_encode(['status' => true, 'html' => $html, 'links' => $str_links]);
-	// 	}else{
-	// 		echo json_encode(['status' => false]);
-	// 		return;
-	// 	}
-	// }
 
 	private function get_temp_container_header()
 	{
@@ -266,6 +256,25 @@ class Produk extends CI_Controller {
 
         $this->custom_paging->initialize($config);
 
+	}
+
+	private function terjemahan_sorting($txt_sort){
+		
+		$data = [
+			'snama' => 'nama asc',
+			'snew' => 'created_at desc',
+			'sold'	=> 'created_at asc',
+			'sminprice' => 'harga asc',
+			'smaxprice' => 'harga desc'
+		];
+
+		if($data[$txt_sort]) {
+			$retval = $data[$txt_sort];
+		}else{
+			$retval = false;
+		}
+
+		return $retval;
 	}
 
 

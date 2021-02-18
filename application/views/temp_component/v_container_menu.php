@@ -28,18 +28,20 @@
                     </ul>
                 </div>
                 <div class="col-md-6">
-                    <div class="input-group">
-                        <select name="carikat" id="carikat" class="form-control">
-                            <option value="all">Semua Kategori</option>
-                            <?php foreach ($kategori->result() as $key => $value) { ?>
-                            <option value="<?=trim(strtolower(str_ireplace(' ', '-', $value->nama_kategori)));?>"><?= $value->nama_kategori; ?></option>
-                            <?php } ?>
-                        </select>
-                        <input type="text" class="form-control" placeholder="Search" aria-label="Search">
-                        <span class="input-group-btn">
-                        <button class="btn btn-secondary" type="button"><i class="icon-magnifier"></i></button>
-                        </span>
-                    </div>
+                    <form method="get" action="<?= base_url('produk/kategori?'); ?>">
+                        <div class="input-group">
+                            <select name="kat" id="kat" class="form-control">
+                                <option value="all">Semua Kategori</option>
+                                <?php foreach ($kategori->result() as $key => $value) { ?>
+                                <option value="<?=trim(strtolower(str_ireplace(' ', '-', $value->nama_kategori)));?>"><?= $value->nama_kategori; ?></option>
+                                <?php } ?>
+                            </select>
+                            <input type="text" name="q" class="form-control" placeholder="Cari disini ..." aria-label="Search">
+                            <span class="input-group-btn">
+                            <button style="cursor:pointer;" class="btn btn-secondary" type="submit"><i class="icon-magnifier"></i></button>
+                            </span>
+                        </div>
+                    </form>
                 </div>
             </div>
         </nav>
