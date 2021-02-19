@@ -11,22 +11,22 @@
                             </div>
                             <div class="secand_fillter">
                                 <h4>Urut :</h4>
-                                <select class="selectpicker" onchange="changeSort(this)">
-                                    <option value="snama">Nama</option>
-                                    <option value="snew">Terbaru</option>
-                                    <option value="sold">Terlama</option>
-                                    <option value="sminprice">Harga Terendah</option>
-                                    <option value="smaxprice">Harga Tertinggi</option>
+                                <select class="selectpicker" onchange="changeSort(this, getQueryStringValue)">
+                                    <option value="snama" <?php if($this->input->get('sort') == 'snama') { echo 'selected'; }?>>Nama</option>
+                                    <option value="snew" <?php if($this->input->get('sort') == 'snew') { echo 'selected'; }?>>Terbaru</option>
+                                    <option value="sold" <?php if($this->input->get('sort') == 'sold') { echo 'selected'; }?>>Terlama</option>
+                                    <option value="sminprice" <?php if($this->input->get('sort') == 'sminprice') { echo 'selected'; }?>>Harga Terendah</option>
+                                    <option value="smaxprice" <?php if($this->input->get('sort') == 'smaxprice') { echo 'selected'; }?>>Harga Tertinggi</option>
                                 </select>
                             </div>
                             <div class="third_fillter col-md-4">
                                 <h4>Menampilkan : </h4>
-                                <select class="selectpicker">
-                                    <option value="9">9</option>
-                                    <option value="12">12</option>
-                                    <option value="15">15</option>
-                                    <option value="18">18</option>
-                                    <option value="24">24</option>
+                                <select class="selectpicker" onchange="changeTampil(this, getQueryStringValue)">
+                                    <option value="9" <?php if($this->input->get('tampil') == '9') { echo 'selected'; }?>>9</option>
+                                    <option value="12" <?php if($this->input->get('tampil') == '12') { echo 'selected'; }?>>12</option>
+                                    <option value="15" <?php if($this->input->get('tampil') == '15') { echo 'selected'; }?>>15</option>
+                                    <option value="18" <?php if($this->input->get('tampil') == '18') { echo 'selected'; }?>>18</option>
+                                    <option value="24" <?php if($this->input->get('tampil') == '24') { echo 'selected'; }?>>24</option>
                                 </select>
                             </div>
                             <!-- <div class="four_fillter">
@@ -135,28 +135,59 @@
         });
     }
 
-    function changeSort(elem, cbqueryStr) {
-        // console.log(elem.value);
-
-        let regex1 = /sort=.*?&/g;
-        let regex2 = /sort=.*?/g;
-        let newStr = str;
-
-        let replaced1 = str.search(regex) >= 0;
-        let replaced2 = str.search(regex) >= 0;
+    function changeSort(elem, cb) {
+        let newStr = elem.value;
+        let uriVal = cb('sort');
+        let txtRep = 'sort='+uriVal;
+        let txtRepNew = 'sort='+newStr;
+        let fullUri = window.location.search;
         
-        if(replaced){
-            newStr = newStr.replace(regex, '!');
+        //console.log(fullUri);
+        
+        if(uriVal == '') {
+            let uriKat = cb('kat');
+            if(uriKat == '') {
+                // jika uri terdapat tanda tanya
+                if(fullUri.search(/\?/) >= 0){
+                    window.location = baseUrl+"produk/kategori"+fullUri+'&'+txtRepNew;
+                }else{
+                    window.location = baseUrl+"produk/kategori"+fullUri+'?'+txtRepNew;
+                }
+            }else{
+                window.location = baseUrl+"produk/kategori"+fullUri+'&'+txtRepNew;
+            }
+        }else{
+            newStr = fullUri.replace(txtRep, txtRepNew);
+            window.location = baseUrl+"produk/kategori"+newStr;    
         }
-
-
-        console.log(window.location.search.replace(/\s/g, "-"););
-        //console.log(getQueryStringValue("sort")); 
-    //    ./ console.log(params);
-        // callback;
-        // window.location = baseUrl+"produk/kategori";
     }
 
+    function changeTampil(elem, cb) {
+        let newStr = elem.value;
+        let uriVal = cb('tampil');
+        let txtRep = 'tampil='+uriVal;
+        let txtRepNew = 'tampil='+newStr;
+        let fullUri = window.location.search;
+        
+        //console.log(fullUri);
+        
+        if(uriVal == '') {
+            let uriKat = cb('kat');
+            if(uriKat == '') {
+                if(fullUri.search(/\?/) >= 0){
+                    window.location = baseUrl+"produk/kategori"+fullUri+'&'+txtRepNew;
+                }else{
+                    window.location = baseUrl+"produk/kategori"+fullUri+'?'+txtRepNew;
+                }
+            }else{
+                window.location = baseUrl+"produk/kategori"+fullUri+'&'+txtRepNew;
+            }
+        }else{
+            newStr = fullUri.replace(txtRep, txtRepNew);
+            window.location = baseUrl+"produk/kategori"+newStr;    
+        }
+    }
+ 
     function getQueryStringValue (key) {  
         return decodeURIComponent(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + encodeURIComponent(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
     }  
