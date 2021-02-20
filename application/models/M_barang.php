@@ -153,13 +153,14 @@ class M_barang extends CI_Model
 	{
         $offset = ((int)$start - 1) * $limit;
         
-		$this->db->select('*');	
+		$this->db->select($this->table.'.*, m_kategori.nama_kategori');	
 		$this->db->from($this->table);
+        $this->db->join('m_kategori', $this->table.'.id_kategori = m_kategori.id_kategori', 'left');
         
         if($where != null) {
             $this->db->where($where);
         }else{
-            $this->db->where('deleted_at', null);
+            $this->db->where($this->table.'.deleted_at', null);
         }
 		
 		$this->db->order_by($this->table.'.'.$sort);

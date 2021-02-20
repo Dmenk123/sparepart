@@ -28,7 +28,7 @@ class Home extends CI_Controller {
 		$this->get_temp_container_latest();
 		$this->get_temp_container_adv_big();
 		$this->get_temp_container_product_listing();
-		$this->get_temp_container_product_related();
+		// $this->get_temp_container_product_related();
 		$this->get_temp_container_blog();
 		$content = $this->data_passing_content;
 		## WAJIB SET ARRAY CONTENT
@@ -39,7 +39,7 @@ class Home extends CI_Controller {
 
 		## paging config
 		$page = 1;
-		$per_page = 2;
+		$per_page = 4;
 		$sort_by = 'created_at desc';
 
 		$data_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
@@ -112,44 +112,44 @@ class Home extends CI_Controller {
 
 	}
 
-	public function get_temp_related()
-	{
-		$page = $this->input->get('page');
-		$per_page = 2;
-		$sort_by = 'created_at desc';
-		// $jml_related_total = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
-		$all_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
-		$data_produk = $this->m_barang->get_list_barang($per_page, $page, $sort_by);
-		$this->paging_config(count($all_produk), $per_page, $page);
-		$str_links = $this->custom_paging->create_links_without_anchor();
+	// public function get_temp_related()
+	// {
+	// 	$page = $this->input->get('page');
+	// 	$per_page = 2;
+	// 	$sort_by = 'created_at desc';
+	// 	// $jml_related_total = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
+	// 	$all_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
+	// 	$data_produk = $this->m_barang->get_list_barang($per_page, $page, $sort_by);
+	// 	$this->paging_config(count($all_produk), $per_page, $page);
+	// 	$str_links = $this->custom_paging->create_links_without_anchor();
 		
-		// var_dump($str_links);exit;
+	// 	// var_dump($str_links);exit;
 
-		if($data_produk) {
-			$html = '';
-			foreach ($data_produk as $key => $value) {
-				$html .= '<div class="col-lg-3 col-sm-6">
-					<div class="l_product_item">
-						<div class="l_p_img">
-							<img class="img-fluid" src="'.base_url('bo/files/img/barang_img/resize_image/').$value->gambar.'" alt="">
-						</div>
-						<div class="l_p_text">
-							<ul>
-								<li><a class="add_cart_btn" href="'.base_url('produk/produk_detail/'.$value->sku).'">Lihat Detail</a></li>
-							</ul>
-							<h4>'.$value->nama.'</h4>
-							<h5>Rp '.number_format($value->harga,2,',','.').'</h5>
-						</div>
-					</div>
-				</div>';
-			}
+	// 	if($data_produk) {
+	// 		$html = '';
+	// 		foreach ($data_produk as $key => $value) {
+	// 			$html .= '<div class="col-lg-3 col-sm-6">
+	// 				<div class="l_product_item">
+	// 					<div class="l_p_img">
+	// 						<img class="img-fluid" src="'.base_url('bo/files/img/barang_img/resize_image/').$value->gambar.'" alt="">
+	// 					</div>
+	// 					<div class="l_p_text">
+	// 						<ul>
+	// 							<li><a class="add_cart_btn" href="'.base_url('produk/produk_detail/'.$value->sku).'">Lihat Detail</a></li>
+	// 						</ul>
+	// 						<h4>'.$value->nama.'</h4>
+	// 						<h5>Rp '.number_format($value->harga,2,',','.').'</h5>
+	// 					</div>
+	// 				</div>
+	// 			</div>';
+	// 		}
 
-			echo json_encode(['status' => true, 'html' => $html, 'links' => $str_links]);
-		}else{
-			echo json_encode(['status' => false]);
-			return;
-		}
-	}
+	// 		echo json_encode(['status' => true, 'html' => $html, 'links' => $str_links]);
+	// 	}else{
+	// 		echo json_encode(['status' => false]);
+	// 		return;
+	// 	}
+	// }
 
 	private function get_temp_container_header()
 	{

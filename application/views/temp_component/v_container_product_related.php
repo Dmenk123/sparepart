@@ -1,7 +1,7 @@
 <section class="related_product_area">
     <div class="container">
         <div class="related_product_inner">
-            <h2 class="single_c_title">Related Product</h2>
+            <h2 class="single_c_title">Produk <?=$results[0]->nama_kategori;?> Lainnya</h2>
             <div class="row" id="related_area">
                 <?php foreach ($results as $key => $value) { ?>
                     <div class="col-lg-3 col-sm-6">
@@ -11,7 +11,7 @@
                             </div>
                             <div class="l_p_text">
                                 <ul>
-                                    <li><a class="add_cart_btn" href="#">Lihat Detail</a></li>
+                                    <li><a class="add_cart_btn" href="<?= base_url('produk/detail/'.seourl($value->nama_kategori).'/'.seourl($value->nama)); ?>">Lihat Detail</a></li>
                                 </ul>
                                 <h4><?= $value->nama;?></h4>
                                 <h5><?= "Rp " . number_format($value->harga,2,',','.');?></h5>
@@ -32,11 +32,13 @@
   
     function getPaging(elem) {
         let page = ($(elem).attr('data-ci-pagination-page'));
+        let kat = "<?= $this->uri->segment(3);?>";
+        let item = "<?= $this->uri->segment(4);?>";
         
         $.ajax({
             type: "get",
-            url: baseUrl+"home/get_temp_related",
-            data: {page:page},
+            url: baseUrl+"produk/get_temp_related",
+            data: {page:page, kat:kat, item:item},
             dataType: "json",
             success: function (response) {
                 if(response.status) {

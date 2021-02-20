@@ -47,7 +47,7 @@
                                     </div>
                                     <div class="l_p_text">
                                         <ul>
-                                            <li><a class="add_cart_btn" href="<?= base_url('produk/produk_detail/'.$value->sku); ?>">Lihat Detail</a></li>
+                                            <li><a class="add_cart_btn" href="<?= base_url('produk/detail/'.seourl($value->nama_kategori).'/'.seourl($value->nama)); ?>">Lihat Detail</a></li>
                                         </ul>
                                         <h4><?= $value->nama;?></h4>
                                         <!-- <h5><del>$45.50</del>  $40</h5> -->

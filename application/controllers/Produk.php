@@ -11,6 +11,8 @@ class Produk extends CI_Controller {
 	}
 
 	protected $data_passing_content = [];
+	protected $perPageRelated = 4;
+	protected $perPageKategori = 9;
 
 	public function kategori()
 	{	
@@ -50,7 +52,7 @@ class Produk extends CI_Controller {
 				}
 			}
 		}else{
-			$per_page = 3;
+			$per_page = $this->perPageKategori;
 		}
 		
 		### kategori
@@ -84,10 +86,10 @@ class Produk extends CI_Controller {
 
 		if($data_kat) {
 			$data_produk = $this->m_global->multi_row('*', ['id_kategori' => $data_kat->id_kategori, 'deleted_at' => null], 'm_barang');
-			$where_paging = ['deleted_at' => null, 'id_kategori' => $data_kat->id_kategori];
+			$where_paging = ['m_barang.deleted_at' => null, 'm_barang.id_kategori' => $data_kat->id_kategori];
 		}else{
 			$data_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
-			$where_paging = ['deleted_at' => null];
+			$where_paging = ['m_barang.deleted_at' => null];
 		}
 		
 		$str_links = $this->set_paging_config($data_produk, $per_page);
@@ -114,7 +116,7 @@ class Produk extends CI_Controller {
 	public function get_temp_produk_item()
 	{
 		$page = $this->input->get('page');
-		$per_page = ($this->input->get('perPage')) ? $this->input->get('perPage') : 3;
+		$per_page = ($this->input->get('perPage')) ? $this->input->get('perPage') : $this->perPageKategori;
 		$sort_by = ($this->input->get('sortBy')) ? $this->input->get('sortBy') : 'created_at desc';
 		if($this->input->get('kat')) {
 			$txt_kat = clean_string(trim(strtolower(str_ireplace('-', ' ', $this->input->get('kat')))));
@@ -127,10 +129,10 @@ class Produk extends CI_Controller {
 
 		if($data_kat) {
 			$all_produk = $this->m_global->multi_row('*', ['id_kategori' => $data_kat->id_kategori, 'deleted_at' => null], 'm_barang');
-			$where_paging = ['deleted_at' => null, 'id_kategori' => $data_kat->id_kategori];
+			$where_paging = ['m_barang.deleted_at' => null, 'm_barang.id_kategori' => $data_kat->id_kategori];
 		}else{
 			$all_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
-			$where_paging = ['deleted_at' => null];
+			$where_paging = ['m_barang.deleted_at' => null];
 		}
 
 		$data_produk = $this->m_barang->get_list_barang($per_page, $page, $sort_by, $where_paging);
@@ -149,7 +151,7 @@ class Produk extends CI_Controller {
 						</div>
 						<div class="l_p_text">
 							<ul>
-								<li><a class="add_cart_btn" href="'.base_url('produk/produk_detail/'.$value->sku).'">Lihat Detail</a></li>
+								<li><a class="add_cart_btn" href="'.base_url('produk/produk_detail/'.seourl($value->nama_kategori).'/'.seourl($value->nama)).'">Lihat Detail</a></li>
 							</ul>
 							<h4>'.$value->nama.'</h4>
 							<h5>Rp '.number_format($value->harga,2,',','.').'</h5>
@@ -165,56 +167,76 @@ class Produk extends CI_Controller {
 		}
 	}
 
-	private function get_temp_container_header()
+	public function get_temp_related()
 	{
-		$this->data_passing_content[] = 'temp_component/v_container_header';
-	}
+		$page = $this->input->get('page');
+		$txt_kategori = $this->input->get('kat');
+		$txt_produk = $this->input->get('item');
 
-	private function get_temp_container_menu()
-	{
-		$this->data_passing_content[] = 'temp_component/v_container_menu';
-	}
+		if($txt_kategori != '') {
+			$data_kat = $this->m_global->single_row('*',['trim(lower(nama_kategori))' => str_replace('-', ' ', trim(strtolower($txt_kategori)))],'m_kategori');
+			if($data_kat) {
+				$id_kat = $data_kat->id_kategori;
+			}else{
+				## cari id barang
+				$data_brg = $this->m_global->single_row('*',['trim(lower(nama))' => str_replace('-', ' ', trim(strtolower($txt_produk)))],'m_barang');
+				
+				if($data_brg) {
+					$id_kat = $data_brg->id_kategori;
+					$id_brg = $data_brg->id_barang;
+				}
+			}
+		}else{
+			## cari id barang
+			$data_brg = $this->m_global->single_row('*',['trim(lower(nama))' => str_replace('-', ' ', trim(strtolower($txt_produk)))],'m_barang');
+			if($data_brg) {
+				$id_kat = $data_brg->id_kategori;
+				$id_brg = $data_brg->id_barang;
+			}
+		}
 
-	private function get_temp_container_slider()
-	{
-		$this->data_passing_content[] = 'temp_component/v_container_slider';
-	}
+		if($id_kat != null) {
+			$all_produk = $this->m_global->multi_row('*', ['deleted_at' => null, 'id_kategori' => $id_kat], 'm_barang');
+			$where_paging = ['m_barang.deleted_at' => null, 'm_barang.id_kategori' => $id_kat];
+		}else{
+			$all_produk = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
+			$where_paging = ['m_barang.deleted_at' => null];
+		}
 
-	private function get_temp_container_feature()
-	{
-		$this->data_passing_content[] = 'temp_component/v_container_feature';
-	}
+		$per_page = $this->perPageRelated;
+		$sort_by = 'created_at desc';
+		
+		$data_produk = $this->m_barang->get_list_barang($per_page, $page, $sort_by, $where_paging);
+		$this->paging_config(count($all_produk), $per_page, $page);
+		$str_links = $this->custom_paging->create_links_without_anchor();
+		
+		// var_dump($str_links);exit;
 
-	private function get_temp_container_latest()
-	{
-		$this->data_passing_content[] = 'temp_component/v_container_latest';
-	}
+		if($data_produk) {
+			$html = '';
+			foreach ($data_produk as $key => $value) {
+				$html .= '<div class="col-lg-3 col-sm-6">
+					<div class="l_product_item">
+						<div class="l_p_img">
+							<img class="img-fluid" src="'.base_url('bo/files/img/barang_img/resize_image/').$value->gambar.'" alt="">
+						</div>
+						<div class="l_p_text">
+							<ul>
+								<li><a class="add_cart_btn" href="'.base_url('produk/produk_detail/'.seourl($value->nama_kategori).'/'.seourl($value->nama)).'">Lihat Detail</a></li>
+							</ul>
+							<h4>'.$value->nama.'</h4>
+							<h5>Rp '.number_format($value->harga,2,',','.').'</h5>
+						</div>
+					</div>
+				</div>';
+			}
 
-	private function get_temp_container_adv_big()
-	{
-		$this->data_passing_content[] = 'temp_component/v_container_adv_big';
+			echo json_encode(['status' => true, 'html' => $html, 'links' => $str_links]);
+		}else{
+			echo json_encode(['status' => false]);
+			return;
+		}
 	}
-
-	private function get_temp_container_product_listing()
-	{
-		$this->data_passing_content[] = 'temp_component/v_container_product_listing';
-	}
-
-	private function get_temp_container_product_related()
-	{
-		$this->data_passing_content[] = 'temp_component/v_container_product_related';
-	}
-
-	private function get_temp_container_blog()
-	{
-		$this->data_passing_content[] = 'temp_component/v_container_blog';
-	}
-
-	private function get_temp_produk_kategori()
-	{
-		$this->data_passing_content[] = 'temp_component/v_produk_kategori';
-	}
-
 
 	public function paging_config($total_row, $per_page, $current_page=0)
 	{
@@ -277,46 +299,158 @@ class Produk extends CI_Controller {
 		return $retval;
 	}
 
+	public function detail($txt_kategori = null, $txt_produk = null)
+	{	
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tanggal = $obj_date->format('Y-m-d');
 
+		$id_kat = null;
+		$id_brg = null;
+
+		if($txt_kategori != null) {
+			$data_kat = $this->m_global->single_row('*',['trim(lower(nama_kategori))' => str_replace('-', ' ', trim(strtolower($txt_kategori)))],'m_kategori');
+			if($data_kat) {
+				$id_kat = $data_kat->id_kategori;
+
+				## cari id barang
+				$data_brg = $this->m_global->single_row('*',['trim(lower(nama))' => str_replace('-', ' ', trim(strtolower($txt_produk)))],'m_barang');
+				
+				if($data_brg) {
+					$id_kat = $data_brg->id_kategori;
+					$id_brg = $data_brg->id_barang;
+				}
+
+			}else{
+				## cari id barang
+				$data_brg = $this->m_global->single_row('*',['trim(lower(nama))' => str_replace('-', ' ', trim(strtolower($txt_produk)))],'m_barang');
+				
+				if($data_brg) {
+					$id_kat = $data_brg->id_kategori;
+					$id_brg = $data_brg->id_barang;
+				}
+			}
+		}else{
+			## cari id barang
+			$data_brg = $this->m_global->single_row('*',['trim(lower(nama))' => str_replace('-', ' ', trim(strtolower($txt_produk)))],'m_barang');
+			if($data_brg) {
+				$id_kat = $data_brg->id_kategori;
+				$id_brg = $data_brg->id_barang;
+			}
+		}
+
+		// var_dump($id_kat, $id_brg);exit;
+
+		## paging config
+		$page = 1;
+		$per_page = $this->perPageRelated;
+		$sort_by = 'created_at desc';
+
+		if($id_kat != null) {
+			$data_produk_related = $this->m_global->multi_row('*', ['deleted_at' => null, 'id_kategori' => $id_kat], 'm_barang');
+			$where = ['m_barang.deleted_at' => null, 'm_barang.id_kategori' => $id_kat];
+		}else{
+			$data_produk_related = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang');
+			$where = ['m_barang.deleted_at' => null];
+		}
+
+		if($id_brg != null) {
+			$data_produk = $this->m_global->single_row('*', ['deleted_at' => null, 'id_barang' => $id_brg], 'm_barang');
+		}else{
+			return redirect(base_url('produk/home'));
+		}
+		
+		$str_links = $this->set_paging_config($data_produk_related, $per_page);
+		
+		/**
+		 * set properti data passing, untuk content view
+		 */
+		$this->get_temp_container_header();
+		$this->get_temp_container_menu();
+		$this->get_temp_container_slider();
+		$this->get_temp_produk_detail();
+		$this->get_temp_container_product_related();
+		
+		$content = $this->data_passing_content;
+		## WAJIB SET ARRAY CONTENT
+		$data['content'] = $content;
+		/**
+		 * end set properti data passing, untuk content view
+		*/
+		
+		$data['links'] = $str_links;
+		// paging related at
+		$data['results'] = $this->m_barang->get_list_barang($per_page, $page, $sort_by, $where);
+		// data produk detail
+		$data['data_produk'] = $data_produk;
+		$data['js'] = 'home.js';
+		
+		### kategori
+		//$data_kat = $this->m_global->single_row('*',['trim(nama_kategori)' => $txt_kat],'m_kategori');
+
+		
+		$this->load->view('v_template', $data, FALSE);
+	}
+	
+	############################# TEMPLATE AREA ##############################
 	public function oops()
 	{	
 		$this->load->view('login/view_404');
 	}
 
-	public function bulan_indo($bulan)
+	private function get_temp_container_header()
 	{
-		$arr_bulan =  [
-			1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-		];
-
-		return $arr_bulan[(int) $bulan];
+		$this->data_passing_content[] = 'temp_component/v_container_header';
 	}
 
-	private function generate_kode_ref() {
-
-		$chars = array(
-			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-			'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-			'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-		);
-	
-		shuffle($chars);
-	
-		$num_chars = count($chars) - 1;
-		$token = '';
-	
-		for ($i = 0; $i < 8; $i++){ // <-- $num_chars instead of $len
-			$token .= $chars[mt_rand(0, $num_chars)];
-		}
-	
-		return $token;
+	private function get_temp_container_menu()
+	{
+		$this->data_passing_content[] = 'temp_component/v_container_menu';
 	}
 
-	private function get_harga_teks($harga)
+	private function get_temp_container_slider()
 	{
-		
+		$this->data_passing_content[] = 'temp_component/v_container_slider';
+	}
+
+	private function get_temp_container_feature()
+	{
+		$this->data_passing_content[] = 'temp_component/v_container_feature';
+	}
+
+	private function get_temp_container_latest()
+	{
+		$this->data_passing_content[] = 'temp_component/v_container_latest';
+	}
+
+	private function get_temp_container_adv_big()
+	{
+		$this->data_passing_content[] = 'temp_component/v_container_adv_big';
+	}
+
+	private function get_temp_container_product_listing()
+	{
+		$this->data_passing_content[] = 'temp_component/v_container_product_listing';
+	}
+
+	private function get_temp_container_product_related()
+	{
+		$this->data_passing_content[] = 'temp_component/v_container_product_related';
+	}
+
+	private function get_temp_container_blog()
+	{
+		$this->data_passing_content[] = 'temp_component/v_container_blog';
+	}
+
+	private function get_temp_produk_kategori()
+	{
+		$this->data_passing_content[] = 'temp_component/v_produk_kategori';
+	}
+
+	private function get_temp_produk_detail()
+	{
+		$this->data_passing_content[] = 'temp_component/v_produk_detail';
 	}
 
 }
