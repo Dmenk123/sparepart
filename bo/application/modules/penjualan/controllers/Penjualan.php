@@ -407,6 +407,8 @@ class Penjualan extends CI_Controller {
 		$id_user = $this->session->userdata('id_user'); 
 		$data_user = $this->m_user->get_detail_user($id_user);
 		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
+		
+		// var_dump($diskon); die();
 			
 		/**
 		 * data passing ke halaman view content
@@ -448,20 +450,25 @@ class Penjualan extends CI_Controller {
 		$data_where     = array('id_barang'=> $id_barang);
 		$barang         = $this->m_global->getSelectedData('m_barang', $data_where)->row();
 		$qty            = $this->input->post('qty');
+		$diskon    = str_replace('%', '', $this->input->post('diskon'));
+		$diskon    = str_replace(',','.',$diskon);
+
+		$nilai     =($diskon/100)*$barang->harga;
+		$harga_diskon = $barang->harga - $nilai;
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
 		}
 
-		$sub_total = $barang->harga * $qty;
+		$sub_total = $harga_diskon * $qty;
 		$this->db->trans_begin();
 		
 		$data_order = [
 			'id_penjualan'  => $id_penjualan,
 			'id_barang' 	=> $id_barang,
 			'harga_awal' 	=> $barang->harga,
-			'harga_diskon' 	=> $barang->harga,
-			'besaran_diskon'=> 0,
+			'harga_diskon' 	=> $harga_diskon,
+			'besaran_diskon'=> $diskon,
 			'sub_total'     => $sub_total,
 			'qty'           => $qty
 		];
@@ -509,7 +516,7 @@ class Penjualan extends CI_Controller {
 		$data = array();
 		if (!empty($hasil)) {
 			// var_dump($data->total);
-			$data['total'] = $hasil->total;
+			$data['total'] = 'Rp '.number_format($hasil->total);
 		} else {
 			$data['total'] = 0;
 		}

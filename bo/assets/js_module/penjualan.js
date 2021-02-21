@@ -3,7 +3,6 @@ var table;
 var id_pen;
 
 $(document).ready(function() {
-  
 
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {

@@ -112,6 +112,11 @@
                                 <input type="number" class="form-control" id="qty" name="qty" autocomplete="off">
                                 <span class="help-block"></span>
                             </div>
+                            <div class="form-group col-sm-2">
+                                <label for="lbl_hargabarang" class="form-control-label">Diskon :</label>
+                                <input type="text" class="form-control percent" id="dis" name="diskon" value="0" autocomplete="off">
+                                <span class="help-block"></span>
+                            </div>
                             <div class="form-group col-sm-3" style="padding-top:25px;">
                               <button type="submit" class="btn btn-primary">Simpan</button>
                             </div>
@@ -142,12 +147,12 @@
                             <div class="col-md-12">
                                 <p class="lead">Amount Due <?php echo $invoice->tgl_jatuh_tempo;?></p>
                                 <div class="table-responsive">
-                                    <table class="table">
+                                    <table class="table" width="100%" >
                                         <tbody>
                                             
                                             
                                             <tr>
-                                                <th>Total:</th>
+                                                <td width="69%" >Total:</td>
                                                 <td id="total">0</td>
                                             </tr>
                                         </tbody>
