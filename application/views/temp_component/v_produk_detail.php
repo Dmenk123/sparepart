@@ -4,11 +4,30 @@
             <div class="col-lg-4">
                 <div class="product_details_slider">
                     <div id="product_slider" class="rev_slider" data-version="5.3.1.6">
-                        <ul>	<!-- SLIDE  -->
+                        <ul>	
+                            <!-- SLIDE  -->
                             <li data-index="rs-137221490" data-transition="scaledownfrombottom" data-slotamount="7"  data-easein="Power3.easeInOut" data-easeout="Power3.easeInOut" data-masterspeed="1500"  data-thumb="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $data_produk->gambar;?>"  data-rotate="0"  data-fstransition="fade" data-fsmasterspeed="1500" data-fsslotamount="7" data-saveperformance="off"  data-title="Ishtar X Tussilago" data-param1="25/08/2015" data-description="">
                                 <!-- MAIN IMAGE -->
                                 <img src="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $data_produk->gambar;?>"  alt="" data-bgposition="center center" data-bgfit="cover" data-bgrepeat="no-repeat" data-bgparallax="5" class="rev-slidebg" data-no-retina>
                                 <!-- LAYERS -->
+                            </li>
+                            <!-- SLIDE  -->
+                            
+                            <!-- SLIDE  -->
+                            <li data-index="rs-136228343" data-transition="scaledownfrombottom" data-slotamount="7"  data-easein="Power3.easeInOut" data-easeout="Power3.easeInOut" data-masterspeed="1500"  data-thumb="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $data_produk->gambar_kedua;?>"  data-rotate="0"  data-saveperformance="off"  data-title="Los Angeles" data-param1="13/08/2015" data-description="">
+                                <!-- MAIN IMAGE -->
+                                <img src="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $data_produk->gambar_kedua;?>"  alt="" data-bgposition="center center" data-bgfit="cover" data-bgrepeat="no-repeat" data-bgparallax="5" class="rev-slidebg" data-no-retina>
+                                <!-- LAYERS -->
+                            </li>
+                            <!-- SLIDE  -->
+
+                            <!-- SLIDE  -->
+                            <li data-index="rs-135960434" data-transition="scaledownfrombottom" data-slotamount="7"  data-easein="Power3.easeInOut" data-easeout="Power3.easeInOut" data-masterspeed="1500"  data-thumb="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $data_produk->gambar_ketiga;?>"  data-rotate="0"  data-saveperformance="off"  data-title="The Colors of Feelings" data-param1="11/08/2015" data-description="">
+                                <!-- MAIN IMAGE -->
+                                <img src="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $data_produk->gambar_ketiga;?>"  alt="" data-bgposition="center center" data-bgfit="cover" data-bgrepeat="no-repeat" data-bgparallax="5" class="rev-slidebg" data-no-retina>
+                                <!-- LAYERS -->
+
+                                
                             </li>
                             <!-- SLIDE  -->
                         </ul>
@@ -17,8 +36,8 @@
             </div>
             <div class="col-lg-8">
                 <div class="product_details_text">
-                    <h3>Nike Flex Run Tracksuit</h3>
-                    <ul class="p_rating">
+                    <h3><?= $data_produk->nama;?></h3>
+                    <!-- <ul class="p_rating">
                         <li><a href="#"><i class="fa fa-star"></i></a></li>
                         <li><a href="#"><i class="fa fa-star"></i></a></li>
                         <li><a href="#"><i class="fa fa-star"></i></a></li>
@@ -28,46 +47,24 @@
                     <div class="add_review">
                         <a href="#">5 Reviews</a>
                         <a href="#">Add your review</a>
-                    </div>
-                    <h6>Available In <span>Stock</span></h6>
-                    <h4>$45.05</h4>
-                    <p>Curabitur semper varius lectus sed consequat. Nam accumsan dapibus sem, sed lobortis nisi porta vitae. Ut quam tortor, facilisis nec laoreet consequat, malesuada a massa. Proin pretium tristique leo et imperdiet.</p>
-                    <div class="p_color">
-                        <h4 class="p_d_title">color <span>*</span></h4>
-                        <ul class="color_list">
-                            <li><a href="#"></a></li>
-                            <li><a href="#"></a></li>
-                            <li><a href="#"></a></li>
-                            <li><a href="#"></a></li>
-                            <li><a href="#"></a></li>
-                            <li><a href="#"></a></li>
-                        </ul>
-                    </div>
-                    <div class="p_color">
-                        <h4 class="p_d_title">size <span>*</span></h4>
-                        <select class="selectpicker">
-                            <option>Select your size</option>
-                            <option>Select your size M</option>
-                            <option>Select your size XL</option>
-                        </select>
-                    </div>
-                    <div class="quantity">
-                        <div class="custom">
-                            <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst ) &amp;&amp; sst > 0 ) result.value--;return false;" class="reduced items-count" type="button"><i class="icon_minus-06"></i></button>
-                            <input type="text" name="qty" id="sst" maxlength="12" value="01" title="Quantity:" class="input-text qty">
-                            <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst )) result.value++;return false;" class="increase items-count" type="button"><i class="icon_plus"></i></button>
+                    </div> -->
+                    <h6>Ketersediaan Stok : <span>Tersedia</span></h6>
+                    <h4><?= "Rp " . number_format($data_produk->harga,0,',','.');?></h4>
+                    <p><?= $data_produk->deskripsi; ?></p>
+                   
+                    <div style="padding-top: 5%;">
+                        <h5>Beli Produk di Sini :</h5>
+                        <div class="row" style="padding-top: 5%;">
+                            <div class="col-md-4" style="text-align: center;">
+                                <a href="#"><img src="<?php echo base_url();?>bo/files/icon/tokped.png" width="180" height="100"/> </a>
+                            </div>
+                            <div class="col-md-4" style="text-align: center;">
+                                <a href="#"><img src="<?php echo base_url();?>bo/files/icon/shopee.png" width="180" height="100"/> </a>
+                            </div>
+                            <div class="col-md-4" style="text-align: center;">
+                                <a href="#"><img src="<?php echo base_url();?>bo/files/icon/bl.png" width="180" height="100"/> </a>
+                            </div>
                         </div>
-                        <a class="add_cart_btn" href="#">add to cart</a>
-                    </div>
-                    <div class="shareing_icon">
-                        <h5>share :</h5>
-                        <ul>
-                            <li><a href="#"><i class="social_facebook"></i></a></li>
-                            <li><a href="#"><i class="social_twitter"></i></a></li>
-                            <li><a href="#"><i class="social_pinterest"></i></a></li>
-                            <li><a href="#"><i class="social_instagram"></i></a></li>
-                            <li><a href="#"><i class="social_youtube"></i></a></li>
-                        </ul>
                     </div>
                 </div>
             </div>

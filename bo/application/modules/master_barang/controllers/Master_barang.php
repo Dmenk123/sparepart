@@ -420,7 +420,7 @@ class Master_barang extends CI_Controller {
 				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 2);
 				$this->image_lib->clear();
 				## replace nama file + ext
-				$namafileseo_2 = $this->seoUrl($namafileseo_2.'.'.$extDet);
+				$namafileseo_2 = $this->seoUrl($namafileseo_2).'.'.$extDet;
 			} else {
 				$error = array('error' => $this->file_obj->display_errors());
 			}
@@ -445,7 +445,7 @@ class Master_barang extends CI_Controller {
 				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 3);
 				$this->image_lib->clear();
 				## replace nama file + ext
-				$namafileseo_3 = $this->seoUrl($namafileseo_3.'.'.$extDet);
+				$namafileseo_3 = $this->seoUrl($namafileseo_3).'.'.$extDet;
 			} else {
 				$error = array('error' => $this->file_obj->display_errors());
 			}
@@ -470,7 +470,7 @@ class Master_barang extends CI_Controller {
 				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 4);
 				$this->image_lib->clear();
 				## replace nama file + ext
-				$namafileseo_4 = $this->seoUrl($namafileseo_4.'.'.$extDet);
+				$namafileseo_4 = $this->seoUrl($namafileseo_4).'.'.$extDet;
 			} else {
 				$error = array('error' => $this->file_obj->display_errors());
 			}
