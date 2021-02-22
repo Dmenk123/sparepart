@@ -12,7 +12,7 @@ class Produk extends CI_Controller {
 
 	protected $data_passing_content = [];
 	protected $perPageRelated = 4;
-	protected $perPageKategori = 9;
+	protected $perPageKategori = 12;
 
 	public function kategori()
 	{	
@@ -38,14 +38,14 @@ class Produk extends CI_Controller {
 		if($this->input->get('tampil')) {
 			$per_page = clean_string(trim(strtolower(str_ireplace('-', ' ', $this->input->get('tampil')))));
 			if(!is_numeric($per_page)) {
-				$per_page = 9;
+				$per_page = $this->perPageKategori;
 			}else{
-				if((int)$per_page < 9) {
-					$per_page = 9;
+				if((int)$per_page < $this->perPageKategori) {
+					$per_page = $this->perPageKategori;
 				}else{
-					$hsl_bagi = (int)$per_page % 3;
-					if((int)$per_page > 24) {
-						$per_page = 24;
+					$hsl_bagi = (int)$per_page % 4;
+					if((int)$per_page > 30) {
+						$per_page = 30;
 					}else{
 						$per_page = (int)$per_page - $hsl_bagi;
 					}

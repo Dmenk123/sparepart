@@ -22,11 +22,11 @@
                             <div class="third_fillter col-md-4">
                                 <h4>Menampilkan : </h4>
                                 <select class="selectpicker" onchange="changeTampil(this, getQueryStringValue)">
-                                    <option value="9" <?php if($this->input->get('tampil') == '9') { echo 'selected'; }?>>9</option>
                                     <option value="12" <?php if($this->input->get('tampil') == '12') { echo 'selected'; }?>>12</option>
-                                    <option value="15" <?php if($this->input->get('tampil') == '15') { echo 'selected'; }?>>15</option>
-                                    <option value="18" <?php if($this->input->get('tampil') == '18') { echo 'selected'; }?>>18</option>
+                                    <option value="16" <?php if($this->input->get('tampil') == '16') { echo 'selected'; }?>>16</option>
+                                    <option value="20" <?php if($this->input->get('tampil') == '20') { echo 'selected'; }?>>20</option>
                                     <option value="24" <?php if($this->input->get('tampil') == '24') { echo 'selected'; }?>>24</option>
+                                    <option value="30" <?php if($this->input->get('tampil') == '30') { echo 'selected'; }?>>30</option>
                                 </select>
                             </div>
                             <!-- <div class="four_fillter">
