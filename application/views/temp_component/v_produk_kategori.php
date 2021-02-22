@@ -41,35 +41,35 @@
                             <?php foreach ($results as $key => $value) { ?>
         
                                 <div class="col-sm-3 col-sm-3 item-pc">
-                                    <div class="l_product_item">
+                                    <div class="l_product_item" style="border-radius: 15px;">
                                         <div class="l_p_img">
-                                            <img src="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $value->gambar;?>" alt="">
+                                            <img src="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $value->gambar;?>" alt="" style="border-top-left-radius: 15px;border-top-right-radius: 15px;">
                                             <!-- <h5 class="new"><?= $value->nama;?></h5> -->
                                         </div>
                                         <div class="l_p_text">
                                             <ul>
                                                 <li><a class="add_cart_btn" href="<?= base_url('produk/detail/'.seourl($value->nama_kategori).'/'.seourl($value->nama)); ?>">Lihat Detail</a></li>
                                             </ul>
-                                            <h4><?= $value->nama;?></h4>
+                                            <h4 style="font-size:13px!important;"><?= $value->nama;?></h4>
                                             <!-- <h5><del>$45.50</del>  $40</h5> -->
-                                            <h5><?= "Rp " . number_format($value->harga,0,',','.');?></h5>
+                                            <h5 style="font-size:15px!important;"><?= "Rp " . number_format($value->harga,0,',','.');?></h5>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- <div class="col-sm-3 col-sm-3 item-hp" style="display: none;"> -->
-                                    <div class="l_product_item item-hp" style="display: none;">
+                                    <div class="l_product_item item-hp" style="display: none;border-radius:15px;">
                                         <div class="l_p_img">
-                                            <img src="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $value->gambar;?>" alt="">
+                                            <img src="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $value->gambar;?>" alt="" style="border-top-left-radius: 15px;border-top-right-radius: 15px;">
                                             <!-- <h5 class="new"><?= $value->nama;?></h5> -->
                                         </div>
                                         <div class="l_p_text">
                                             <ul>
                                                 <li><a class="add_cart_btn" href="<?= base_url('produk/detail/'.seourl($value->nama_kategori).'/'.seourl($value->nama)); ?>">Lihat Detail</a></li>
                                             </ul>
-                                            <h4><?= $value->nama;?></h4>
+                                            <h4 style="font-size:13px!important;"><?= $value->nama;?></h4>
                                             <!-- <h5><del>$45.50</del>  $40</h5> -->
-                                            <h5><?= "Rp " . number_format($value->harga,0,',','.');?></h5>
+                                            <h5 style="font-size:15px!important;"><?= "Rp " . number_format($value->harga,0,',','.');?></h5>
                                         </div>
                                     </div>
                                 <!-- </div> -->

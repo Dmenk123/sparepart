@@ -39,10 +39,12 @@
 .l_product_item{
     border: 1px solid #cccccc;
     margin-bottom: 30px;
+    border-radius: 20px!important;
     .l_p_img{
         position: relative;
         img{
             max-width: 100%;
+            border-radius: 20px;
         }
     }
     .l_p_text{
@@ -81,7 +83,7 @@
             }
         }    
         h4{
-            font-size: 16px;
+            font-size: 13px;
             font-family: $mon;
             font-weight: 600;
             color: #000;
@@ -90,7 +92,7 @@
             @include transition;
         }
         h5{
-            font-size: 18px;
+            font-size: 15px;
             font-family: $mon;
             font-weight: 600;
             color: $baseColor;

@@ -330,6 +330,7 @@
     }
     .l_product_item .l_p_img {
         text-align: center;
+        border-radius: 20px!important;
     }
     .billing_details {
         padding-right: 0px;
