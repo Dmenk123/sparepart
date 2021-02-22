@@ -41,7 +41,7 @@
                             <?php foreach ($results as $key => $value) { ?>
         
                                 <div class="col-sm-3 col-sm-3 item-pc">
-                                    <div class="l_product_item" style="border-radius: 15px;">
+                                    <div class="l_product_item" style="border-radius: 15px;box-shadow: rgb(49 53 59 / 12%) 0px 1px 6px 0px;">
                                         <div class="l_p_img">
                                             <img src="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $value->gambar;?>" alt="" style="border-top-left-radius: 15px;border-top-right-radius: 15px;">
                                             <!-- <h5 class="new"><?= $value->nama;?></h5> -->
@@ -58,7 +58,7 @@
                                 </div>
 
                                 <!-- <div class="col-sm-3 col-sm-3 item-hp" style="display: none;"> -->
-                                    <div class="l_product_item item-hp" style="display: none;border-radius:15px;">
+                                    <div class="l_product_item item-hp" style="display: none;border-radius:15px;box-shadow: rgb(49 53 59 / 12%) 0px 1px 6px 0px;">
                                         <div class="l_p_img">
                                             <img src="<?php echo base_url();?>bo/files/img/barang_img/resize_image/<?= $value->gambar;?>" alt="" style="border-top-left-radius: 15px;border-top-right-radius: 15px;">
                                             <!-- <h5 class="new"><?= $value->nama;?></h5> -->
