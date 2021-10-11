@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 17/02/2021 00:00:54
+ Date: 12/10/2021 00:25:45
 */
 
 SET NAMES utf8mb4;
@@ -61,43 +61,39 @@ CREATE TABLE `m_barang`  (
   `gambar_kedua` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `gambar_ketiga` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `gambar_keempat` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `deskripsi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
   PRIMARY KEY (`id_barang`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of m_barang
 -- ----------------------------
-INSERT INTO `m_barang` VALUES (1, 'SK001', 'Handle Break Rem', 15000, 'handle-break-rem-sk001.jpg', 1, '2020-12-10 09:47:13', '2021-02-12 23:37:17', NULL, 3, NULL, NULL, NULL, NULL, 'handle-break-rem-sk001-2jpg', 'handle-break-rem-sk001-3jpg', NULL);
-INSERT INTO `m_barang` VALUES (2, 'SK002', 'Knalpot Racing R5344', 350000, 'knalpot-racing-r5344-sk002.jpg', 1, NULL, '2021-02-12 23:38:59', NULL, 4, NULL, NULL, NULL, NULL, 'knalpot-racing-r5344-sk002-2jpg', 'knalpot-racing-r5344-sk002-3jpg', NULL);
-INSERT INTO `m_barang` VALUES (3, 'SK003', 'Stang Fitbar', 200000, 'stang-fitbar-sk003.jpg', 1, NULL, '2021-02-12 23:37:53', NULL, 2, NULL, NULL, NULL, NULL, 'stang-fitbar-sk003-2jpg', 'stang-fitbar-sk003-3jpg', NULL);
-INSERT INTO `m_barang` VALUES (4, 'SK004', 'Stang Protapper coba', 150000, 'stang-protapper-coba-sk004.jpg', 1, NULL, '2021-02-12 23:39:50', NULL, 5, NULL, NULL, NULL, NULL, 'stang-protapper-coba-sk004-2jpg', 'stang-protapper-coba-sk004-3jpg', NULL);
-INSERT INTO `m_barang` VALUES (7, 'SK005', 'Kaca Spion Racing', 35000, 'kaca-spion-racing-sk005.jpg', 2, NULL, '2021-02-12 23:40:14', NULL, 0, '', '', '', '', 'kaca-spion-racing-sk005-2jpg', 'kaca-spion-racing-sk005-3jpg', NULL);
-INSERT INTO `m_barang` VALUES (12, 'SK006', 'Piston Brt', 500000, 'piston-brt-sk006.jpg', 2, NULL, '2021-02-12 23:40:54', NULL, 0, '', '', '', '', 'piston-brt-sk006-2jpg', 'piston-brt-sk006-3jpg', NULL);
-INSERT INTO `m_barang` VALUES (15, 'SK007', 'Ban Motor Keren', 250000, 'ban-motor-keren-sk007.png', 2, NULL, '2021-02-12 23:41:18', NULL, 0, '', '', '', '', 'ban-motor-keren-sk007-2jpg', 'ban-motor-keren-sk007-3jpg', NULL);
+INSERT INTO `m_barang` VALUES (1, 'SK001', 'Handle Break Rem', 15000, 'handle-break-rem-sk001.jpg', 1, '2020-12-10 09:47:13', '2021-02-12 23:37:17', NULL, 3, NULL, NULL, NULL, NULL, 'handle-break-rem-sk001-2.jpg', 'handle-break-rem-sk001-3.jpg', NULL, NULL);
+INSERT INTO `m_barang` VALUES (2, 'SK002', 'Knalpot Racing R5344', 350000, 'knalpot-racing-r5344-sk002.jpg', 1, NULL, '2021-02-12 23:38:59', NULL, 4, NULL, NULL, NULL, NULL, 'knalpot-racing-r5344-sk002-2.jpg', 'knalpot-racing-r5344-sk002-3.jpg', NULL, NULL);
+INSERT INTO `m_barang` VALUES (3, 'SK003', 'Stang Fitbar', 200000, 'stang-fitbar-sk003.jpg', 1, NULL, '2021-02-12 23:37:53', NULL, 2, NULL, NULL, NULL, NULL, 'stang-fitbar-sk003-2.jpg', 'stang-fitbar-sk003-3.jpg', NULL, NULL);
+INSERT INTO `m_barang` VALUES (4, 'SK004', 'Stang Protapper coba', 150000, 'stang-protapper-coba-sk004.jpg', 1, NULL, '2021-02-21 23:18:34', NULL, 5, NULL, NULL, NULL, NULL, 'stang-protapper-coba-sk004-2.jpg', 'stang-protapper-coba-sk004-3.jpg', NULL, 'Stang istimewa coba coba, ukuran 49 x 29 cm, Harga Terjangkau Warna Polkadot');
+INSERT INTO `m_barang` VALUES (7, 'SK005', 'Kaca Spion Racing', 35000, 'kaca-spion-racing-sk005.jpg', 2, NULL, '2021-02-12 23:40:14', NULL, 0, '', '', '', '', 'kaca-spion-racing-sk005-2.jpg', 'kaca-spion-racing-sk005-3.jpg', NULL, NULL);
+INSERT INTO `m_barang` VALUES (12, 'SK006', 'Piston Brt', 500000, 'piston-brt-sk006.jpg', 2, NULL, '2021-02-12 23:40:54', NULL, 0, '', '', '', '', 'piston-brt-sk006-2.jpg', 'piston-brt-sk006-3.jpg', NULL, NULL);
+INSERT INTO `m_barang` VALUES (15, 'SK007', 'Ban Motor Keren', 250000, 'ban-motor-keren-sk007.png', 2, NULL, '2021-02-12 23:41:18', NULL, 0, '', '', '', '', 'ban-motor-keren-sk007-2.jpg', 'ban-motor-keren-sk007-3.jpg', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for m_kategori
 -- ----------------------------
 DROP TABLE IF EXISTS `m_kategori`;
 CREATE TABLE `m_kategori`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nama` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `keterangan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `created_at` datetime(0) NULL DEFAULT NULL,
-  `updated_at` datetime(0) NULL DEFAULT NULL,
-  `deleted_at` datetime(0) NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+  `id_kategori` int(20) NOT NULL,
+  `nama_kategori` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id_kategori`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of m_kategori
 -- ----------------------------
-INSERT INTO `m_kategori` VALUES (1, 'Ban', 'Ban', '2021-02-16 22:10:19', NULL, NULL);
-INSERT INTO `m_kategori` VALUES (2, 'Stang', 'Stang', '2021-02-16 22:10:19', NULL, NULL);
-INSERT INTO `m_kategori` VALUES (3, 'Knalpot', 'Knalpot', '2021-02-16 22:10:19', NULL, NULL);
-INSERT INTO `m_kategori` VALUES (4, 'Spion', 'Spion', '2021-02-16 22:10:19', NULL, NULL);
-INSERT INTO `m_kategori` VALUES (5, 'Handle', 'Handle', '2021-02-16 22:10:19', NULL, NULL);
-INSERT INTO `m_kategori` VALUES (6, 'Piston', 'Piston', '2021-02-16 22:10:19', NULL, NULL);
+INSERT INTO `m_kategori` VALUES (1, 'Honda');
+INSERT INTO `m_kategori` VALUES (2, 'Yamaha');
+INSERT INTO `m_kategori` VALUES (3, 'Kawasaki');
+INSERT INTO `m_kategori` VALUES (4, 'Suzuki');
+INSERT INTO `m_kategori` VALUES (5, 'KTM');
 
 -- ----------------------------
 -- Table structure for m_menu
@@ -123,7 +119,7 @@ CREATE TABLE `m_menu`  (
 -- Records of m_menu
 -- ----------------------------
 INSERT INTO `m_menu` VALUES (1, 0, 'Dashboard', 'Dashboard', 'home', 'flaticon2-architecture-and-city', 1, 1, 1, 0, 0, 0);
-INSERT INTO `m_menu` VALUES (2, 0, 'Setting (Administrator)', 'Setting', NULL, 'flaticon2-gear', 1, 1, 5, 0, 0, 0);
+INSERT INTO `m_menu` VALUES (2, 0, 'Setting (Administrator)', 'Setting', '', 'flaticon2-gear', 1, 1, 100, 0, 0, 0);
 INSERT INTO `m_menu` VALUES (3, 2, 'Setting Menu', 'Setting Menu', 'set_menu', 'flaticon-grid-menu', 1, 2, 2, 1, 1, 1);
 INSERT INTO `m_menu` VALUES (4, 2, 'Setting Role', 'Setting Role', 'set_role', 'flaticon-network', 1, 2, 1, 1, 1, 1);
 INSERT INTO `m_menu` VALUES (6, 0, 'Master', 'Master', '', 'flaticon-folder-1', 1, 1, 2, 0, 0, 0);
@@ -131,8 +127,14 @@ INSERT INTO `m_menu` VALUES (7, 6, 'Data User', 'Data User', 'master_user', 'fla
 INSERT INTO `m_menu` VALUES (8, 6, 'Data Barang', 'Master Barang', 'master_barang', 'flaticon-clock', 1, 1, 2, 1, 1, 1);
 INSERT INTO `m_menu` VALUES (9, 6, 'Data Agen', 'Data Agen', 'master_agen', 'flaticon-book', 1, 1, 3, 1, 1, 1);
 INSERT INTO `m_menu` VALUES (10, 6, 'Data Pelanggan', 'Data Pelanggan', 'master_pelanggan', 'flaticon-user', 1, 2, 5, 1, 1, 1);
-INSERT INTO `m_menu` VALUES (11, 0, 'Invoice', 'Invoice', 'invoice', 'flaticon-cart', 1, 1, 3, 0, 0, 0);
+INSERT INTO `m_menu` VALUES (11, 0, 'Invoice', 'Invoice', 'invoice', 'flaticon-cart', 0, 1, 3, 0, 0, 0);
 INSERT INTO `m_menu` VALUES (12, 11, 'Invoice Penjualan', 'Invoice Penjualan', 'penjualan', 'flaticon-price-tag', 1, 3, 1, 1, 1, 1);
+INSERT INTO `m_menu` VALUES (13, 0, 'Inventory', 'Inventory', '', 'flaticon-open-box', 1, 1, 4, 0, 0, 0);
+INSERT INTO `m_menu` VALUES (14, 13, 'Stok Barang', 'Stok Barang', 'stok_barang', 'flaticon-interface-3', 1, 1, 1, 1, 1, 1);
+INSERT INTO `m_menu` VALUES (15, 0, 'Transaksi', 'Transaksi', '', 'flaticon-list-3', 1, 1, 5, 0, 0, 0);
+INSERT INTO `m_menu` VALUES (16, 15, 'Pembelian', 'Pembelian', 'pembelian', 'flaticon2-shopping-cart-1', 1, 2, 1, 1, 1, 1);
+INSERT INTO `m_menu` VALUES (17, 15, 'Penjualan', 'Penjualan', 'penjualan', 'flaticon-truck', 1, 2, 2, 1, 1, 1);
+INSERT INTO `m_menu` VALUES (18, 15, 'Penerimaan Barang', 'Penerimaan Barang', 'barang_masuk', 'flaticon2-box-1', 1, 2, 4, 1, 1, 1);
 
 -- ----------------------------
 -- Table structure for m_pelanggan
@@ -197,16 +199,17 @@ CREATE TABLE `m_user`  (
   `created_at` datetime(0) NULL DEFAULT NULL,
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
+  `nama` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-02-16 21:42:27', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL);
-INSERT INTO `m_user` VALUES (2, 1, 'coba', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50');
-INSERT INTO `m_user` VALUES (3, 6, 'alsyafin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00003', 'user_default.png', '2021-01-15 09:07:51', NULL, NULL);
-INSERT INTO `m_user` VALUES (4, 6, 'zamroni', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00004', 'user_default.png', '2021-01-15 09:08:19', NULL, NULL);
+INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-10-11 21:40:29', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
+INSERT INTO `m_user` VALUES (2, 1, 'coba', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50', 'coba saja');
+INSERT INTO `m_user` VALUES (3, 6, 'alsyafin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00003', 'user_default.png', '2021-01-15 09:07:51', NULL, NULL, 'Alsuafinollah');
+INSERT INTO `m_user` VALUES (4, 6, 'zamroni', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00004', 'user_default.png', '2021-01-15 09:08:19', NULL, NULL, 'Moch Zamroni');
 
 -- ----------------------------
 -- Table structure for t_kota
@@ -744,7 +747,6 @@ INSERT INTO `t_kota` VALUES ('9471', '94', 'KOTA JAYAPURA');
 DROP TABLE IF EXISTS `t_penjualan`;
 CREATE TABLE `t_penjualan`  (
   `id_penjualan` int(32) NOT NULL AUTO_INCREMENT,
-  `order_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `no_faktur` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `id_pelanggan` int(32) NULL DEFAULT NULL,
   `id_sales` int(32) NULL DEFAULT NULL,
@@ -753,24 +755,12 @@ CREATE TABLE `t_penjualan`  (
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id_penjualan`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_penjualan
 -- ----------------------------
-INSERT INTO `t_penjualan` VALUES (1, '1554256789', NULL, 3, 3, '2021-01-15 00:00:00', '2021-01-15 14:03:04', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (2, '1133369150', NULL, 3, 3, '2021-01-15 00:00:00', '2021-01-15 14:19:10', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (3, '526126507', NULL, 3, 4, '2021-01-15 00:00:00', '2021-01-15 14:39:24', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (4, '640057262', NULL, 3, 4, '2021-01-15 00:00:00', '2021-01-15 14:41:21', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (5, '1550187689', NULL, 3, 3, '2021-01-23 00:00:00', '2021-01-15 14:54:52', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (6, '1894632856', NULL, 3, 0, '2021-01-30 00:00:00', '2021-01-15 15:00:27', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (7, '513241814', NULL, 3, 3, '2021-01-30 00:00:00', '2021-01-15 17:49:29', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (8, '691641770', NULL, 3, 3, '2021-01-23 00:00:00', '2021-01-16 09:03:40', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (9, '534765585', NULL, 3, 3, '2021-01-23 00:00:00', '2021-01-16 10:45:08', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (10, '891587337', 'FqvkTqlD5sTHWnfhhH92ALYQM', 3, 3, '2021-01-29 00:00:00', '2021-01-16 12:49:58', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (11, '797261672', '1TPNRC', 3, 4, '2021-02-12 00:00:00', '2021-01-16 12:51:31', '2021-01-28 16:02:34', NULL);
-INSERT INTO `t_penjualan` VALUES (12, '1883342141', '2WW11A', 3, 3, '2021-02-02 00:00:00', '2021-01-17 10:27:51', NULL, NULL);
-INSERT INTO `t_penjualan` VALUES (13, '450880910', 'ULUFG2', 3, 3, '2021-01-29 00:00:00', '2021-01-18 08:00:39', NULL, NULL);
+INSERT INTO `t_penjualan` VALUES (1, 'J120012021', 3, 4, '2021-10-12 00:00:00', '2021-10-12 00:22:32', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_penjualan_det
@@ -786,19 +776,13 @@ CREATE TABLE `t_penjualan_det`  (
   `sub_total` float NULL DEFAULT NULL,
   `qty` int(32) NULL DEFAULT NULL,
   PRIMARY KEY (`id_penjualan_det`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_penjualan_det
 -- ----------------------------
-INSERT INTO `t_penjualan_det` VALUES (2, 8, 2, 350000, 350000, 0, 700000, 2);
-INSERT INTO `t_penjualan_det` VALUES (3, 8, 1, 15000, 15000, 0, 45000, 3);
-INSERT INTO `t_penjualan_det` VALUES (4, 9, 3, 200000, 200000, 0, 400000, 2);
-INSERT INTO `t_penjualan_det` VALUES (5, 9, 1, 15000, 15000, 0, 15000, 1);
-INSERT INTO `t_penjualan_det` VALUES (8, 13, 7, 35000, 35000, 0, 70000, 2);
-INSERT INTO `t_penjualan_det` VALUES (9, 13, 1, 15000, 15000, 0, 15000, 1);
-INSERT INTO `t_penjualan_det` VALUES (10, 11, 3, 200000, 200000, 0, 400000, 2);
-INSERT INTO `t_penjualan_det` VALUES (11, 11, 15, 250000, 250000, 0, 250000, 1);
+INSERT INTO `t_penjualan_det` VALUES (1, 1, 2, 350000, 350000, 0, 4200000, 12);
+INSERT INTO `t_penjualan_det` VALUES (2, 1, 3, 200000, 200000, 0, 800000, 4);
 
 -- ----------------------------
 -- Table structure for t_provinsi
@@ -875,9 +859,15 @@ INSERT INTO `t_role_menu` VALUES (9, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (10, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (11, 1, 0, 0, 0);
 INSERT INTO `t_role_menu` VALUES (12, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (13, 1, 0, 0, 0);
+INSERT INTO `t_role_menu` VALUES (14, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (2, 1, 0, 0, 0);
 INSERT INTO `t_role_menu` VALUES (4, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (3, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (15, 1, 0, 0, 0);
+INSERT INTO `t_role_menu` VALUES (16, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (17, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (18, 1, 1, 1, 1);
 
 -- ----------------------------
 -- Function structure for dm

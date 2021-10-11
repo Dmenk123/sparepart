@@ -66,7 +66,7 @@
                         <select name="pelanggan" id="pelanggan" class="form-control select2">
                             <option value="0">-PILIH-</option>
                             <?php foreach($pelanggan->result() as $row):?>
-                                <option value="<?php echo $row->id_pelanggan;?>" <?php echo $invoice->id_pelanggan == $row->id_pelanggan ? 'selected' : ''?>><?php echo $row->nama_toko;?></option>
+                                <option value="<?php echo $row->id_pelanggan;?>" <?php echo ((isset($invoice)) && ($invoice->id_pelanggan == $row->id_pelanggan)) ? 'selected' : ''?>><?php echo $row->nama_toko;?></option>
                             <?php endforeach;?>
                         </select>
                     <span class="help-block"></span>
@@ -76,7 +76,7 @@
                         <select name="sales" id="sales" class="form-control select2">
                             <option value="0">-PILIH-</option>
                             <?php foreach($sales->result() as $row):?>
-                                <option value="<?php echo $row->id;?>" <?php echo $invoice->id_sales == $row->id ? 'selected' : ''?>><?php echo $row->username;?></option>
+                                <option value="<?php echo $row->id;?>" <?php echo ((isset($invoice)) && ($invoice->id_sales == $row->id)) ? 'selected' : ''?>><?php echo $row->username;?></option>
                             <?php endforeach;?>
                         </select>
                     <span class="help-block"></span>

@@ -23,7 +23,7 @@
         <div class="kt-portlet__head-toolbar">
           <div class="kt-portlet__head-wrapper">
             <div class="kt-portlet__head-actions row">
-              <div><?= $this->template_view->getAddButton(false, 'add_menu'); ?></div>
+              <div><?= $this->template_view->getAddButton(false, 'add_menu', 'new_penjualan', 'Tambah Penjualan'); ?></div>
             </div>
           </div>
         </div>
@@ -35,7 +35,6 @@
           <thead>
             <tr>
               <th style="width: 5%;">No</th>
-              <th>Order ID</th>
               <th>No. Faktur</th>
               <th>Nama Pelanggan</th>
               <th>Alamat Pelanggan</th>

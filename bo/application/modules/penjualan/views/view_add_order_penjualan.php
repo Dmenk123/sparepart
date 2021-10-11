@@ -66,14 +66,14 @@
                         </div>
                         <!-- info row -->
                         <div class="row invoice-info">
-                            <div class="col-sm-4 invoice-col">
+                            <!-- <div class="col-sm-4 invoice-col">
                                 From
                                 <address>
                                     <strong>
-                                                                            </strong>
+                                    </strong>
                                 </address>
-                            </div><!-- /.col -->
-                            <div class="col-sm-4 invoice-col">
+                            </div> -->
+                            <div class="col-sm-6 invoice-col">
                                 To
                                 <address>
                                     <strong><?php echo $invoice->nama_toko;?></strong>
@@ -85,7 +85,7 @@
                                     <?= (isset($invoice->email))?$invoice->email:"";?>
                                 </address>
                             </div><!-- /.col -->
-                            <div class="col-sm-4 invoice-col">
+                            <div class="col-sm-6 invoice-col">
                                 <b>Invoice #<?= (isset($invoice->order_id))?$invoice->order_id:"";?></b><br>
                                 <br>
                                 <b>No. Faktur:</b> <?= (isset($invoice->no_faktur))?$invoice->no_faktur:"";?><br>

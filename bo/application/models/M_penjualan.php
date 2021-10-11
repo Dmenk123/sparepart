@@ -3,11 +3,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_penjualan extends CI_Model
 {
 	var $table = 't_penjualan';
-	var $column_search = ['pj.order_id','pj.no_faktur'];
+	var $column_search = ['pj.no_faktur'];
 	
 	var $column_order = [
 		null, 
-		'pj.order.id',
 		'pj.no_faktur',
 		'pj.tgl_jatuh_tempo',
 		'pj.id_sales',
@@ -27,7 +26,6 @@ class M_penjualan extends CI_Model
 	{
 		$this->db->select('
 				pj.id_penjualan,
-				pj.order_id,
 				pj.no_faktur,
 				pj.tgl_jatuh_tempo,
 				pj.created_at,
@@ -102,19 +100,6 @@ class M_penjualan extends CI_Model
 		$this->db->from($this->table);
 		return $this->db->count_all_results();
 	}
-
-	public function get_detail_user($id_user)
-	{
-		$this->db->select('*');
-		$this->db->from('m_user');
-		$this->db->where('id', $id_user);
-
-        $query = $this->db->get();
-
-        if ($query->num_rows() > 0) {
-            return $query->result();
-        }
-	}
 	
 	public function get_by_id($id)
 	{
@@ -160,46 +145,16 @@ class M_penjualan extends CI_Model
 		$data = ['deleted_at' => $timestamp];
 		return $this->db->update($this->table, $data, $where);
 	}
-
-	//dibutuhkan di contoller login untuk ambil data user
-	function login($data){
-		return $this->db->select('*')
-			->where('username',$data['data_user'])
-			->where('password',$data['data_password'])
-			->where('status', 1 )
-			->get($this->table)->row();
-	}
-
-	//dibutuhkan di contoller login untuk set last login
-	function set_lastlogin($id){
-		$this->db->where('id',$id);
-		$this->db->update(
-			$this->table, 
-			['last_login'=>date('Y-m-d H:i:s')]
-		);			
-	}
-
-	function get_kode_user(){
-            $q = $this->db->query("select MAX(RIGHT(kode_user,5)) as kode_max from m_user");
-            $kd = "";
-            if($q->num_rows()>0){
-                foreach($q->result() as $k){
-                    $tmp = ((int)$k->kode_max)+1;
-                    $kd = sprintf("%05s", $tmp);
-                }
-            }else{
-                $kd = "00001";
-            }
-            return "USR-".$kd;
-	}
 	
-	public function get_max_id_user()
+	public function get_max_penjualan()
 	{
-		$q = $this->db->query("SELECT MAX(id) as kode_max from m_user");
+		$obj_date = new DateTime();
+		$tgl = $obj_date->format('Y-m-d');
+		$q = $this->db->query("SELECT count(*) as jml FROM t_penjualan WHERE DATE_FORMAT(created_at ,'%Y-%m-%d') = '$tgl' and deleted_at is null");
 		$kd = "";
 		if($q->num_rows()>0){
 			$kd = $q->row();
-			return (int)$kd->kode_max + 1;
+			return (int)$kd->jml + 1;
 		}else{
 			return '1';
 		} 
@@ -236,11 +191,10 @@ class M_penjualan extends CI_Model
 		$this->db->query("truncate table m_user");
 	}
 
-	public function getPenjualan($order_id)
+	public function getPenjualan($no_faktur)
 	{
 		$this->db->select('
 						pj.id_penjualan,
-						pj.order_id,
 						pj.no_faktur,
 						pj.tgl_jatuh_tempo,
 						pj.created_at,
@@ -254,7 +208,7 @@ class M_penjualan extends CI_Model
 		$this->db->from('t_penjualan pj');
 		$this->db->join('m_user mu', 'mu.id=pj.id_sales');
 		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=pj.id_pelanggan');
-		$this->db->where('pj.order_id', $order_id);
+		$this->db->where('pj.no_faktur', $no_faktur);
 		$q = $this->db->get();
 		return $q;
 	}

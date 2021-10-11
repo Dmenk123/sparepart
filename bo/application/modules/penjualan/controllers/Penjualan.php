@@ -39,7 +39,7 @@ class Penjualan extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => 'modal_master_agen',
+			'modal' => null,
 			'js'	=> 'penjualan.js',
 			'view'	=> 'view_invoice_penjualan'
 		];
@@ -95,37 +95,6 @@ class Penjualan extends CI_Controller {
 		echo json_encode($output);
 	}
 
-	/**
-	 * Hanya melakukan softdelete saja
-	 * isi kolom updated_at dengan datetime now()
-	 */
-
-	public function edit_status_user($id)
-	{
-		$input_status = $this->input->post('status');
-		// jika aktif maka di set ke nonaktif / "0"
-		$status = ($input_status == "aktif") ? $status = 0 : $status = 1;
-			
-		$input = array('status' => $status);
-
-		$where = ['id' => $id];
-
-		$this->m_user->update($where, $input);
-
-		if ($this->db->affected_rows() == '1') {
-			$data = array(
-				'status' => TRUE,
-				'pesan' => "Status User berhasil di ubah.",
-			);
-		}else{
-			$data = array(
-				'status' => FALSE
-			);
-		}
-
-		echo json_encode($data);
-	}
-
 	// ===============================================
 	private function rule_validasi($is_update=false, $skip_pass=false)
 	{
@@ -163,101 +132,39 @@ class Penjualan extends CI_Controller {
         return $data;
 	}
 
-		// ===============================================
-		private function rule_validasi_order($is_update=false, $skip_pass=false)
-		{
-			$data = array();
-			$data['error_string'] = array();
-			$data['inputerror'] = array();
-			$data['status'] = TRUE;
-	
-			
-			
-			// if ($this->input->post('icon_menu') == '') {
-			// 	$data['inputerror'][] = 'icon_menu';
-			//     $data['error_string'][] = 'Wajib mengisi icon menu';
-			//     $data['status'] = FALSE;
-			// }
-	
-			if ($this->input->post('id_barang') == '') {
-				$data['inputerror'][] = 'id_barang';
-				$data['error_string'][] = 'Wajib Memilih Barang yang akan diorder';
-				$data['status'] = FALSE;
-			}
-	
-			if ($this->input->post('qty') == '') {
-				$data['inputerror'][] = 'qty';
-				$data['error_string'][] = 'Wajib Menginputkan Jumlag Quantity';
-				$data['status'] = FALSE;
-			}
-	
-	
-			return $data;
+	// ===============================================
+	private function rule_validasi_order($is_update=false, $skip_pass=false)
+	{
+		$data = array();
+		$data['error_string'] = array();
+		$data['inputerror'] = array();
+		$data['status'] = TRUE;
+
+		
+		
+		// if ($this->input->post('icon_menu') == '') {
+		// 	$data['inputerror'][] = 'icon_menu';
+		//     $data['error_string'][] = 'Wajib mengisi icon menu';
+		//     $data['status'] = FALSE;
+		// }
+
+		if ($this->input->post('id_barang') == '') {
+			$data['inputerror'][] = 'id_barang';
+			$data['error_string'][] = 'Wajib Memilih Barang yang akan diorder';
+			$data['status'] = FALSE;
 		}
 
-	private function konfigurasi_upload_img($nmfile)
-	{ 
-		//konfigurasi upload img display
-		$config['upload_path'] = './files/img/barang_img/';
-		$config['allowed_types'] = 'gif|jpg|png|jpeg|bmp';
-		$config['overwrite'] = TRUE;
-		$config['max_size'] = '4000';//in KB (4MB)
-		$config['max_width']  = '0';//zero for no limit 
-		$config['max_height']  = '0';//zero for no limit
-		$config['file_name'] = $nmfile;
-		//load library with custom object name alias
-		$this->load->library('upload', $config, 'file_obj');
-		$this->file_obj->initialize($config);
+		if ($this->input->post('qty') == '') {
+			$data['inputerror'][] = 'qty';
+			$data['error_string'][] = 'Wajib Menginputkan Jumlag Quantity';
+			$data['status'] = FALSE;
+		}
+
+
+		return $data;
 	}
 
-	private function konfigurasi_image_resize($filename)
-	{
-		//konfigurasi image lib
-	    $config['image_library'] = 'gd2';
-	    $config['source_image'] = './files/img/user_img/'.$filename;
-	    $config['create_thumb'] = FALSE;
-	    $config['maintain_ratio'] = FALSE;
-	    $config['new_image'] = './files/img/user_img/'.$filename;
-	    $config['overwrite'] = TRUE;
-	    $config['width'] = 450; //resize
-	    $config['height'] = 500; //resize
-	    $this->load->library('image_lib',$config); //load image library
-	    $this->image_lib->initialize($config);
-	    $this->image_lib->resize();
-	}
-
-	private function konfigurasi_image_thumb($filename, $gbr)
-	{
-		//konfigurasi image lib
-	    $config2['image_library'] = 'gd2';
-	    $config2['source_image'] = './files/img/user_img/'.$filename;
-	    $config2['create_thumb'] = TRUE;
-	 	$config2['thumb_marker'] = '_thumb';
-	    $config2['maintain_ratio'] = FALSE;
-	    $config2['new_image'] = './files/img/user_img/thumbs/'.$filename;
-	    $config2['overwrite'] = TRUE;
-	    $config2['quality'] = '60%';
-	 	$config2['width'] = 45;
-	 	$config2['height'] = 45;
-	    $this->load->library('image_lib',$config2); //load image library
-	    $this->image_lib->initialize($config2);
-	    $this->image_lib->resize();
-	    return $output_thumb = $gbr['raw_name'].'_thumb'.$gbr['file_ext'];	
-	}
-
-	private function seoUrl($string) {
-	    //Lower case everything
-	    $string = strtolower($string);
-	    //Make alphanumeric (removes all other characters)
-	    $string = preg_replace("/[^a-z0-9_\s-]/", "", $string);
-	    //Clean up multiple dashes or whitespaces
-	    $string = preg_replace("/[\s-]+/", " ", $string);
-	    //Convert whitespaces and underscore to dash
-	    $string = preg_replace("/[\s_]/", "-", $string);
-	    return $string;
-	}
-
-	public function new_invoice()
+	public function new_penjualan()
 	{
 		$id_user = $this->session->userdata('id_user'); 
 		$data_user = $this->m_user->get_detail_user($id_user);
@@ -267,7 +174,7 @@ class Penjualan extends CI_Controller {
 		 * data passing ke halaman view content
 		 */
 		$data = array(
-			'title' => 'NEW INVOICE',
+			'title' => 'Penjualan Baru',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
 			'pelanggan' => $this->m_global->getSelectedData('m_pelanggan', array('deleted_at'=>NULL)),
@@ -281,7 +188,7 @@ class Penjualan extends CI_Controller {
 			$invoice = $this->m_global->getSelectedData('t_penjualan', array('order_id'=>$order_id))->row();
 			$data['invoice'] = $invoice;
 			$data['mode'] = $mode;
-			$data['title'] = "EDIT INVOICE";
+			$data['title'] = "Edit Penjualan";
 			$data['id_penjualan'] = $invoice->id_penjualan;
 			$data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
 		}
@@ -302,20 +209,21 @@ class Penjualan extends CI_Controller {
 		$this->template_view->load_view($content, $data);
 	}
 
-	public function add_new_invoice()
+	public function add_new_penjualan()
 	{
 		$this->load->library('Enkripsi');
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tgl = $obj_date->format('Y-m-d');
 		$arr_valid = $this->rule_validasi();
+		$counter_penjualan = $this->m_penjualan->get_max_penjualan();
 		
 		$id_pelanggan 		= $this->input->post('pelanggan');
 		$id_sales 			= $this->input->post('sales');
 		$tgl_jatuh_tempo	= $this->input->post('tgl_jatuh_tempo');
-		$date = str_replace('/', '-', $tgl_jatuh_tempo);
+		$date 				= str_replace('/', '-', $tgl_jatuh_tempo);
 		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date) );
-		$order_id           = rand();
-		$no_faktur          = $this->generateRandomString($timestamp);
+		$no_faktur          = no_faktur($tgl, $counter_penjualan);
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
@@ -325,7 +233,6 @@ class Penjualan extends CI_Controller {
 		$this->db->trans_begin();
 		
 		$data = [
-			'order_id' 			=> $order_id,
 			'no_faktur'         => $no_faktur,
 			'id_pelanggan' 		=> $id_pelanggan,
 			'id_sales' 			=> $id_sales,
@@ -343,7 +250,7 @@ class Penjualan extends CI_Controller {
 			$this->db->trans_commit();
 			$retval['status'] = true;
 			$retval['pesan'] = 'Sukses Menambahkan Data Invoice';
-			$retval['order_id'] = $order_id;
+			$retval['no_faktur'] = $no_faktur;
 		}
 
 		echo json_encode($retval);
@@ -355,6 +262,7 @@ class Penjualan extends CI_Controller {
 		$this->load->library('Enkripsi');
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tgl = $obj_date->format('Y-m-d');
 		$arr_valid = $this->rule_validasi();
 		
 		$id_penjualan       = $this->input->post('id_penjualan');
@@ -363,8 +271,6 @@ class Penjualan extends CI_Controller {
 		$tgl_jatuh_tempo	= $this->input->post('tgl_jatuh_tempo');
 		$date = str_replace('/', '-', $tgl_jatuh_tempo);
 		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date) );
-		// $order_id           = rand();
-		// $no_faktur          = $this->generateRandomString();
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
@@ -374,8 +280,6 @@ class Penjualan extends CI_Controller {
 		$this->db->trans_begin();
 		
 		$data = [
-			// 'order_id' 			=> $order_id,
-			// 'no_faktur'         => $no_faktur,
 			'id_pelanggan' 		=> $id_pelanggan,
 			'id_sales' 			=> $id_sales,
 			'tgl_jatuh_tempo'	=> $jatuh_tempo,
@@ -403,7 +307,7 @@ class Penjualan extends CI_Controller {
 
 	public function add_order()
 	{
-		$order_id = $this->input->get('order_id');
+		$no_faktur = $this->input->get('no_faktur');
 		$id_user = $this->session->userdata('id_user'); 
 		$data_user = $this->m_user->get_detail_user($id_user);
 		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
@@ -419,7 +323,7 @@ class Penjualan extends CI_Controller {
 			'data_role'	=> $data_role,
 		);
 
-		$data['invoice'] = $this->m_penjualan->getPenjualan($order_id)->row();
+		$data['invoice'] = $this->m_penjualan->getPenjualan($no_faktur)->row();
 		$data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL));
 
 		/**

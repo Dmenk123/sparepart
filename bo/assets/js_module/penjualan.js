@@ -180,7 +180,7 @@ function saveDataPenjualan()
     var txtAksi;
     const loadingCircle = $("#loading-circle");
  
-    url = base_url + 'penjualan/add_new_invoice';
+    url = base_url + 'penjualan/add_new_penjualan';
     txtAksi = 'Tambah Invoice';
     var alert = "Menambah";
     
@@ -190,14 +190,14 @@ function saveDataPenjualan()
     
     $("#btnSave").prop("disabled", true);
     $('#btnSave').text('Menyimpan Data'); //change button text
-    swalConfirmDelete.fire({
+    swalConfirm.fire({
         title: 'Perhatian',
         text: "Apakah Anda ingin "+alert+" Data ini ?",
         type: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Ya !',
         cancelButtonText: 'Tidak !',
-        reverseButtons: true
+        reverseButtons: false
       }).then((result) => {
         if (result.value) {
             $.ajax({
@@ -218,7 +218,7 @@ function saveDataPenjualan()
                         $('#btnSave').text('Simpan');
                         loadingCircle.css("display", "block");
                         setTimeout(function(){
-                          ajax_send(data.order_id);
+                          ajax_send(data.no_faktur);
                           loadingCircle.css("display", "none");
                         }, 3000);
                     }else {
@@ -541,9 +541,9 @@ function createAlert(title, summary, details, severity, dismissible, autoDismiss
     }
 }
 
-function ajax_send(order_id)
+function ajax_send(no_faktur)
 {
-    window.location.href = base_url+'penjualan/add_order?order_id='+order_id;
+    window.location.href = base_url+'penjualan/add_order?no_faktur='+no_faktur;
 }
  
   
