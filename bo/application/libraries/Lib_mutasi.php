@@ -9,31 +9,39 @@ class Lib_mutasi extends CI_Controller {
 	
 	/**
 	 * $id_jenis_trans = adalah id dari m jenis transaksi
-	 * $id_trans_flag = id transaksi dari tiap2 tabel transaksi
 	 * $datanya = data array dari inputan
-	 * $flag_transaksi = 1: penerimaan, 2: pengeluaran
 	 */
-	function simpan_mutasi($id_jenis_trans, $id_trans_flag, $datanya=null, $flag_transaksi) {
+	function simpan_mutasi($id_kategori_trans, $datanya=null, $tanggal=null) {
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$datenow = $obj_date->format('Y-m-d');
-		$select = "m.*, md.id as id_mut_det, md.id_logistik, md.qty, md.harga, md.subtotal, md.id_trans_det_flag";
-		$join = [ 
-			['table' => 't_mutasi_det as md', 'on' => 'm.id = md.id_mutasi'],
-		];
-		$data = $this->_ci->m_global->single_row($select, ['m.id_jenis_trans' => $id_jenis_trans, 'm.id_trans_flag' => $id_trans_flag], 't_mutasi as m', $join);
 		
+		if($tanggal) {
+			$tgl = $tanggal;
+		}else{
+			$tgl = $obj_date->format('Y-m-d');
+		}
+		 
+		$select = "m.*, md.id_mutasi_det, md.id_barang, md.qty, md.harga, md.subtotal";
+		$join = [ 
+			['table' => 't_mutasi_det as md', 'on' => 'm.id_mutasi = md.id_mutasi'],
+		];
+		$data = $this->_ci->m_global->single_row($select, ['m.id_kategori_trans' => $id_kategori_trans, 'm.tanggal' => $tgl, 'deleted_at' => null], 't_mutasi as m', $join);
+		
+		$data_kategori_trans = $this->_ci->m_global->single_row('*', ['id_kategori_trans' => $id_kategori_trans, 'deleted_at' => null], 'm_kategori_transaksi');
+
 		if(!$data){	
 			###insert
-			$data['tanggal'] = $datenow;
-			$data['id_jenis_trans'] = $id_jenis_trans;
-			$data['id_trans_flag'] = $id_trans_flag;
+			$data['tanggal'] = $tgl;
+			$data['id_kategori_trans'] = $id_kategori_trans;
 			$data['id_user'] = $this->_ci->session->userdata('id_user');
+			
 			## jika transaksi penerimaan/pengeluaran
-			if($flag_transaksi == 1) {
-				$data['harga_total_in'] = $datanya['harga_total'];
+			if($data_kategori_trans->is_penerimaan == 1) {
+				$flag_transaksi = 1;
+				$data['total_penerimaan'] = $datanya['harga_total'];
 			}else{
-				$data['harga_total_out'] = $datanya['harga_total'];	
+				$flag_transaksi = 2;
+				$data['total_pengeluaran'] = $datanya['harga_total'];	
 			}
 			
 			$data['flag_transaksi'] = $flag_transaksi;
@@ -49,14 +57,14 @@ class Lib_mutasi extends CI_Controller {
 			}
 		}else{
 			###update
-			if($flag_transaksi == 1) {
+			if($data_kategori_trans->is_penerimaan == 1) {
 				$data_upd = [
-					'harga_total_in' => $datanya['harga_total'],
+					'total_penerimaan' => $datanya['harga_total'],
 					'id_user' => $this->_ci->session->userdata('id_user')
 				];
 			}else{
 				$data_upd = [
-					'harga_total_out' => $datanya['harga_total'],
+					'total_pengeluaran' => $datanya['harga_total'],
 					'id_user' => $this->_ci->session->userdata('id_user')
 				];
 			}
