@@ -72,7 +72,7 @@ class M_barang extends CI_Model
 		}
 	}
 
-	function get_datatable_user()
+	function get_datatable_barang()
 	{
 		$term = $_REQUEST['search']['value'];
 		$this->_get_datatables_query($term);

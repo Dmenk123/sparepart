@@ -51,7 +51,7 @@ class Master_barang extends CI_Controller {
 
 	public function list_barang()
 	{
-		$list = $this->m_barang->get_datatable_user();
+		$list = $this->m_barang->get_datatable_barang();
 		$data = array();
 		$no =$_POST['start'];
 		foreach ($list as $barang) {
