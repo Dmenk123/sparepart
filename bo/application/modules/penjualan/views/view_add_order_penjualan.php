@@ -145,12 +145,9 @@
                         <div class="row">
                             <!-- accepted payments column -->
                             <div class="col-md-12">
-                                <p class="lead">Amount Due <?php echo $invoice->tgl_jatuh_tempo;?></p>
                                 <div class="table-responsive">
                                     <table class="table" width="100%" >
                                         <tbody>
-                                            
-                                            
                                             <tr>
                                                 <td width="69%" >Total:</td>
                                                 <td id="total">0</td>

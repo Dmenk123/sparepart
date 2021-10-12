@@ -35,10 +35,10 @@
           <thead>
             <tr>
               <th style="width: 5%;">No</th>
+              <th>Tanggal</th>
               <th>No. Faktur</th>
               <th>Nama Pelanggan</th>
               <th>Alamat Pelanggan</th>
-              <th>Jatuh Tempo</th>
               <th>Nama Sales</th>
               <th style="width: 5%;">Aksi</th>
             </tr>

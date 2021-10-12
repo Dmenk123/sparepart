@@ -26,7 +26,7 @@ class Penjualan extends CI_Controller {
 		 * data passing ke halaman view content
 		 */
 		$data = array(
-			'title' => 'Invoice Penjualan',
+			'title' => 'Pengelolaan Daftar Penjualan',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role
 		);
@@ -57,24 +57,23 @@ class Penjualan extends CI_Controller {
 			$row = array();
 			//loop value tabel db
 			$row[] = $no;
-			$row[] = $invoice->order_id;
+			$row[] = DateTime::createFromFormat('Y-m-d H:i:s', $invoice->created_at)->format('d-m-Y');
 			$row[] = $invoice->no_faktur;
 			$row[] = $invoice->nama_toko;
 			$row[] = $invoice->alamat;
-			$row[] = $invoice->tgl_jatuh_tempo;
 			$row[] = $invoice->username;
 			
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_penjualan(\''.$invoice->order_id.'\')">
+						<button class="dropdown-item" onclick="edit_penjualan(\''.$invoice->no_faktur.'\')">
 							<i class="la la-pencil"></i> Edit Invoice
 						</button>
-						<button class="dropdown-item" onclick="delete_penjualan(\''.$invoice->order_id.'\')">
+						<button class="dropdown-item" onclick="delete_penjualan(\''.$invoice->no_faktur.'\')">
 							<i class="la la-trash"></i> Hapus
 						</button>
-						<button class="dropdown-item" onclick="cetak_invoice(\''.$invoice->order_id.'\')">
+						<button class="dropdown-item" onclick="cetak_invoice(\''.$invoice->no_faktur.'\')">
 							<i class="la la-trash"></i> Cetak
 						</button>
 			';
@@ -123,11 +122,6 @@ class Penjualan extends CI_Controller {
             $data['status'] = FALSE;
 		}
 
-		if ($this->input->post('tgl_jatuh_tempo') == '') {
-			$data['inputerror'][] = 'tgl_jatuh_tempo';
-            $data['error_string'][] = 'Wajib Mengisi Tgl Jatuh Tempo';
-            $data['status'] = FALSE;
-		}
 
         return $data;
 	}
@@ -354,11 +348,10 @@ class Penjualan extends CI_Controller {
 		$data_where     = array('id_barang'=> $id_barang);
 		$barang         = $this->m_global->getSelectedData('m_barang', $data_where)->row();
 		$qty            = $this->input->post('qty');
-		$diskon    = str_replace('%', '', $this->input->post('diskon'));
-		$diskon    = str_replace(',','.',$diskon);
-
-		$nilai     =($diskon/100)*$barang->harga;
-		$harga_diskon = $barang->harga - $nilai;
+		$diskon    		= str_replace('%', '', $this->input->post('diskon'));
+		$diskon    		= str_replace(',','.',$diskon);
+		$nilai     		= ($diskon/100)*$barang->harga;
+		$harga_diskon 	= $barang->harga - $nilai;
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;

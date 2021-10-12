@@ -58,7 +58,7 @@
     
         <form id="form-user" name="form-user">
             <div class="row">
-                <div class="form-group col-sm-4">
+                <div class="form-group col-sm-6">
                     <input type="hidden" class="form-control" id="id_agen" name="id_agen">
                     <input type="hidden" class="form-control" id="id_penjualan" name="id_penjualan"  value="<?php $value = (isset($id_penjualan))?$id_penjualan:''; echo $value; ?>">
                     <input type="hidden" class="form-control" id="mode" name="mode" value="<?php echo $mode;?>">
@@ -71,7 +71,7 @@
                         </select>
                     <span class="help-block"></span>
                 </div>
-                <div class="form-group col-sm-4">
+                <div class="form-group col-sm-6">
                     <label for="lbl_namabarang" class="form-control-label">Nama Sales :</label>
                         <select name="sales" id="sales" class="form-control select2">
                             <option value="0">-PILIH-</option>
@@ -81,11 +81,11 @@
                         </select>
                     <span class="help-block"></span>
                 </div>
-                <div class="form-group col-sm-4">
+                <!-- <div class="form-group col-sm-4">
                     <label for="lbl_hargabarang" class="form-control-label">Tgl Jatuh Tempo :</label>
                     <input type="text" class="form-control kt_datepicker" id="tgl_jatuh_tempo" name="tgl_jatuh_tempo" autocomplete="off" value="<?php $value = (isset($tgl_jatuh_tempo))?$tgl_jatuh_tempo:''; echo $value; ?>">
                     <span class="help-block"></span>
-                </div>
+                </div> -->
             </div>
          
           <div class="modal-footer">
