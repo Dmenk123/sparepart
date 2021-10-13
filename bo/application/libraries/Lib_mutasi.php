@@ -53,79 +53,82 @@ class Lib_mutasi extends CI_Controller {
          	{
 				### ambil last id pada t_stok_mutasi
 				// $id_stok_mutasi_det = d_stock_mutation::where('sm_item',$item)->where('sm_comp',$comp)->where('sm_position',$position)->max('sm_detailid')+$k+1;
-				$id_stok_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', ['id_stok_mutasi' => $getBarang[$k]->id_stok_mutasi, 'id_barang' => $id_barang]);
-					
-				$totalQty = $getBarang[$k]->sm_qty_sisa;                                  
+				$max_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', ['id_stok_mutasi' => $getBarang[$k]->id_stok_mutasi, 'id_barang' => $id_barang]);
+				$id_max_stok_mutasi_det = $max_mutasi_det->id_stok_mutasi_det + $k +1;
+
+				$totalQty = $getBarang[$k]->qty_sisa;                                  
             	
+				#### jika permintaan barang <= dari stok sisa tiap loop
 				if ($totalPermintaan <= $totalQty) {
-					$qty_used=$getBarang[$k]->sm_qty_used+$totalPermintaan;
-					$qty_sisa = $getBarang[$k]->sm_qty_sisa-$totalPermintaan;
+					$qty_pakai = $getBarang[$k]->qty_pakai + $totalPermintaan;
+					$qty_sisa = $getBarang[$k]->qty_sisa - $totalPermintaan;
 
-					$sm_stock=$getBarang[$k]->sm_stock;
-					$sm_detailid = $getBarang[$k]->sm_detailid;
+					$id_stok = $getBarang[$k]->id_stok;
+					$id_stok_mutasi_det = $getBarang[$k]->id_stok_mutasi_det;
 
-					$updateStokMutasi=d_stock_mutation::where('sm_stock',$sm_stock)
-							->where('sm_detailid',$sm_detailid);   
+					### update data t_stok_mutasi
+					$this->_ci->m_global->update('t_stok_mutasi', [
+						'qty_pakai' => $qty_pakai,
+						'qty_sisa' => $qty_sisa
+					], ['id_stok' => $id_stok, 'id_stok_mutasi_det' => $id_stok_mutasi_det, 'deleted_at' => null]);
+					
+					$newMutasi[$k]['id_stok'] = $getBarang[$k]->id_stok;
+					$newMutasi[$k]['id_stok_mutasi_det'] = $id_max_stok_mutasi_det; 
+					$newMutasi[$k]['tanggal'] = $tgl;
 
-					$updateStokMutasi->update([                                                             
-						'sm_qty_used'=>$qty_used,
-						'sm_qty_sisa'=>$qty_sisa
-					]);
+					// $newMutasi[$k]['sm_comp'] = $comp;
+					// $newMutasi[$k]['sm_position'] = $position;
+					// $newMutasi[$k]['sm_hpp'] = $hpp;
+					// $newMutasi[$k]['sm_reff'] = $sm_reff; 
 
-					$newMutasi[$k]['sm_stock'] = $getBarang[$k]->sm_stock;
-					$newMutasi[$k]['sm_detailid'] = $id_stok_mutasi_det; 
-					$newMutasi[$k]['sm_date'] = Carbon::now();
-					$newMutasi[$k]['sm_comp'] = $comp;
-					$newMutasi[$k]['sm_position'] = $position;
-					$newMutasi[$k]['sm_mutcat'] = $flag;
-					$newMutasi[$k]['sm_item'] = $item;
-					$newMutasi[$k]['sm_qty'] = -$totalPermintaan;
-					$newMutasi[$k]['sm_hpp'] = $getBarang[$k]->sm_hpp;
-					$newMutasi[$k]['sm_detail'] = 'PENGURANGAN';
-					$newMutasi[$k]['sm_reff'] = $sm_reff; 
-					$newMutasi[$k]['sm_insert'] = Carbon::now();              
+					$newMutasi[$k]['id_kategori_trans'] = $id_kategori_trans;
+					$newMutasi[$k]['id_barang'] = $id_barang;
+					$newMutasi[$k]['qty'] = -$totalPermintaan;
+					$newMutasi[$k]['keterangan'] = 'PENGURANGAN';
+					$newMutasi[$k]['created_at'] = $timestamp;              
 					$k = count($getBarang);
             	} 
+				#### jika permintaan barang > dari stok sisa tiap loop
+				#### update data stok mutasi dengan sisa value yg ada
 				elseif ($totalPermintaan > $totalQty) {
-					$qty_used=$getBarang[$k]->sm_qty_used+$totalQty;
-					$qty_sisa =$getBarang[$k]->sm_qty_sisa-$totalQty;                          
-					$sm_stock=$getBarang[$k]->sm_stock;
-					$sm_detailid = $getBarang[$k]->sm_detailid;
-								
-					$updateStokMutasi=d_stock_mutation::where('sm_stock',$sm_stock)
-							->where('sm_detailid',$sm_detailid);   
+					$qty_pakai = $getBarang[$k]->qty_pakai + $totalQty;
+					$qty_sisa = $getBarang[$k]->qty_sisa - $totalQty;
+					$id_stok = $getBarang[$k]->id_stok;
+					$id_stok_mutasi_det = $getBarang[$k]->id_stok_mutasi_det;
 
-					$updateStokMutasi->update([                                                             
-						'sm_qty_used'=>$qty_used,
-						'sm_qty_sisa'=>$qty_sisa
-					]);
+					### update data t_stok_mutasi
+					$this->_ci->m_global->update('t_stok_mutasi', [
+						'qty_pakai' => $qty_pakai,
+						'qty_sisa' => $qty_sisa
+					], ['id_stok' => $id_stok, 'id_stok_mutasi_det' => $id_stok_mutasi_det, 'deleted_at' => null]);
 
-					$newMutasi[$k]['sm_stock'] = $getBarang[$k]->sm_stock;
-					$newMutasi[$k]['sm_detailid'] = $sm_detailidInsert;
-					$newMutasi[$k]['sm_date'] = Carbon::now();
-					$newMutasi[$k]['sm_comp'] = $comp;
-					$newMutasi[$k]['sm_position'] = $position;
-					$newMutasi[$k]['sm_mutcat'] = $flag;
-					$newMutasi[$k]['sm_item'] = $item;
-					$newMutasi[$k]['sm_qty'] = -$totalQty;
-					$newMutasi[$k]['sm_hpp'] = $getBarang[$k]->sm_hpp;
-					$newMutasi[$k]['sm_detail'] = 'PENGURANGAN';
-					$newMutasi[$k]['sm_reff'] = $sm_reff; 
-					$newMutasi[$k]['sm_insert'] = Carbon::now();
+					$newMutasi[$k]['id_stok'] = $getBarang[$k]->id_stok;
+					$newMutasi[$k]['id_stok_mutasi_det'] = $id_max_stok_mutasi_det;
+					$newMutasi[$k]['tanggal'] = $tgl;
+
+					// $newMutasi[$k]['sm_comp'] = $comp;
+					// $newMutasi[$k]['sm_position'] = $position;
+					// $newMutasi[$k]['sm_hpp'] = $getBarang[$k]->sm_hpp;
+					// $newMutasi[$k]['sm_reff'] = $sm_reff; 
+					
+					$newMutasi[$k]['qty'] = -$totalQty;
+					$newMutasi[$k]['id_kategori_trans'] = $id_kategori_trans;
+					$newMutasi[$k]['id_barang'] = $id_barang;
+					$newMutasi[$k]['keterangan'] = 'PENGURANGAN';
+					$newMutasi[$k]['created_at'] = $timestamp;
 					$totalPermintaan = $totalPermintaan - $totalQty;
 				}
          	}
-			
+
+			// insert batch
+			DB::table('d_stock_mutation')->insert($newMutasi);
+			return true;
+
 		} catch (\Throwable $th) {
 			$this->_ci->db->trans_rollback();
 		}
-		
 
-		
-
-		
-
-		$select = "m.*, md.id_mutasi_det, md.id_barang, md.qty, md.harga, md.subtotal";
+		/* $select = "m.*, md.id_mutasi_det, md.id_barang, md.qty, md.harga, md.subtotal";
 		$join = [ 
 			['table' => 't_mutasi_det as md', 'on' => 'm.id_mutasi = md.id_mutasi'],
 		];
@@ -182,7 +185,7 @@ class Lib_mutasi extends CI_Controller {
 			}
 		}
 
-		return $retval;
+		return $retval; */
 	}
 
 	public function insert_data_det($datanya)
