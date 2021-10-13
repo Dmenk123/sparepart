@@ -371,6 +371,17 @@ class Penjualan extends CI_Controller {
 		];
 		
 		$insert = $this->m_global->save($data_order, 't_penjualan_det');
+
+		if($insert) {
+			$mutasi = $this->lib_mutasi->simpan_mutasi($id_barang, $qty, 2);
+			
+			if($mutasi === FALSE) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menambahkan Order';
+				return;
+			}
+		}
 		
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();

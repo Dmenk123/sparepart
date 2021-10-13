@@ -319,7 +319,8 @@ class Master_barang extends CI_Controller {
 			'lazada_link'		=> $this->input->post('lazada'),
 		];
 		
-		$insert = $this->m_barang->save($data_barang);
+		$id_insert = $this->m_barang->store_id($data_barang, 'm_barang');
+		$insert_stok = $this->m_global->save(['id_barang' => $id_insert, 'qty' => $stok, 'created_at' => $timestamp], 't_stok');
 		
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();

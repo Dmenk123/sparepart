@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 13/10/2021 01:47:57
+ Date: 14/10/2021 01:14:05
 */
 
 SET NAMES utf8mb4;
@@ -227,7 +227,7 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-10-12 22:30:43', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
+INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-10-14 00:13:09', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
 INSERT INTO `m_user` VALUES (2, 1, 'coba', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50', 'coba saja');
 INSERT INTO `m_user` VALUES (3, 6, 'alsyafin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00003', 'user_default.png', '2021-01-15 09:07:51', NULL, NULL, 'Alsuafinollah');
 INSERT INTO `m_user` VALUES (4, 6, 'zamroni', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00004', 'user_default.png', '2021-01-15 09:08:19', NULL, NULL, 'Moch Zamroni');
@@ -776,13 +776,14 @@ CREATE TABLE `t_penjualan`  (
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id_penjualan`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_penjualan
 -- ----------------------------
 INSERT INTO `t_penjualan` VALUES (1, 'J120012021', 3, 4, '2021-10-12 00:00:00', '2021-10-12 00:22:32', NULL, NULL);
 INSERT INTO `t_penjualan` VALUES (2, 'J120022021', 3, 3, '1970-01-01 07:00:00', '2021-10-12 23:21:34', NULL, NULL);
+INSERT INTO `t_penjualan` VALUES (3, 'J140012021', 3, 3, '1970-01-01 07:00:00', '2021-10-14 00:13:32', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_penjualan_det
@@ -798,11 +799,14 @@ CREATE TABLE `t_penjualan_det`  (
   `sub_total` float NULL DEFAULT NULL,
   `qty` int(32) NULL DEFAULT NULL,
   PRIMARY KEY (`id_penjualan_det`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 26 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_penjualan_det
 -- ----------------------------
+INSERT INTO `t_penjualan_det` VALUES (8, 3, 0, NULL, 0, 0, 0, 2);
+INSERT INTO `t_penjualan_det` VALUES (9, 3, 1, 15000, 15000, 0, 30000, 2);
+INSERT INTO `t_penjualan_det` VALUES (25, 3, 1, 15000, 15000, 0, 30000, 2);
 
 -- ----------------------------
 -- Table structure for t_provinsi
@@ -898,6 +902,7 @@ CREATE TABLE `t_stok`  (
   `id_barang` int(11) NOT NULL,
   `qty` int(11) NULL DEFAULT NULL,
   `qty_min` int(11) NULL DEFAULT NULL,
+  `id_gudang` int(64) NULL DEFAULT NULL,
   `created_at` datetime(0) NULL DEFAULT NULL,
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
@@ -908,38 +913,41 @@ CREATE TABLE `t_stok`  (
 -- ----------------------------
 -- Records of t_stok
 -- ----------------------------
-INSERT INTO `t_stok` VALUES (1, 1, 3, 0, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (2, 2, 4, 0, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (3, 3, 2, 0, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (4, 4, 5, 0, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (5, 7, 0, 0, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (6, 12, 0, 0, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (7, 15, 0, 0, '2021-10-12 23:09:23', NULL, NULL);
+INSERT INTO `t_stok` VALUES (1, 1, 1, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
+INSERT INTO `t_stok` VALUES (2, 2, 4, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
+INSERT INTO `t_stok` VALUES (3, 3, 2, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
+INSERT INTO `t_stok` VALUES (4, 4, 5, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
+INSERT INTO `t_stok` VALUES (5, 7, 0, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
+INSERT INTO `t_stok` VALUES (6, 12, 0, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
+INSERT INTO `t_stok` VALUES (7, 15, 0, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_stok_mutasi
 -- ----------------------------
 DROP TABLE IF EXISTS `t_stok_mutasi`;
 CREATE TABLE `t_stok_mutasi`  (
-  `id_stok_mutasi` int(64) NOT NULL,
+  `id_stok` int(64) NOT NULL,
   `id_stok_mutasi_det` int(64) NOT NULL,
   `id_barang` int(64) NULL DEFAULT NULL,
   `id_kategori_trans` int(64) NULL DEFAULT NULL,
-  `qty` int(64) NULL DEFAULT NULL,
-  `qty_sisa` int(64) NULL DEFAULT NULL,
-  `qty_expired` int(64) NULL DEFAULT NULL,
+  `qty` int(64) NULL DEFAULT 0,
+  `qty_pakai` int(64) NULL DEFAULT 0,
+  `qty_sisa` int(64) NULL DEFAULT 0,
+  `qty_expired` int(64) NULL DEFAULT 0,
   `harga` float(20, 2) NULL DEFAULT NULL,
   `tanggal` date NULL DEFAULT NULL,
   `keterangan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `created_at` datetime(0) NULL DEFAULT NULL,
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
-  PRIMARY KEY (`id_stok_mutasi`, `id_stok_mutasi_det`) USING BTREE
+  PRIMARY KEY (`id_stok`, `id_stok_mutasi_det`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_stok_mutasi
 -- ----------------------------
+INSERT INTO `t_stok_mutasi` VALUES (1, 1, 1, 2, 3, 2, 1, 0, 300000.00, '2021-10-14', NULL, NULL, NULL, NULL);
+INSERT INTO `t_stok_mutasi` VALUES (1, 2, 1, 2, -2, NULL, NULL, NULL, NULL, '2021-10-14', 'PENGURANGAN', '2021-10-14 01:11:31', NULL, NULL);
 
 -- ----------------------------
 -- Function structure for dm

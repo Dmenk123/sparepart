@@ -135,6 +135,11 @@ class M_barang extends CI_Model
 		return $this->db->insert($this->table, $data);	
 	}
 
+	function store_id($data,$table){
+        $this->db->insert($table,$data);
+        return $this->db->insert_id();
+    }
+
 	public function update($where, $data)
 	{
 		return $this->db->update($this->table, $data, $where);
