@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 14/10/2021 01:14:05
+ Date: 14/10/2021 23:41:23
 */
 
 SET NAMES utf8mb4;
@@ -45,6 +45,7 @@ INSERT INTO `m_agen` VALUES (2, 'PT. SANJAYA PRIMA', 'Jl. kaliurang sidoarjo', '
 DROP TABLE IF EXISTS `m_barang`;
 CREATE TABLE `m_barang`  (
   `id_barang` int(32) NOT NULL AUTO_INCREMENT,
+  `id_satuan` int(4) NULL DEFAULT NULL,
   `sku` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `nama` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `harga` float(20, 0) NULL DEFAULT NULL,
@@ -53,7 +54,37 @@ CREATE TABLE `m_barang`  (
   `created_at` datetime(0) NULL DEFAULT NULL,
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
-  `stok` int(32) NULL DEFAULT NULL COMMENT 'perhatian : ini stok awal barang, dilarang mengubah data ini ketika sudah di set',
+  `shopee_link` varchar(350) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `tokopedia_link` varchar(350) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `bukalapak_link` varchar(350) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `lazada_link` varchar(350) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `gambar_kedua` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `gambar_ketiga` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `gambar_keempat` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `deskripsi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
+  PRIMARY KEY (`id_barang`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of m_barang
+-- ----------------------------
+INSERT INTO `m_barang` VALUES (3, 1, 'SKU001', 'Handle Kuning', 10000, 'handle-kuning-sku001.jpg', 2, NULL, '2021-10-14 23:40:52', NULL, '', '', '', '', 'handle-kuning-sku001-2.jpg', 'user_default.png', 'user_default.png', NULL);
+
+-- ----------------------------
+-- Table structure for m_barang_copy1
+-- ----------------------------
+DROP TABLE IF EXISTS `m_barang_copy1`;
+CREATE TABLE `m_barang_copy1`  (
+  `id_barang` int(32) NOT NULL AUTO_INCREMENT,
+  `id_satuan` int(4) NULL DEFAULT NULL,
+  `sku` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `nama` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `harga` float(20, 0) NULL DEFAULT NULL,
+  `gambar` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `id_kategori` int(32) NULL DEFAULT NULL,
+  `created_at` datetime(0) NULL DEFAULT NULL,
+  `updated_at` datetime(0) NULL DEFAULT NULL,
+  `deleted_at` datetime(0) NULL DEFAULT NULL,
   `shopee_link` varchar(350) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `tokopedia_link` varchar(350) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `bukalapak_link` varchar(350) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
@@ -66,15 +97,32 @@ CREATE TABLE `m_barang`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Records of m_barang
+-- Records of m_barang_copy1
 -- ----------------------------
-INSERT INTO `m_barang` VALUES (1, 'SK001', 'Handle Break Rem', 15000, 'handle-break-rem-sk001.jpg', 1, '2020-12-10 09:47:13', '2021-02-12 23:37:17', NULL, 3, NULL, NULL, NULL, NULL, 'handle-break-rem-sk001-2.jpg', 'handle-break-rem-sk001-3.jpg', NULL, NULL);
-INSERT INTO `m_barang` VALUES (2, 'SK002', 'Knalpot Racing R5344', 350000, 'knalpot-racing-r5344-sk002.jpg', 1, NULL, '2021-02-12 23:38:59', NULL, 4, NULL, NULL, NULL, NULL, 'knalpot-racing-r5344-sk002-2.jpg', 'knalpot-racing-r5344-sk002-3.jpg', NULL, NULL);
-INSERT INTO `m_barang` VALUES (3, 'SK003', 'Stang Fitbar', 200000, 'stang-fitbar-sk003.jpg', 1, NULL, '2021-02-12 23:37:53', NULL, 2, NULL, NULL, NULL, NULL, 'stang-fitbar-sk003-2.jpg', 'stang-fitbar-sk003-3.jpg', NULL, NULL);
-INSERT INTO `m_barang` VALUES (4, 'SK004', 'Stang Protapper coba', 150000, 'stang-protapper-coba-sk004.jpg', 1, NULL, '2021-02-21 23:18:34', NULL, 5, NULL, NULL, NULL, NULL, 'stang-protapper-coba-sk004-2.jpg', 'stang-protapper-coba-sk004-3.jpg', NULL, 'Stang istimewa coba coba, ukuran 49 x 29 cm, Harga Terjangkau Warna Polkadot');
-INSERT INTO `m_barang` VALUES (7, 'SK005', 'Kaca Spion Racing', 35000, 'kaca-spion-racing-sk005.jpg', 2, NULL, '2021-02-12 23:40:14', NULL, 0, '', '', '', '', 'kaca-spion-racing-sk005-2.jpg', 'kaca-spion-racing-sk005-3.jpg', NULL, NULL);
-INSERT INTO `m_barang` VALUES (12, 'SK006', 'Piston Brt', 500000, 'piston-brt-sk006.jpg', 2, NULL, '2021-02-12 23:40:54', NULL, 0, '', '', '', '', 'piston-brt-sk006-2.jpg', 'piston-brt-sk006-3.jpg', NULL, NULL);
-INSERT INTO `m_barang` VALUES (15, 'SK007', 'Ban Motor Keren', 250000, 'ban-motor-keren-sk007.png', 2, NULL, '2021-02-12 23:41:18', NULL, 0, '', '', '', '', 'ban-motor-keren-sk007-2.jpg', 'ban-motor-keren-sk007-3.jpg', NULL, NULL);
+INSERT INTO `m_barang_copy1` VALUES (1, NULL, 'SK001', 'Handle Break Rem', 15000, 'handle-break-rem-sk001.jpg', 1, '2020-12-10 09:47:13', '2021-02-12 23:37:17', NULL, NULL, NULL, NULL, NULL, 'handle-break-rem-sk001-2.jpg', 'handle-break-rem-sk001-3.jpg', NULL, NULL);
+INSERT INTO `m_barang_copy1` VALUES (2, NULL, 'SK002', 'Knalpot Racing R5344', 350000, 'knalpot-racing-r5344-sk002.jpg', 1, NULL, '2021-02-12 23:38:59', NULL, NULL, NULL, NULL, NULL, 'knalpot-racing-r5344-sk002-2.jpg', 'knalpot-racing-r5344-sk002-3.jpg', NULL, NULL);
+INSERT INTO `m_barang_copy1` VALUES (3, NULL, 'SK003', 'Stang Fitbar', 200000, 'stang-fitbar-sk003.jpg', 1, NULL, '2021-02-12 23:37:53', NULL, NULL, NULL, NULL, NULL, 'stang-fitbar-sk003-2.jpg', 'stang-fitbar-sk003-3.jpg', NULL, NULL);
+INSERT INTO `m_barang_copy1` VALUES (4, NULL, 'SK004', 'Stang Protapper coba', 150000, 'stang-protapper-coba-sk004.jpg', 1, NULL, '2021-02-21 23:18:34', NULL, NULL, NULL, NULL, NULL, 'stang-protapper-coba-sk004-2.jpg', 'stang-protapper-coba-sk004-3.jpg', NULL, 'Stang istimewa coba coba, ukuran 49 x 29 cm, Harga Terjangkau Warna Polkadot');
+INSERT INTO `m_barang_copy1` VALUES (7, NULL, 'SK005', 'Kaca Spion Racing', 35000, 'kaca-spion-racing-sk005.jpg', 2, NULL, '2021-02-12 23:40:14', NULL, '', '', '', '', 'kaca-spion-racing-sk005-2.jpg', 'kaca-spion-racing-sk005-3.jpg', NULL, NULL);
+INSERT INTO `m_barang_copy1` VALUES (12, NULL, 'SK006', 'Piston Brt', 500000, 'piston-brt-sk006.jpg', 2, NULL, '2021-02-12 23:40:54', NULL, '', '', '', '', 'piston-brt-sk006-2.jpg', 'piston-brt-sk006-3.jpg', NULL, NULL);
+INSERT INTO `m_barang_copy1` VALUES (15, NULL, 'SK007', 'Ban Motor Keren', 250000, 'ban-motor-keren-sk007.png', 2, NULL, '2021-02-12 23:41:18', NULL, '', '', '', '', 'ban-motor-keren-sk007-2.jpg', 'ban-motor-keren-sk007-3.jpg', NULL, NULL);
+
+-- ----------------------------
+-- Table structure for m_gudang
+-- ----------------------------
+DROP TABLE IF EXISTS `m_gudang`;
+CREATE TABLE `m_gudang`  (
+  `id_gudang` int(4) NULL DEFAULT NULL,
+  `nama_gudang` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `created_at` datetime(0) NULL DEFAULT NULL,
+  `updated_at` datetime(0) NULL DEFAULT NULL,
+  `deleted_at` datetime(0) NULL DEFAULT NULL
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of m_gudang
+-- ----------------------------
+INSERT INTO `m_gudang` VALUES (1, 'Gudang Utama', '2021-10-14 22:42:35', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for m_kategori
@@ -205,6 +253,23 @@ INSERT INTO `m_role` VALUES (5, 'Staff Keuangan', 'Role Untuk Staff Keuangan', 1
 INSERT INTO `m_role` VALUES (6, 'Sales', 'Role Untuk Sales', 1);
 
 -- ----------------------------
+-- Table structure for m_satuan
+-- ----------------------------
+DROP TABLE IF EXISTS `m_satuan`;
+CREATE TABLE `m_satuan`  (
+  `id_satuan` int(4) NULL DEFAULT NULL,
+  `nama_satuan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `created_at` datetime(0) NULL DEFAULT NULL,
+  `updated_at` datetime(0) NULL DEFAULT NULL,
+  `deleted_at` datetime(0) NULL DEFAULT NULL
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of m_satuan
+-- ----------------------------
+INSERT INTO `m_satuan` VALUES (1, 'Pcs', '2021-10-14 23:13:21', NULL, NULL);
+
+-- ----------------------------
 -- Table structure for m_user
 -- ----------------------------
 DROP TABLE IF EXISTS `m_user`;
@@ -227,7 +292,7 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-10-14 00:13:09', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
+INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-10-14 22:32:16', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
 INSERT INTO `m_user` VALUES (2, 1, 'coba', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50', 'coba saja');
 INSERT INTO `m_user` VALUES (3, 6, 'alsyafin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00003', 'user_default.png', '2021-01-15 09:07:51', NULL, NULL, 'Alsuafinollah');
 INSERT INTO `m_user` VALUES (4, 6, 'zamroni', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00004', 'user_default.png', '2021-01-15 09:08:19', NULL, NULL, 'Moch Zamroni');
@@ -763,6 +828,24 @@ INSERT INTO `t_kota` VALUES ('9436', '94', 'KABUPATEN DEIYAI');
 INSERT INTO `t_kota` VALUES ('9471', '94', 'KOTA JAYAPURA');
 
 -- ----------------------------
+-- Table structure for t_log_harga_jual
+-- ----------------------------
+DROP TABLE IF EXISTS `t_log_harga_jual`;
+CREATE TABLE `t_log_harga_jual`  (
+  `id_log_harga_jual` int(64) NOT NULL AUTO_INCREMENT,
+  `id_barang` int(64) NULL DEFAULT NULL,
+  `harga_jual` float(20, 2) NULL DEFAULT NULL,
+  `tanggal` date NULL DEFAULT NULL,
+  `is_harga_awal` int(1) NULL DEFAULT NULL,
+  PRIMARY KEY (`id_log_harga_jual`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of t_log_harga_jual
+-- ----------------------------
+INSERT INTO `t_log_harga_jual` VALUES (1, 3, 10000.00, '2021-10-14', 1);
+
+-- ----------------------------
 -- Table structure for t_penjualan
 -- ----------------------------
 DROP TABLE IF EXISTS `t_penjualan`;
@@ -900,26 +983,19 @@ DROP TABLE IF EXISTS `t_stok`;
 CREATE TABLE `t_stok`  (
   `id_stok` int(64) NOT NULL AUTO_INCREMENT,
   `id_barang` int(11) NOT NULL,
+  `id_gudang` int(4) NULL DEFAULT NULL,
   `qty` int(11) NULL DEFAULT NULL,
   `qty_min` int(11) NULL DEFAULT NULL,
-  `id_gudang` int(64) NULL DEFAULT NULL,
   `created_at` datetime(0) NULL DEFAULT NULL,
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id_stok`) USING BTREE,
   INDEX `id_barang`(`id_barang`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_stok
 -- ----------------------------
-INSERT INTO `t_stok` VALUES (1, 1, 1, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (2, 2, 4, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (3, 3, 2, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (4, 4, 5, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (5, 7, 0, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (6, 12, 0, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
-INSERT INTO `t_stok` VALUES (7, 15, 0, 0, NULL, '2021-10-12 23:09:23', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_stok_mutasi
@@ -934,7 +1010,7 @@ CREATE TABLE `t_stok_mutasi`  (
   `qty_pakai` int(64) NULL DEFAULT 0,
   `qty_sisa` int(64) NULL DEFAULT 0,
   `qty_expired` int(64) NULL DEFAULT 0,
-  `harga` float(20, 2) NULL DEFAULT NULL,
+  `hpp` float(20, 2) NULL DEFAULT NULL,
   `tanggal` date NULL DEFAULT NULL,
   `keterangan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `created_at` datetime(0) NULL DEFAULT NULL,
@@ -946,8 +1022,6 @@ CREATE TABLE `t_stok_mutasi`  (
 -- ----------------------------
 -- Records of t_stok_mutasi
 -- ----------------------------
-INSERT INTO `t_stok_mutasi` VALUES (1, 1, 1, 2, 3, 2, 1, 0, 300000.00, '2021-10-14', NULL, NULL, NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (1, 2, 1, 2, -2, NULL, NULL, NULL, NULL, '2021-10-14', 'PENGURANGAN', '2021-10-14 01:11:31', NULL, NULL);
 
 -- ----------------------------
 -- Function structure for dm

@@ -9,8 +9,8 @@ class M_barang extends CI_Model
 		null, 
 		'm_barang.sku',
 		'm_barang.nama',
+		'm_barang.satuan',
 		'm_barang.harga',
-		'm_barang.stok',
 		'm_barang.id_kategori',
 		'm_kategori.nama_barang',
 		null
@@ -29,11 +29,13 @@ class M_barang extends CI_Model
 	{
 		$this->db->select('
 			m_barang.*,
-			m_kategori.nama_kategori
+			m_kategori.nama_kategori,
+			m_satuan.nama_satuan
 		');
 
 		$this->db->from('m_barang');
-		$this->db->join('m_kategori', 'm_barang.id_kategori=m_kategori.id_kategori');	
+		$this->db->join('m_kategori', 'm_barang.id_kategori=m_kategori.id_kategori');
+		$this->db->join('m_satuan', 'm_barang.id_satuan = m_satuan.id_satuan');	
 		$this->db->where('m_barang.deleted_at is null');
 		
 		$i = 0;

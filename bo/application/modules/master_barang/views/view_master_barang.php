@@ -38,9 +38,9 @@
               <th>Kode SKU</th>
               <th>Barcode</th>
               <th>Nama Barang</th>
-              <th>Harga</th>
+              <th>Satuan</th>
+              <th>Harga Jual</th>
               <th>Kategori</th>
-              <th>Stok</th>
               <th>Gambar</th>
               <th style="width: 5%;">Aksi</th>
             </tr>

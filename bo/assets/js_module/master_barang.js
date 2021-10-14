@@ -130,7 +130,7 @@ function edit_barang(id)
             $('[name="tokopedia"]').val(data.old_data.tokopedia_link);
             $('[name="bukalapak"]').val(data.old_data.bukalapak_link);
             $('[name="lazada"]').val(data.old_data.lazada_link);
-            $('[name="stok"]').val(data.old_data.stok);
+            $('[name="satuan"]').val(data.old_data.id_satuan);
             // $("#pegawai").val(data.old_data.id_pegawai).trigger("change");
             // if (data.foto_encoded != '') {
             //     $('#preview_img').attr('src', 'data:image/jpeg;base64,'+data.foto_encoded);

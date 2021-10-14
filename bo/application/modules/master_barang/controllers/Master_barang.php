@@ -45,6 +45,7 @@ class Master_barang extends CI_Controller {
 		];
 
 		$data['kategori'] = $this->m_global->getSelectedData('m_kategori', NULL);
+		$data['satuan'] = $this->m_global->getSelectedData('m_satuan', NULL);
 
 		$this->template_view->load_view($content, $data);
 	}
@@ -62,9 +63,9 @@ class Master_barang extends CI_Controller {
 			$row[] = $barang->sku;
 			$row[] = ' <img src='.base_url().'files/img/barcode/'.$barang->sku.'.jpg style="width:100px;" height="auto" class="center">';
 			$row[] = $barang->nama;
+			$row[] = $barang->nama_satuan;
 			$row[] = 'Rp '.number_format($barang->harga);
 			$row[] = $barang->nama_kategori;
-			$row[] = $barang->stok.' Pcs';
 			$row[] = ' <img src='.base_url().'files/img/barang_img/'.$barang->gambar.' style="width:60px;" height="auto" class="center">';
 			$str_aksi = '
 				<div class="btn-group">
@@ -173,6 +174,7 @@ class Master_barang extends CI_Controller {
 		$this->load->library('Enkripsi');
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tanggal = $obj_date->format('Y-m-d');
 		$arr_valid = $this->rule_validasi();
 		
 		$sku 	    = trim($this->input->post('sku'));
@@ -180,7 +182,7 @@ class Master_barang extends CI_Controller {
 		$harga 	    = trim($this->input->post('harga'));
 		$harga      = str_replace('.', '', $harga);
 		$kategori 	= $this->input->post('kategori');
-		$stok       = $this->input->post('stok');
+		$satuan       = $this->input->post('satuan');
 		$namafileseo = $this->seoUrl($nama.' '.$sku);
 		$namafileseo_2 = $this->seoUrl($nama.' '.$sku.'_2');
 		$namafileseo_3 = $this->seoUrl($nama.' '.$sku.'_3');
@@ -308,7 +310,7 @@ class Master_barang extends CI_Controller {
 			'nama' 				=> $nama,
 			'harga' 			=> $harga,
 			'id_kategori' 		=> $kategori,
-			'stok'      		=> $stok,
+			'id_satuan'      	=> $satuan,
 			'gambar'			=> $namafileseo,
 			'gambar_kedua' 		=> $namafileseo_2,
 			'gambar_ketiga' 	=> $namafileseo_3,
@@ -320,8 +322,8 @@ class Master_barang extends CI_Controller {
 		];
 		
 		$id_insert = $this->m_barang->store_id($data_barang, 'm_barang');
-		$insert_stok = $this->m_global->save(['id_barang' => $id_insert, 'qty' => $stok, 'created_at' => $timestamp], 't_stok');
-		
+		$insert_log_harga = $this->m_global->save(['id_barang' => $id_insert, 'harga_jual' => $harga, 'tanggal' => $tanggal, 'is_harga_awal' => 1], 't_log_harga_jual');
+
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
 			$retval['status'] = false;
@@ -343,12 +345,6 @@ class Master_barang extends CI_Controller {
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		
-		// if($this->input->post('skip_pass') != null){
-		// 	$skip_pass = true;
-		// }else{
-		// 	$skip_pass = false;
-		// }
-		
 		$arr_valid = $this->rule_validasi(true);
 
 		if ($arr_valid['status'] == FALSE) {
@@ -361,7 +357,7 @@ class Master_barang extends CI_Controller {
 		$harga    = str_replace('.', '', $harga);
 		$kategori = $this->input->post('kategori');
 		$sku      = $this->input->post('sku');
-		$stok     = $this->input->post('stok');
+		$satuan     = $this->input->post('satuan');
 		
 		$q = $this->m_barang->get_by_id($id_barang);
 		$namafileseo = $this->seoUrl($q->nama.' '.$sku);
@@ -483,7 +479,7 @@ class Master_barang extends CI_Controller {
 			'nama' => $nama,
 			'sku' => $sku,
 			'harga' => $harga,
-			'stok'  => $stok,
+			'id_satuan'  => $satuan,
 			'id_kategori' => $kategori,
 			'updated_at' => $timestamp
 		];
@@ -506,6 +502,11 @@ class Master_barang extends CI_Controller {
 
 		$where = ['id_barang' => $id_barang];
 		$update = $this->m_barang->update($where, $data_barang);
+
+		$cek_log_harga    = $this->m_global->getSelectedData('t_log_harga_jual', ['id_barang' => $id_barang])->row();
+		if ($cek_log_harga) {
+			$this->m_global->update('t_log_harga_jual', ['harga_jual' => $harga], ['id_barang' => $id_barang, 'is_harga_awal' => 1]);
+		}
 
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
@@ -596,6 +597,12 @@ class Master_barang extends CI_Controller {
 		if ($this->input->post('kategori') == '') {
 			$data['inputerror'][] = 'kategori';
             $data['error_string'][] = 'Wajib Mengisi Kategori';
+            $data['status'] = FALSE;
+		}
+
+		if ($this->input->post('satuan') == '') {
+			$data['inputerror'][] = 'satuan';
+            $data['error_string'][] = 'Wajib Mengisi satuan';
             $data['status'] = FALSE;
 		}
 

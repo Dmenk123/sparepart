@@ -39,8 +39,13 @@
               <span class="help-block"></span>
             </div>
             <div class="form-group col-sm-4">
-              <label for="lbl_kategori" class="form-control-label">Stok :</label>
-              <input type="number" class="form-control" id="stok" name="stok" autocomplete="off">
+              <label for="lbl_satuan" class="form-control-label">Satuan :</label>
+              <select name="satuan" id="satuan" class="form-control">
+                  <option value="">-PILIH-</option>
+                  <?php foreach($satuan->result() as $row):?>
+                      <option value="<?php echo $row->id_satuan;?>"><?php echo $row->nama_satuan;?></option>
+                  <?php endforeach;?>
+              </select>
               <span class="help-block"></span>
             </div>
           </div>
