@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 14/10/2021 23:41:23
+ Date: 17/10/2021 04:43:23
 */
 
 SET NAMES utf8mb4;
@@ -163,6 +163,7 @@ CREATE TABLE `m_kategori_transaksi`  (
 -- ----------------------------
 INSERT INTO `m_kategori_transaksi` VALUES (1, 'Pembelian', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL);
 INSERT INTO `m_kategori_transaksi` VALUES (2, 'Penjualan', 1, '2021-10-12 00:58:51', NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (3, 'Stok Awal', 1, '2021-10-12 00:58:51', NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for m_menu
@@ -292,7 +293,7 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-10-14 22:32:16', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
+INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-10-17 02:20:00', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
 INSERT INTO `m_user` VALUES (2, 1, 'coba', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50', 'coba saja');
 INSERT INTO `m_user` VALUES (3, 6, 'alsyafin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00003', 'user_default.png', '2021-01-15 09:07:51', NULL, NULL, 'Alsuafinollah');
 INSERT INTO `m_user` VALUES (4, 6, 'zamroni', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00004', 'user_default.png', '2021-01-15 09:08:19', NULL, NULL, 'Moch Zamroni');
@@ -859,7 +860,7 @@ CREATE TABLE `t_penjualan`  (
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id_penjualan`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_penjualan
@@ -867,6 +868,7 @@ CREATE TABLE `t_penjualan`  (
 INSERT INTO `t_penjualan` VALUES (1, 'J120012021', 3, 4, '2021-10-12 00:00:00', '2021-10-12 00:22:32', NULL, NULL);
 INSERT INTO `t_penjualan` VALUES (2, 'J120022021', 3, 3, '1970-01-01 07:00:00', '2021-10-12 23:21:34', NULL, NULL);
 INSERT INTO `t_penjualan` VALUES (3, 'J140012021', 3, 3, '1970-01-01 07:00:00', '2021-10-14 00:13:32', NULL, NULL);
+INSERT INTO `t_penjualan` VALUES (4, 'J160012021', 3, 3, '1970-01-01 07:00:00', '2021-10-16 12:24:08', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_penjualan_det
@@ -991,11 +993,12 @@ CREATE TABLE `t_stok`  (
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id_stok`) USING BTREE,
   INDEX `id_barang`(`id_barang`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_stok
 -- ----------------------------
+INSERT INTO `t_stok` VALUES (3, 3, 1, 20, 2, '2021-10-17 03:56:20', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_stok_mutasi
@@ -1006,11 +1009,13 @@ CREATE TABLE `t_stok_mutasi`  (
   `id_stok_mutasi_det` int(64) NOT NULL,
   `id_barang` int(64) NULL DEFAULT NULL,
   `id_kategori_trans` int(64) NULL DEFAULT NULL,
+  `id_gudang` int(64) NULL DEFAULT NULL,
   `qty` int(64) NULL DEFAULT 0,
   `qty_pakai` int(64) NULL DEFAULT 0,
   `qty_sisa` int(64) NULL DEFAULT 0,
   `qty_expired` int(64) NULL DEFAULT 0,
   `hpp` float(20, 2) NULL DEFAULT NULL,
+  `kode_reff` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `tanggal` date NULL DEFAULT NULL,
   `keterangan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `created_at` datetime(0) NULL DEFAULT NULL,
@@ -1022,6 +1027,7 @@ CREATE TABLE `t_stok_mutasi`  (
 -- ----------------------------
 -- Records of t_stok_mutasi
 -- ----------------------------
+INSERT INTO `t_stok_mutasi` VALUES (3, 1, 3, 3, 1, 10, 0, 10, 0, 6000.00, NULL, '2021-10-17', 'PENAMBAHAN', '2021-10-17 03:56:20', NULL, NULL);
 
 -- ----------------------------
 -- Function structure for dm
