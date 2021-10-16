@@ -23,6 +23,9 @@
         <div class="kt-portlet__head-toolbar">
           <div class="kt-portlet__head-wrapper">
             <div class="kt-portlet__head-actions row">
+              &nbsp;
+              <?= $this->template_view->getOpsiButton(); ?>
+              &nbsp;
               <div><?= $this->template_view->getAddButton(true, 'add_menu'); ?></div>
             </div>
           </div>

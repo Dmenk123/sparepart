@@ -407,4 +407,232 @@ class Master_pelanggan extends CI_Controller {
 		$data       = $this->m_global->getSelectedData('t_kota', $data_where)->result();
 		echo json_encode($data);
 	}
+
+	public function template_excel()
+	{
+		$file_url = base_url().'files/template_dokumen/template_master_pelanggan.xlsx';
+		header('Content-Type: application/octet-stream');
+		header("Content-Transfer-Encoding: Binary"); 
+		header("Content-disposition: attachment; filename=\"" . basename($file_url) . "\""); 
+		readfile($file_url); 
+	}
+
+	public function import_data_master()
+	{
+		$this->load->library('Enkripsi');
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+
+		$file_mimes = ['text/x-comma-separated-values', 'text/comma-separated-values', 'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv', 'text/x-csv', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.msexcel', 'text/plain', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+		$retval = [];
+
+		if(isset($_FILES['file_excel']['name']) && in_array($_FILES['file_excel']['type'], $file_mimes)) {
+			$arr_file = explode('.', $_FILES['file_excel']['name']);
+			$extension = end($arr_file);
+			if('csv' == $extension){
+				$reader = $this->excel->csv_reader_obj();
+			} else {
+				$reader = $this->excel->reader_obj();
+			}
+
+			$spreadsheet = $reader->load($_FILES['file_excel']['tmp_name']);
+			$sheetData = $spreadsheet->getActiveSheet()->toArray();
+			
+			for ($i=0; $i <count($sheetData); $i++) { 
+				
+				if ($sheetData[$i][0] == null || $sheetData[$i][1] == null || $sheetData[$i][2] == null || $sheetData[$i][3] == null) {
+					if($i == 0) {
+						$flag_kosongan = true;
+						$status_import = false;
+						$pesan = "Data Kosong...";
+					}else{
+						$flag_kosongan = false;
+						$status_import = true;
+						$pesan = "Data Sukses Di Import";
+					}
+
+					break;
+				}
+
+				$data['nama_pembeli'] = strtoupper(strtolower(trim($sheetData[$i][0])));
+				$data['alamat'] = strtolower(trim($sheetData[$i][1]));
+				$data['no_telp'] = strtolower(trim($sheetData[$i][2]));
+				$data['email'] = strtolower(trim($sheetData[$i][3]));
+				$data['nama_toko'] = strtolower(trim($sheetData[$i][4]));
+				$data['id_provinsi'] = strtolower(trim($sheetData[$i][5]));
+				$data['id_kota'] = strtolower(trim($sheetData[$i][6]));
+				$data['kecamatan'] = strtolower(trim($sheetData[$i][7]));
+				
+				#pegawai
+				// $id_pegawai = $this->m_user->get_id_pegawai_by_name(strtolower(trim($sheetData[$i][2])));
+				// if($id_pegawai){
+				// 	$data['id_pegawai'] = $id_pegawai->id;
+				// }else{
+					// if($i == 0) {
+					// 	continue;
+					// }else{
+					// 	$flag_kosongan = false;
+					// 	$status_import = false;
+					// 	$pesan = "Terjadi Kesalahan Dalam Penulisan Nama Pegawai, Mohon Cek Kembali";
+					// 	break;
+					// }
+				// }
+				#end pegawai
+
+				#role
+				$id_role = $this->m_user->get_id_role_by_name(strtolower(trim($sheetData[$i][3])));
+
+				// if($id_role){
+				// 	$data['id_role'] = $id_role->id;
+				// }else{
+					// if($i == 0) {
+					// 	continue;
+					// }else{
+					// 	$flag_kosongan = false;
+					// 	$status_import = false;
+					// 	$pesan = "Terjadi Kesalahan Dalam Penulisan Nama Role, Mohon Cek Kembali";
+					// 	break;
+					// }
+				// }
+				#end role
+
+				$data['created_at'] = $timestamp;
+				// $data['foto'] = 'user_default.png';
+				// $data['status'] = 1;
+				#default password 123456
+				// $data['password'] = $this->enkripsi->enc_dec('encrypt', '123456');
+
+				$retval[] = $data;
+
+				######## jika lancar sampai akhir beri flag sukses
+				if($i == (count($sheetData) - 1)) {
+					$flag_kosongan = false;
+					$status_import = true;
+					$pesan = "Data Sukses Di Import";
+				}
+			}
+
+			if($status_import) {
+				// var_dump(count($retval));exit;
+				## jika array maks cuma 1, maka batalkan (soalnya hanya header saja disana) ##
+				if(count($retval) <= 1) {
+					echo json_encode([
+						'status' => false,
+						'pesan'	=> 'Import dibatalkan, Data Kosong...'
+					]);
+
+					return;
+				}
+				
+				$this->db->trans_begin();
+				
+				#### truncate loh !!!!!!
+				// $this->m_pelanggan->trun_master_pelanggan();
+				
+				foreach ($retval as $keys => $vals) {
+					#### simpan
+					// $vals['id'] = $this->m_user->get_max_id_user();
+					$simpan = $this->m_pelanggan->save($vals);
+				}
+
+				if ($this->db->trans_status() === FALSE){
+					$this->db->trans_rollback();
+					$status = false;
+					$pesan = 'Gagal melakukan Import, cek ulang dalam melakukan pengisian data excel';
+				}else{
+					$this->db->trans_commit();
+					$status = true;
+					$pesan = 'Sukses Import data pelanggan';
+				}
+
+				echo json_encode([
+					'status' => $status,
+					'pesan'	=> $pesan
+				]);
+				
+			}else{
+				echo json_encode([
+					'status' => false,
+					'pesan'	=> $pesan
+				]);
+			}
+
+		}else{
+			echo json_encode([
+				'status' => false,
+				'pesan'	=> 'Terjadi Kesalahan dalam upload file. pastikan file adalah file excel .xlsx/.xls'
+			]);
+		}
+	}
+
+	public function export_excel()
+	{
+		$select = "m_pelanggan.*";
+		$where = ['m_pelanggan.deleted_at' => null];
+		$table = 'm_pelanggan';
+		// $join = [ 
+		// 	[
+		// 		'table' => 'm_pegawai',
+		// 		'on'	=> 'm_user.id_pegawai = m_pegawai.id'
+		// 	],
+		// 	[
+		// 		'table' => 'm_role',
+		// 		'on'	=> 'm_user.id_role = m_role.id'
+		// 	]
+		// ];
+
+		$data = $this->m_global->multi_row($select, $where, $table);
+		
+		$spreadsheet = $this->excel->spreadsheet_obj();
+		$writer = $this->excel->xlsx_obj($spreadsheet);
+		$number_format_obj = $this->excel->number_format_obj();
+		
+		$spreadsheet
+			->getActiveSheet()
+			->getStyle('A1:E1000')
+			->getNumberFormat()
+			->setFormatCode($number_format_obj::FORMAT_TEXT);
+		
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$sheet
+			->setCellValue('A1', 'Nama')
+			->setCellValue('B1', 'Alamat')
+			->setCellValue('C1', 'Telepon')
+			->setCellValue('D1', 'Email')
+			->setCellValue('E1', 'Nama toko')
+			->setCellValue('F1', 'Id Provinsi')
+			->setCellValue('G1', 'Id Kota')
+			->setCellValue('H1', 'Kecamatan');
+		
+		$startRow = 2;
+		$row = $startRow;
+		if($data){
+			foreach ($data as $key => $val) {
+			
+				$sheet
+					->setCellValue("A{$row}", $val->nama_pembeli)
+					->setCellValue("B{$row}", $val->alamat)
+					->setCellValue("C{$row}", $val->no_telp)
+					->setCellValue("D{$row}", $val->email)
+					->setCellValue("E{$row}", $val->nama_toko)
+					->setCellValue("F{$row}", $val->id_provinsi)
+					->setCellValue("G{$row}", $val->id_kota)
+					->setCellValue("H{$row}", $val->kecamatan);
+				$row++;
+			}
+
+			$endRow = $row - 1;
+		}
+		
+		
+		$filename = 'master-pelanggan-'.time();
+		
+		header('Content-Type: application/vnd.ms-excel');
+		header('Content-Disposition: attachment;filename="'. $filename .'.xlsx"'); 
+		header('Cache-Control: max-age=0');
+
+		$writer->save('php://output');
+		
+	}
 }
