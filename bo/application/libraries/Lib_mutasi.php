@@ -347,16 +347,18 @@ class Lib_mutasi extends CI_Controller {
 				$id_stok = $this->_ci->t_stok->store_id($arr_ins_stok, 't_stok');
 
 			}else{
+
+				$id_stok = $data_stok->id_stok;
 				### update tabel d_stock
 				$qty = $data_stok->qty + $totalPermintaan;            
 				### update data t_stok
 				$this->_ci->m_global->update('t_stok', ['qty' => $qty], ['id_barang' => $id_barang, 'id_gudang' => $id_gudang, 'deleted_at' => null]);
 			}
 
-			$max_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', ['id_stok_mutasi' => $data_stok->id_stok]);
+			$max_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', ['id_stok_mutasi' => $id_stok]);
 			$id_max_stok_mutasi_det = $max_mutasi_det->id_stok_mutasi_det +1;
 
-			$newMutasi['id_stok'] = $data_stok->id_stok;
+			$newMutasi['id_stok'] = $id_stok;
 			$newMutasi['id_stok_mutasi_det'] = $id_max_stok_mutasi_det; 
 			$newMutasi['tanggal'] = $tgl;
 			$newMutasi['hpp'] = $hpp;
@@ -374,7 +376,7 @@ class Lib_mutasi extends CI_Controller {
 
 			$totalHpp = $hpp * $totalPermintaan;
 				
-			$id_stok = $this->_ci->m_global->save($newMutasi, 't_stok_mutasi');
+			$this->_ci->m_global->save($newMutasi, 't_stok_mutasi');
 
 			if ($this->_ci->db->trans_status() === FALSE) {
 				$this->_ci->db->trans_rollback();
@@ -403,7 +405,6 @@ class Lib_mutasi extends CI_Controller {
 	 * id_gudang = optional (jika terdapat multi gudang)
 	 * kode_ref = kode referal transaksi
 	 */
-	// public static function perbaruiMutasiMasuk($comp, $position, $item, $totalPermintaan, $sm_detail, $mutcat, $sm_reff, $hpp)
 	public function perbaruiMutasiMasuk(
 		$id_barang, 
 		$totalPermintaan, 
@@ -439,11 +440,22 @@ class Lib_mutasi extends CI_Controller {
 				'qty >' => 0,  
 				'deleted_at' => null
 			], 't_stok_mutasi');
-
-			$qty = $data_stok->qty + $totalPermintaan;
+			
+			$qty = $totalPermintaan;
 
 			### update data t_stok
-			$this->_ci->m_global->update('t_stok', ['qty' => $qty], ['id_barang' => $id_barang, 'id_gudang' => $id_gudang, 'deleted_at' => null]);
+			$this->_ci->m_global->update('t_stok', [
+				'id_barang' 	=> $id_barang,
+				'id_gudang' 	=> $id_gudang,
+				'qty' 			=> $qty,
+				'qty_min' 		=> $totalPermintaanMin,
+				'updated_at'	=> $timestamp
+			], 
+			[
+				'id_barang' => $id_barang, 
+				'id_gudang' => $id_gudang, 
+				'deleted_at' => null
+			]);
 
 			### update data t_stok_mutasi
 			$this->_ci->m_global->update('t_stok_mutasi', [
@@ -454,6 +466,7 @@ class Lib_mutasi extends CI_Controller {
 				'id_barang' => $id_barang, 
 				'id_gudang' => $id_gudang, 
 				'kode_reff' => $kode_reff,
+				'id_kategori_trans' => $id_kategori_trans,
 				'qty >' => 0,  
 				'deleted_at' => null
 			]);
@@ -477,19 +490,80 @@ class Lib_mutasi extends CI_Controller {
 		}
 	}
 	
-	// public static function hapusMutasiMasuk($comp, $position, $item, $permintaan, $sm_reff)
-	// {
-	// 	return DB::transaction(function () use ($comp, $position, $item, $permintaan, $sm_reff) {
-	// 		$totalHpp = 0;
-	// 		$updateStock = d_stock::where('s_item', $item)->where('s_comp', $comp)->where('s_position', $position);
-	// 		$qty = $updateStock->first()->s_qty - $permintaan;
-	// 		$updateStock->update([
-	// 			's_qty' => $qty
-	// 		]);
-	// 		$d_stock_mutation = d_stock_mutation::where('sm_reff', $sm_reff)->where('sm_item', $item)->where('sm_qty', $permintaan);
-	// 		$d_stock_mutation->delete();
-	// 		$data = ['true' => true, 'totalHpp' => $totalHpp];
-	// 		return $data;
-	// 	});
-	// }
+	public function hapusMutasiMasuk(
+		$id_barang, 
+		$totalPermintaan, 
+		$id_kategori_trans, 
+		$tanggal = null, 
+		$id_gudang, 
+		$kode_reff
+	)
+	{
+		try {
+			$this->_ci->db->trans_begin();
+
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			
+			if($tanggal) {
+				$tgl = $tanggal;
+			}else{
+				$tgl = $obj_date->format('Y-m-d');
+			}
+
+			$totalHpp = '';
+			#### ambil data dari t_stok
+			$data_stok = $this->_ci->m_global->single_row('*', ['id_barang' => $id_barang, 'id_gudang' => $id_gudang, 'deleted_at' => null], 't_stok');
+
+			#### ambil data t_stok_mutasi 
+			$data_stok_mutasi = $this->_ci->m_global->single_row('*', [
+				'id_barang' => $id_barang, 
+				'id_gudang' => $id_gudang, 
+				'kode_reff' => $kode_reff,
+				'id_kategori_trans' => $id_kategori_trans,
+				'qty >' => 0,  
+				'deleted_at' => null
+			], 't_stok_mutasi');
+
+			$qty = $data_stok->qty - $totalPermintaan;
+
+			### update data t_stok
+			$this->_ci->m_global->update('t_stok', [
+				'id_barang' 	=> $id_barang,
+				'id_gudang' 	=> $id_gudang,
+				'qty' 			=> $qty,
+				'updated_at'	=> $timestamp
+			], 
+			[
+				'id_barang' => $id_barang, 
+				'id_gudang' => $id_gudang, 
+				'deleted_at' => null
+			]);
+
+			### delete t_stok_mutasi
+			$this->_ci->m_global->delete([
+				'id_barang' => $id_barang, 
+				'id_gudang' => $id_gudang, 
+				'kode_reff' => $kode_reff,
+				'id_kategori_trans' => $id_kategori_trans,
+				'qty >' => 0,  
+				'deleted_at' => null
+			], 't_stok_mutasi');
+
+			if ($this->_ci->db->trans_status() === FALSE) {
+				$this->_ci->db->trans_rollback();
+				$retval = ['status' => false];		
+			} 
+			else {
+				$this->_ci->db->trans_commit();
+				$retval = ['status' => true];		
+			}
+
+			return $retval;
+		} catch (\Throwable $th) {
+			$this->_ci->db->trans_rollback();
+			$retval = ['status' => false, 'pesan' => $th];		
+			return $retval;
+		}
+	}
 }

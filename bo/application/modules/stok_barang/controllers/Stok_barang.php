@@ -178,16 +178,6 @@ class Stok_barang extends CI_Controller {
 
 			$this->db->trans_begin();
 
-			$data_stok = [
-				'id_barang' 	=> $id_barang,
-				'id_gudang' 	=> $id_gudang,
-				'qty' 			=> $qty,
-				'qty_min' 		=> $qty_min,
-				'created_at'	=> $timestamp
-			];
-			
-			$id_stok = $this->t_stok->store_id($data_stok, 't_stok');
-
 			$mutasi = $this->lib_mutasi->mutasiMasuk(
 				$id_barang, 
 				$qty, 
@@ -215,207 +205,108 @@ class Stok_barang extends CI_Controller {
 			$this->db->trans_rollback();
 			$retval['status'] = false;
 			$retval['pesan'] = $th;
+			echo json_encode($retval);
 		}
 	}
 
-	public function update_data_barang()
+	public function update_stok_barang()
 	{
-		$sesi_id_user = $this->session->userdata('id_user'); 
-		$id_barang = $this->input->post('id_barang');
-		$this->load->library('Enkripsi');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		
-		$arr_valid = $this->rule_validasi(true);
+		try {
+			$sesi_id_user = $this->session->userdata('id_user'); 
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			$tanggal = $obj_date->format('Y-m-d');
+			$arr_valid = $this->rule_validasi();
 
-		if ($arr_valid['status'] == FALSE) {
-			echo json_encode($arr_valid);
-			return;
-		}
+			$id_stok = $this->input->post('id_stok');
+			$id_barang 	    = trim($this->input->post('id_barang'));
+			$id_gudang 	    = trim($this->input->post('id_gudang'));
+			$qty 	    	= (int)$this->input->post('sawal');
+			$qty_min 	    = (int)$this->input->post('smin');
 
-		$nama = $this->input->post('nama');
-		$harga = $this->input->post('harga');
-		$harga    = str_replace('.', '', $harga);
-		$kategori = $this->input->post('kategori');
-		$sku      = $this->input->post('sku');
-		$satuan     = $this->input->post('satuan');
-		
-		$q = $this->m_barang->get_by_id($id_barang);
-		$namafileseo = $this->seoUrl($q->nama.' '.$sku);
-		$namafileseo_2 = $this->seoUrl($q->nama.' '.$sku.'_2');
-		$namafileseo_3 = $this->seoUrl($q->nama.' '.$sku.'_3');
-		$namafileseo_4 = $this->seoUrl($q->nama.' '.$sku.'_4');
-		
-		$this->db->trans_begin();
+			$hpp 	  = trim($this->input->post('hpp'));
+			$hpp      = str_replace('.', '', $hpp);
 
-		$data_where = array('sku' => $sku);
-		$cek_sku    = $this->m_global->getSelectedData('m_barang', $data_where)->row();
-
-		if (empty($cek_sku)) {
-			$this->barcode_scanner($sku);
-		}
-
-		$file_mimes = ['image/png', 'image/x-citrix-png', 'image/x-png', 'image/x-citrix-jpeg', 'image/jpeg', 'image/pjpeg'];
-
-		if(isset($_FILES['foto']['name']) && in_array($_FILES['foto']['type'], $file_mimes)) {
-			$this->konfigurasi_upload_img($namafileseo);
-			//get detail extension
-			$pathDet = $_FILES['foto']['name'];
-			$extDet = pathinfo($pathDet, PATHINFO_EXTENSION);
-			
-			if ($this->file_obj->do_upload('foto')) 
-			{
-				$gbrBukti = $this->file_obj->data();
-				$nama_file_foto = $gbrBukti['file_name'];
-				$this->konfigurasi_image_resize($nama_file_foto);
-				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti);
-				$this->image_lib->clear();
-				## replace nama file + ext
-				$namafileseo = $this->seoUrl($q->nama.' '.$sku).'.'.$extDet;
-				$foto = $namafileseo;
-			} else {
-				$error = array('error' => $this->file_obj->display_errors());
-				var_dump($error);exit;
+			if ($arr_valid['status'] == FALSE) {
+				echo json_encode($arr_valid);
+				return;
 			}
-		}else{
-			$foto = null;
-		}
 
-		if(isset($_FILES['foto_kedua']['name']) && in_array($_FILES['foto_kedua']['type'], $file_mimes)) {
-			$namafileseo_2 = $namafileseo_2;
-			// var_dump($namafileseo_2); die();
-			$this->konfigurasi_upload_img($namafileseo_2);
-			//get detail extension
-			$pathDet = $_FILES['foto_kedua']['name'];
-			$extDet = pathinfo($pathDet, PATHINFO_EXTENSION);
-			
-			if ($this->file_obj->do_upload('foto_kedua')) 
-			{
+			$this->db->trans_begin();
 
-				$gbrBukti = $this->file_obj->data();
-				$nama_file_foto = $gbrBukti['file_name'];
-				$this->konfigurasi_image_resize($nama_file_foto, 2);
-				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 2);
-				$this->image_lib->clear();
-				## replace nama file + ext
-				$namafileseo_2 = $this->seoUrl($namafileseo_2).'.'.$extDet;
-			} else {
-				$error = array('error' => $this->file_obj->display_errors());
+			$mutasi = $this->lib_mutasi->perbaruiMutasiMasuk(
+				$id_barang, 
+				$qty, 
+				$qty_min, 
+				3, 
+				null, 
+				$hpp, 
+				$id_gudang, 
+				'STOK AWAL'
+			);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal update stok barang';
+			}else{
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses update stok barang';
 			}
-		}else{
-			$namafileseo_2 = null;
-		}
 
-		if(isset($_FILES['foto_ketiga']['name']) && in_array($_FILES['foto_ketiga']['type'], $file_mimes)) {
-			$namafileseo_3 = $namafileseo_3;
-			// var_dump($namafileseo_2); die();
-			$this->konfigurasi_upload_img($namafileseo_3);
-			//get detail extension
-			$pathDet = $_FILES['foto_ketiga']['name'];
-			$extDet = pathinfo($pathDet, PATHINFO_EXTENSION);
-			
-			if ($this->file_obj->do_upload('foto_ketiga')) 
-			{
+			echo json_encode($retval);
 
-				$gbrBukti = $this->file_obj->data();
-				$nama_file_foto = $gbrBukti['file_name'];
-				$this->konfigurasi_image_resize($nama_file_foto, 3);
-				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 3);
-				$this->image_lib->clear();
-				## replace nama file + ext
-				$namafileseo_3 = $this->seoUrl($namafileseo_3).'.'.$extDet;
-			} else {
-				$error = array('error' => $this->file_obj->display_errors());
-			}
-		}else{
-			$namafileseo_3 = null;
-		}
-
-		if(isset($_FILES['foto_keempat']['name']) && in_array($_FILES['foto_keempat']['type'], $file_mimes)) {
-			$namafileseo_4 = $namafileseo_4;
-			// var_dump($namafileseo_2); die();
-			$this->konfigurasi_upload_img($namafileseo_4);
-			//get detail extension
-			$pathDet = $_FILES['foto_keempat']['name'];
-			$extDet = pathinfo($pathDet, PATHINFO_EXTENSION);
-			
-			if ($this->file_obj->do_upload('foto_keempat')) 
-			{
-
-				$gbrBukti = $this->file_obj->data();
-				$nama_file_foto = $gbrBukti['file_name'];
-				$this->konfigurasi_image_resize($nama_file_foto, 4);
-				$output_thumb = $this->konfigurasi_image_thumb($nama_file_foto, $gbrBukti, 4);
-				$this->image_lib->clear();
-				## replace nama file + ext
-				$namafileseo_4 = $this->seoUrl($namafileseo_4).'.'.$extDet;
-			} else {
-				$error = array('error' => $this->file_obj->display_errors());
-			}
-		}else{
-			$namafileseo_4 = null;
-		}
-
-		$data_barang = [
-			'nama' => $nama,
-			'sku' => $sku,
-			'harga' => $harga,
-			'id_satuan'  => $satuan,
-			'id_kategori' => $kategori,
-			'updated_at' => $timestamp
-		];
-		
-		if($foto != null) {
-			$data_barang['gambar'] = $foto;
-		}
-
-		if ($namafileseo_2 != NULL) {
-			$data_barang['gambar_kedua'] = $namafileseo_2;
-		}
-
-		if ($namafileseo_3 != NULL) {
-			$data_barang['gambar_ketiga'] = $namafileseo_3;
-		}
-
-		if ($namafileseo_4 != NULL) {
-			$data_barang['gambar_keempat'] = $namafileseo_4;
-		}
-
-		$where = ['id_barang' => $id_barang];
-		$update = $this->m_barang->update($where, $data_barang);
-
-		$cek_log_harga    = $this->m_global->getSelectedData('t_log_harga_jual', ['id_barang' => $id_barang])->row();
-		if ($cek_log_harga) {
-			$this->m_global->update('t_log_harga_jual', ['harga_jual' => $harga], ['id_barang' => $id_barang, 'is_harga_awal' => 1]);
-		}
-
-		if ($this->db->trans_status() === FALSE){
+		} catch (\Throwable $th) {
 			$this->db->trans_rollback();
-			$data['status'] = false;
-			$data['pesan'] = 'Gagal update Master Barang';
-		}else{
-			$this->db->trans_commit();
-			$data['status'] = true;
-			$data['pesan'] = 'Sukses update Master Barang';
+			$retval['status'] = false;
+			$retval['pesan'] = $th;
+			echo json_encode($retval);
 		}
-		
-		echo json_encode($data);
 	}
 
 	/**
 	 * Hanya melakukan softdelete saja
 	 * isi kolom updated_at dengan datetime now()
 	 */
-	public function delete_barang()
+	public function delete_stok()
 	{
-		$id_barang = $this->input->post('id');
-		$del = $this->m_barang->softdelete_by_id($id_barang);
-		if($del) {
-			$retval['status'] = TRUE;
-			$retval['pesan'] = 'Data Master Barang berhasil dihapus';
-		}else{
-			$retval['status'] = FALSE;
-			$retval['pesan'] = 'Data Master Barang berhasil dihapus';
+		try {
+			$this->db->trans_begin();
+			$id_stok = $this->input->post('id');
+			$data_stok = $this->m_global->getSelectedData('t_stok', ['id_stok' => $id_stok])->row();
+
+			if(!$data_stok) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Data stok tidak ditemukan';
+				echo json_encode($retval);
+				return;
+			}
+
+			$mutasi = $this->lib_mutasi->hapusMutasiMasuk(
+				$data_stok->id_barang, 
+				$data_stok->qty, 
+				3, 
+				null, 
+				$data_stok->id_gudang, 
+				'STOK AWAL'
+			);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal hapus stok barang';
+			}else{
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses hapus stok barang';
+			}
+
+		} catch (\Throwable $th) {
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = $th;
 		}
 
 		echo json_encode($retval);
