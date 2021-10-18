@@ -530,7 +530,7 @@ $(document).ready(function(){
             type: 'POST',
             data: reg,
             dataType: 'json',
-            url: base_url + 'penjualan/save_order',
+            url: base_url + 'pembelian/save_pembelian',
             success: function(data)
             {
                 swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');

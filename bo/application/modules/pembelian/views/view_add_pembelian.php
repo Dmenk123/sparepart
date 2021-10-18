@@ -102,7 +102,7 @@
               </div>
               <div class="form-group col-sm-2">
                   <label for="lbl_hargabarang" class="form-control-label">Diskon :</label>
-                  <input type="text" class="form-control percent" id="dis" name="diskon" value="0" autocomplete="off">
+                  <input type="text" class="form-control percent" id="dis" name="dis" value="0" autocomplete="off">
                   <span class="help-block"></span>
               </div>
 

@@ -171,30 +171,34 @@ class Pembelian extends CI_Controller {
 	}
 
 	// ===============================================
-	private function rule_validasi_order($is_update=false, $skip_pass=false)
+	private function rule_validasi_pembelian($is_update=false, $skip_pass=false)
 	{
 		$data = array();
 		$data['error_string'] = array();
 		$data['inputerror'] = array();
 		$data['status'] = TRUE;
 
-		
-		
-		// if ($this->input->post('icon_menu') == '') {
-		// 	$data['inputerror'][] = 'icon_menu';
-		//     $data['error_string'][] = 'Wajib mengisi icon menu';
-		//     $data['status'] = FALSE;
-		// }
-
 		if ($this->input->post('id_barang') == '') {
 			$data['inputerror'][] = 'id_barang';
-			$data['error_string'][] = 'Wajib Memilih Barang yang akan diorder';
+			$data['error_string'][] = 'Wajib Memilih Barang';
 			$data['status'] = FALSE;
 		}
 
 		if ($this->input->post('qty') == '') {
 			$data['inputerror'][] = 'qty';
-			$data['error_string'][] = 'Wajib Menginputkan Jumlag Quantity';
+			$data['error_string'][] = 'Wajib Menginputkan qty';
+			$data['status'] = FALSE;
+		}
+
+		// if ($this->input->post('dis') == '') {
+		// 	$data['inputerror'][] = 'dis';
+		// 	$data['error_string'][] = 'Wajib Menginputkan diskon';
+		// 	$data['status'] = FALSE;
+		// }
+
+		if ($this->input->post('hsat') == '') {
+			$data['inputerror'][] = 'hsat';
+			$data['error_string'][] = 'Wajib Menginputkan satuan';
 			$data['status'] = FALSE;
 		}
 
@@ -327,22 +331,32 @@ class Pembelian extends CI_Controller {
 	}
 	
 
-	public function save_order()
+	public function save_pembelian()
 	{
 		$this->load->library('Enkripsi');
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$arr_valid = $this->rule_validasi_order();
+		$arr_valid = $this->rule_validasi_pembelian();
 		
-		$id_penjualan 	= $this->input->post('id_penjualan');
+		$id_pembelian 	= $this->input->post('id_pembelian');
 		$id_barang      = $this->input->post('id_barang');
-		$data_where     = array('id_barang'=> $id_barang);
-		$barang         = $this->m_global->getSelectedData('m_barang', $data_where)->row();
+		$id_agen      = $this->input->post('id_agen');
 		$qty            = $this->input->post('qty');
-		$diskon    		= str_replace('%', '', $this->input->post('diskon'));
+
+		$harga 	    	= trim($this->input->post('hsat'));
+		$harga      	= str_replace('.', '', $harga);
+		
+		$diskon    		= str_replace('%', '', $this->input->post('dis'));
 		$diskon    		= str_replace(',','.',$diskon);
-		$nilai     		= ($diskon/100)*$barang->harga;
-		$harga_diskon 	= $barang->harga - $nilai;
+		
+		if($diskon > 0) {
+			$nilai = ($diskon/100) * $harga;
+		}else{
+			$nilai = 0;
+		}
+		
+		$harga_satuan 	= $harga - $nilai;
+
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
