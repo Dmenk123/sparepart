@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 17/10/2021 04:43:23
+ Date: 19/10/2021 06:19:18
 */
 
 SET NAMES utf8mb4;
@@ -293,7 +293,7 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-10-17 02:20:00', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
+INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-10-19 05:41:19', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
 INSERT INTO `m_user` VALUES (2, 1, 'coba', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50', 'coba saja');
 INSERT INTO `m_user` VALUES (3, 6, 'alsyafin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00003', 'user_default.png', '2021-01-15 09:07:51', NULL, NULL, 'Alsuafinollah');
 INSERT INTO `m_user` VALUES (4, 6, 'zamroni', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00004', 'user_default.png', '2021-01-15 09:08:19', NULL, NULL, 'Moch Zamroni');
@@ -847,6 +847,55 @@ CREATE TABLE `t_log_harga_jual`  (
 INSERT INTO `t_log_harga_jual` VALUES (1, 3, 10000.00, '2021-10-14', 1);
 
 -- ----------------------------
+-- Table structure for t_pembelian
+-- ----------------------------
+DROP TABLE IF EXISTS `t_pembelian`;
+CREATE TABLE `t_pembelian`  (
+  `id_pembelian` int(32) NOT NULL,
+  `kode_pembelian` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `id_agen` int(32) NULL DEFAULT NULL,
+  `id_user` int(11) NULL DEFAULT NULL,
+  `tanggal` date NULL DEFAULT NULL,
+  `total_pembelian` float(20, 2) NULL DEFAULT NULL,
+  `total_disc` float(20, 2) NULL DEFAULT NULL,
+  `is_terima_all` int(1) NULL DEFAULT NULL COMMENT '1: jika det sudah diterima semua, null jika ada yg belum',
+  `created_at` datetime(0) NULL DEFAULT NULL,
+  `updated_at` datetime(0) NULL DEFAULT NULL,
+  `deleted_at` datetime(0) NULL DEFAULT NULL,
+  PRIMARY KEY (`id_pembelian`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of t_pembelian
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for t_pembelian_det
+-- ----------------------------
+DROP TABLE IF EXISTS `t_pembelian_det`;
+CREATE TABLE `t_pembelian_det`  (
+  `id_pembelian_det` int(32) NULL DEFAULT NULL,
+  `id_pembelian` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `id_barang` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `qty` int(11) NULL DEFAULT NULL,
+  `harga` float(20, 2) NULL DEFAULT NULL,
+  `disc` float(20, 2) NULL DEFAULT NULL,
+  `disc_persen` float(20, 2) NULL DEFAULT NULL,
+  `harga_fix` float(20, 2) NULL DEFAULT NULL,
+  `harga_total_fix` float(20, 2) NULL DEFAULT NULL,
+  `created_at` datetime(0) NULL DEFAULT NULL,
+  `updated_at` datetime(0) NULL DEFAULT NULL,
+  `deleted_at` datetime(0) NULL DEFAULT NULL,
+  `is_terima` int(1) NULL DEFAULT NULL,
+  `tgl_terima` date NULL DEFAULT NULL,
+  `reff_terima` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of t_pembelian_det
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for t_penjualan
 -- ----------------------------
 DROP TABLE IF EXISTS `t_penjualan`;
@@ -860,7 +909,7 @@ CREATE TABLE `t_penjualan`  (
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id_penjualan`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_penjualan
@@ -869,6 +918,7 @@ INSERT INTO `t_penjualan` VALUES (1, 'J120012021', 3, 4, '2021-10-12 00:00:00', 
 INSERT INTO `t_penjualan` VALUES (2, 'J120022021', 3, 3, '1970-01-01 07:00:00', '2021-10-12 23:21:34', NULL, NULL);
 INSERT INTO `t_penjualan` VALUES (3, 'J140012021', 3, 3, '1970-01-01 07:00:00', '2021-10-14 00:13:32', NULL, NULL);
 INSERT INTO `t_penjualan` VALUES (4, 'J160012021', 3, 3, '1970-01-01 07:00:00', '2021-10-16 12:24:08', NULL, NULL);
+INSERT INTO `t_penjualan` VALUES (5, 'J180012021', 3, 3, '1970-01-01 07:00:00', '2021-10-18 21:41:10', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_penjualan_det
@@ -993,12 +1043,12 @@ CREATE TABLE `t_stok`  (
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id_stok`) USING BTREE,
   INDEX `id_barang`(`id_barang`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_stok
 -- ----------------------------
-INSERT INTO `t_stok` VALUES (3, 3, 1, 20, 2, '2021-10-17 03:56:20', NULL, NULL);
+INSERT INTO `t_stok` VALUES (1, 3, 1, 24, 2, '2021-10-19 06:17:54', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_stok_mutasi
@@ -1027,7 +1077,7 @@ CREATE TABLE `t_stok_mutasi`  (
 -- ----------------------------
 -- Records of t_stok_mutasi
 -- ----------------------------
-INSERT INTO `t_stok_mutasi` VALUES (3, 1, 3, 3, 1, 10, 0, 10, 0, 6000.00, NULL, '2021-10-17', 'PENAMBAHAN', '2021-10-17 03:56:20', NULL, NULL);
+INSERT INTO `t_stok_mutasi` VALUES (1, 1, 3, 3, 1, 24, 0, 24, 0, 12000.00, 'STOK AWAL', '2021-10-19', 'PENAMBAHAN', '2021-10-19 06:17:54', NULL, NULL);
 
 -- ----------------------------
 -- Function structure for dm

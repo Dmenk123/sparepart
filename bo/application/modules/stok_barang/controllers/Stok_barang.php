@@ -80,15 +80,23 @@ class Stok_barang extends CI_Controller {
 			$datas[$key][] = ' <img src='.base_url().'files/img/barang_img/'.$value->gambar.' style="width:60px;" height="auto" class="center">';
 
 			if($show_action_button) {
+				// $str_aksi = '
+				// 	<div class="btn-group">
+				// 		<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
+				// 		<div class="dropdown-menu">
+				// 			<button class="dropdown-item" onclick="edit_stok(\''.$value->id_stok.'\')">
+				// 				<i class="la la-pencil"></i> Edit Stok
+				// 			</button>
+				// 			<button class="dropdown-item" onclick="delete_stok(\''.$value->id_stok.'\')">
+				// 				<i class="la la-trash"></i> Hapus
+				// 			</button>
+				// ';
 				$str_aksi = '
 					<div class="btn-group">
 						<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 						<div class="dropdown-menu">
 							<button class="dropdown-item" onclick="edit_stok(\''.$value->id_stok.'\')">
 								<i class="la la-pencil"></i> Edit Stok
-							</button>
-							<button class="dropdown-item" onclick="delete_stok(\''.$value->id_stok.'\')">
-								<i class="la la-trash"></i> Hapus
 							</button>
 				';
 			}else{

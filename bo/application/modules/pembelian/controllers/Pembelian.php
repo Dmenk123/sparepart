@@ -296,8 +296,35 @@ class Pembelian extends CI_Controller {
 
 		echo json_encode($retval);
 	}
+	
+	public function get_harga_barang()
+	{
+		$id_barang = $this->input->get('id_barang');
 
+		### cek hpp di stok mutasi
+		$q_mutasi = $this->db->select('hpp')
+						->from('t_stok_mutasi')
+						->where('deleted_at', null)
+						->group_start()
+							->where('id_kategori_trans', 1)
+							->or_where('id_kategori_trans', 3)
+						->group_end() 
+						->order_by('tanggal desc')
+						->get();
+	
+		$cek_mutasi = $q_mutasi->row();
+		
+		if($cek_mutasi) {
+			$hpp = $cek_mutasi->hpp;
+		}else{
+			#####
+			$hpp = 0;
+		}
 
+		echo json_encode([
+			'hpp' => $hpp
+		]);
+	}
 	
 
 	public function save_order()

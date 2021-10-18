@@ -29,51 +29,20 @@ $(document).ready(function() {
 		],
     });
     
-    $("#foto").change(function() {
-        readURL(this);
-    });
-
-    //change menu status
-    $(document).on('click', '.btn_edit_status', function(){
-        var id = $(this).attr('id');
-        var status = $(this).val();
-        swalConfirm.fire({
-            title: 'Ubah Status Data User ?',
-            text: "Apakah Anda Yakin ?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Ubah Status!',
-            cancelButtonText: 'Tidak, Batalkan!',
-            reverseButtons: true
-          }).then((result) => {
-            if (result.value) {
-                $.ajax({
-                    url : base_url + 'master_user/edit_status_user/'+ id,
-                    type: "POST",
-                    dataType: "JSON",
-                    data : {status : status},
-                    success: function(data)
-                    {
-                        swalConfirm.fire('Berhasil Ubah Status User!', data.pesan, 'success');
-                        table.ajax.reload();
-                    },
-                    error: function (jqXHR, textStatus, errorThrown)
-                    {
-                        Swal.fire('Terjadi Kesalahan');
-                    }
-                });
-            } else if (
-              /* Read more about handling dismissals below */
-              result.dismiss === Swal.DismissReason.cancel
-            ) {
-              swalConfirm.fire(
-                'Dibatalkan',
-                'Aksi Dibatalakan',
-                'error'
-              )
-            }
+    $('#id_barang').on('select2:select', function (e) {
+        var data = e.params.data;
+        // console.log(data);
+        $.ajax({
+          type: "get",
+          url: base_url+ "pembelian/get_harga_barang",
+          data: {id_barang:data.id},
+          dataType: "json",
+          success: function (response) {
+            $('#hsat').val(response.hpp);
+          }
         });
     });
+   
 
     $(".modal").on("hidden.bs.modal", function(){
         reset_modal_form();
