@@ -147,11 +147,11 @@ class T_pembelian extends CI_Model
 		return $this->db->update($this->table, $data, $where);
 	}
 	
-	public function get_max_penjualan()
+	public function get_max_pembelian()
 	{
 		$obj_date = new DateTime();
 		$tgl = $obj_date->format('Y-m-d');
-		$q = $this->db->query("SELECT count(*) as jml FROM t_penjualan WHERE DATE_FORMAT(created_at ,'%Y-%m-%d') = '$tgl' and deleted_at is null");
+		$q = $this->db->query("SELECT count(*) as jml FROM t_pembelian WHERE DATE_FORMAT(created_at ,'%Y-%m-%d') = '$tgl' and deleted_at is null");
 		$kd = "";
 		if($q->num_rows()>0){
 			$kd = $q->row();

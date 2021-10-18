@@ -91,6 +91,53 @@ class Pembelian extends CI_Controller {
 		echo json_encode($output);
 	}
 
+	public function add_pembelian()
+	{
+		$id_user = $this->session->userdata('id_user'); 
+		$data_user = $this->m_user->get_detail_user($id_user);
+		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
+
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tgl = $obj_date->format('Y-m-d');
+		
+		// var_dump($diskon); die();
+			
+		/**
+		 * data passing ke halaman view content
+		 */
+		$data = array(
+			'title' => 'Pembelian Baru',
+			'data_user' => $data_user,
+			'data_role'	=> $data_role,
+		);
+
+		$data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL));
+		$data['agen']  = $this->m_global->getSelectedData('m_agen', array('deleted_at'=>NULL));
+		$counter_pembelian = $this->t_pembelian->get_max_pembelian();
+		$data['kode_trans'] = generate_kode_transaksi($tgl, $counter_pembelian, 'ORD');
+		
+		// echo "<pre>";
+		// print_r ($data);
+		// echo "</pre>";
+		// exit;
+
+		/**
+		 * content data untuk template
+		 * param (css : link css pada direktori assets/css_module)
+		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
+		 * param (js : link js pada direktori assets/js_module)
+		 */
+		$content = [
+			'css' 	=> null,
+			'modal' => null,
+			'js'	=> 'pembelian.js',
+			'view'	=> 'view_add_pembelian'
+		];
+
+		$this->template_view->load_view($content, $data);
+	}
+
 	// ===============================================
 	private function rule_validasi($is_update=false, $skip_pass=false)
 	{
@@ -153,51 +200,6 @@ class Pembelian extends CI_Controller {
 
 
 		return $data;
-	}
-
-	public function new_pembelian()
-	{
-		$id_user = $this->session->userdata('id_user'); 
-		$data_user = $this->m_user->get_detail_user($id_user);
-		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
-			
-		/**
-		 * data passing ke halaman view content
-		 */
-		$data = array(
-			'title' => 'Pembelian Baru',
-			'data_user' => $data_user,
-			'data_role'	=> $data_role,
-			'pelanggan' => $this->m_global->getSelectedData('m_pelanggan', array('deleted_at'=>NULL)),
-			'sales'     => $this->m_global->getSelectedData('m_user', array('id_role'=>6)),
-			'mode'		=> 'add',
-		);
-
-		$mode = $this->input->get('mode');
-		if ($mode == 'edit') {
-			$order_id = $this->input->get('order_id');
-			$invoice = $this->m_global->getSelectedData('t_penjualan', array('order_id'=>$order_id))->row();
-			$data['invoice'] = $invoice;
-			$data['mode'] = $mode;
-			$data['title'] = "Edit Penjualan";
-			$data['id_penjualan'] = $invoice->id_penjualan;
-			$data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
-		}
-
-		/**
-		 * content data untuk template
-		 * param (css : link css pada direktori assets/css_module)
-		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
-		 * param (js : link js pada direktori assets/js_module)
-		 */
-		$content = [
-			'css' 	=> null,
-			'modal' => null,
-			'js'	=> 'pembelian.js',
-			'view'	=> 'view_new_pembelian'
-		];
-
-		$this->template_view->load_view($content, $data);
 	}
 
 	public function add_new_penjualan()
@@ -296,42 +298,7 @@ class Pembelian extends CI_Controller {
 	}
 
 
-	public function add_order()
-	{
-		$no_faktur = $this->input->get('no_faktur');
-		$id_user = $this->session->userdata('id_user'); 
-		$data_user = $this->m_user->get_detail_user($id_user);
-		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
-		
-		// var_dump($diskon); die();
-			
-		/**
-		 * data passing ke halaman view content
-		 */
-		$data = array(
-			'title' => 'NEW INVOICE',
-			'data_user' => $data_user,
-			'data_role'	=> $data_role,
-		);
-
-		$data['invoice'] = $this->m_penjualan->getPenjualan($no_faktur)->row();
-		$data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL));
-
-		/**
-		 * content data untuk template
-		 * param (css : link css pada direktori assets/css_module)
-		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
-		 * param (js : link js pada direktori assets/js_module)
-		 */
-		$content = [
-			'css' 	=> null,
-			'modal' => null,
-			'js'	=> 'penjualan.js',
-			'view'	=> 'view_add_order_penjualan'
-		];
-
-		$this->template_view->load_view($content, $data);
-	}
+	
 
 	public function save_order()
 	{

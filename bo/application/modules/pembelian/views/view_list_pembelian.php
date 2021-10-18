@@ -23,7 +23,7 @@
         <div class="kt-portlet__head-toolbar">
           <div class="kt-portlet__head-wrapper">
             <div class="kt-portlet__head-actions row">
-              <div><?= $this->template_view->getAddButton(false, 'add_menu', 'new_pembelian', 'Tambah Pembelian'); ?></div>
+              <div><?= $this->template_view->getAddButton(false, 'add_menu', 'add_pembelian', 'Tambah Pembelian'); ?></div>
             </div>
           </div>
         </div>
