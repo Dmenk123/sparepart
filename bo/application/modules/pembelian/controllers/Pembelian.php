@@ -91,6 +91,56 @@ class Pembelian extends CI_Controller {
 		echo json_encode($output);
 	}
 
+	public function new_pembelian()
+	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tgl = $obj_date->format('Y-m-d');
+		$id_user = $this->session->userdata('id_user');
+		$data_user = $this->m_user->get_detail_user($id_user);
+		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
+
+		$counter_pembelian = $this->t_pembelian->get_max_pembelian();
+		
+		/**
+		 * data passing ke halaman view content
+		 */
+		$data = array(
+			'title' => 'Pembelian Baru',
+			'data_user' => $data_user,
+			'data_role'	=> $data_role,
+			'agen' 		=> $this->m_global->getSelectedData('m_agen', array('deleted_at' => NULL)),
+			'kode_trans'=> generate_kode_transaksi($tgl, $counter_pembelian, 'ORD'),
+			'mode'		=> 'add',
+		);
+
+		$mode = $this->input->get('mode');
+		if ($mode == 'edit') {
+			$order_id = $this->input->get('order_id');
+			$pembelian = $this->m_global->getSelectedData('t_pembelian', array('order_id' => $order_id))->row();
+			$data['pembelian'] = $pembelian;
+			$data['mode'] = $mode;
+			$data['title'] = "Edit Pembelian";
+			$data['id_pembelian'] = $pembelian->id_penjualan;
+			$data['kode_trans'] = $pembelian->kode_pembelian;
+		}
+
+		/**
+		 * content data untuk template
+		 * param (css : link css pada direktori assets/css_module)
+		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
+		 * param (js : link js pada direktori assets/js_module)
+		 */
+		$content = [
+			'css' 	=> null,
+			'modal' => null,
+			'js'	=> 'penjualan.js',
+			'view'	=> 'view_new_pembelian'
+		];
+
+		$this->template_view->load_view($content, $data);
+	}
+
 	public function add_pembelian()
 	{
 		$id_user = $this->session->userdata('id_user'); 
@@ -138,40 +188,55 @@ class Pembelian extends CI_Controller {
 		$this->template_view->load_view($content, $data);
 	}
 
-	// ===============================================
-	private function rule_validasi($is_update=false, $skip_pass=false)
+	public function save_new_pembelian()
 	{
-		$data = array();
-		$data['error_string'] = array();
-		$data['inputerror'] = array();
-		$data['status'] = TRUE;
+		$this->load->library('Enkripsi');
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tgl = $obj_date->format('Y-m-d');
+		$arr_valid = $this->rule_validasi();
+		$counter_penjualan = $this->m_penjualan->get_max_penjualan();
 
-		
-		
-		// if ($this->input->post('icon_menu') == '') {
-		// 	$data['inputerror'][] = 'icon_menu';
-        //     $data['error_string'][] = 'Wajib mengisi icon menu';
-        //     $data['status'] = FALSE;
-		// }
+		$agen 				= $this->input->post('agen');
+		$kode_pembelian 	= $this->input->post('kode_pembelian');
+		$tgl_jatuh_tempo	= $this->input->post('tgl_jatuh_tempo');
+		$date 				= str_replace('/', '-', $tgl_jatuh_tempo);
+		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date));
+		$no_faktur          = no_faktur($tgl, $counter_penjualan);
 
-		if ($this->input->post('pelanggan') == '') {
-			$data['inputerror'][] = 'pelanggan';
-            $data['error_string'][] = 'Wajib Memilih Nama Toko Pelanggan';
-            $data['status'] = FALSE;
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
 		}
 
-		if ($this->input->post('sales') == '') {
-			$data['inputerror'][] = 'sales';
-            $data['error_string'][] = 'Wajib Memilih Nama Sales';
-            $data['status'] = FALSE;
+		$this->db->trans_begin();
+
+		$data = [
+			'no_faktur'         => $no_faktur,
+			'id_pelanggan' 		=> $id_pelanggan,
+			'id_sales' 			=> $id_sales,
+			'tgl_jatuh_tempo'	=> $jatuh_tempo,
+			'created_at'		=> $timestamp
+		];
+
+		$insert = $this->m_penjualan->save($data);
+
+		if ($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal menambahkan Data Invoice';
+		} else {
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses Menambahkan Data Invoice';
+			$retval['no_faktur'] = $no_faktur;
 		}
 
-
-        return $data;
+		echo json_encode($retval);
 	}
 
 	// ===============================================
-	private function rule_validasi_pembelian($is_update=false, $skip_pass=false)
+	private function rule_validasi($is_update = false, $skip_pass = false)
 	{
 		$data = array();
 		$data['error_string'] = array();
@@ -206,48 +271,75 @@ class Pembelian extends CI_Controller {
 		return $data;
 	}
 
-	public function add_new_penjualan()
+	// ===============================================
+
+
+	public function save_pembelian()
 	{
 		$this->load->library('Enkripsi');
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$tgl = $obj_date->format('Y-m-d');
 		$arr_valid = $this->rule_validasi();
-		$counter_penjualan = $this->m_penjualan->get_max_penjualan();
 		
-		$id_pelanggan 		= $this->input->post('pelanggan');
-		$id_sales 			= $this->input->post('sales');
-		$tgl_jatuh_tempo	= $this->input->post('tgl_jatuh_tempo');
-		$date 				= str_replace('/', '-', $tgl_jatuh_tempo);
-		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date) );
-		$no_faktur          = no_faktur($tgl, $counter_penjualan);
+		$id_barang 	= $this->input->post('id_barang');
+		$qty      = $this->input->post('qty');
+		$id_agen = $this->input->post('id_agen');
+
+		$harga 	    	= trim($this->input->post('hsat'));
+		$harga      	= str_replace('.', '', $harga);
+
+		$diskon    		= str_replace('%', '', $this->input->post('dis'));
+		$diskon    		= str_replace(',', '.', $diskon);
+
+		if ($diskon > 0) {
+			$nilai = ($diskon / 100) * $harga;
+		} else {
+			$nilai = 0;
+		}
+
+		$harga_satuan 	= $harga - $nilai;
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
 		}
 
+		$sub_total = $harga_satuan * $qty;
+		$counter_pembelian = $this->t_pembelian->get_max_pembelian();
+		$kode_pembelian = generate_kode_transaksi($tgl, $counter_pembelian, 'ORD');
 		$this->db->trans_begin();
-		
-		$data = [
-			'no_faktur'         => $no_faktur,
-			'id_pelanggan' 		=> $id_pelanggan,
-			'id_sales' 			=> $id_sales,
-			'tgl_jatuh_tempo'	=> $jatuh_tempo,
-			'created_at'		=> $timestamp
+
+		$data_pembelian = [
+			'kode_pembelian' => $kode_pembelian,
+			'id_agen' 	=> $id_agen,
+			'id_user' 	=> $this->session->userdata('id_user'),
+			'tanggal' 	=> $tgl,
+			'total_pembelian' => $sub_total,
+			'total_disc'     => $nilai,
 		];
-		
-		$insert = $this->m_penjualan->save($data);
-		
-		if ($this->db->trans_status() === FALSE){
+
+		$insert = $this->m_global->save($data_pembelian, 't_pembelian');
+
+		if ($insert) {
+			$mutasi = $this->lib_mutasi->simpan_mutasi($id_barang, $qty, 2);
+
+			if ($mutasi === FALSE) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menambahkan Order';
+				return;
+			}
+		}
+
+		if ($this->db->trans_status() === FALSE) {
 			$this->db->trans_rollback();
 			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan Data Invoice';
-		}else{
+			$retval['pesan'] = 'Gagal menambahkan Order';
+		} else {
 			$this->db->trans_commit();
 			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Menambahkan Data Invoice';
-			$retval['no_faktur'] = $no_faktur;
+			$retval['pesan'] = 'Sukses menambahkan Order';
 		}
 
 		echo json_encode($retval);
@@ -331,75 +423,7 @@ class Pembelian extends CI_Controller {
 	}
 	
 
-	public function save_pembelian()
-	{
-		$this->load->library('Enkripsi');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$arr_valid = $this->rule_validasi_pembelian();
-		
-		$id_pembelian 	= $this->input->post('id_pembelian');
-		$id_barang      = $this->input->post('id_barang');
-		$id_agen      = $this->input->post('id_agen');
-		$qty            = $this->input->post('qty');
-
-		$harga 	    	= trim($this->input->post('hsat'));
-		$harga      	= str_replace('.', '', $harga);
-		
-		$diskon    		= str_replace('%', '', $this->input->post('dis'));
-		$diskon    		= str_replace(',','.',$diskon);
-		
-		if($diskon > 0) {
-			$nilai = ($diskon/100) * $harga;
-		}else{
-			$nilai = 0;
-		}
-		
-		$harga_satuan 	= $harga - $nilai;
-
-		if ($arr_valid['status'] == FALSE) {
-			echo json_encode($arr_valid);
-			return;
-		}
-
-		$sub_total = $harga_diskon * $qty;
-		$this->db->trans_begin();
-		
-		$data_order = [
-			'id_penjualan'  => $id_penjualan,
-			'id_barang' 	=> $id_barang,
-			'harga_awal' 	=> $barang->harga,
-			'harga_diskon' 	=> $harga_diskon,
-			'besaran_diskon'=> $diskon,
-			'sub_total'     => $sub_total,
-			'qty'           => $qty
-		];
-		
-		$insert = $this->m_global->save($data_order, 't_penjualan_det');
-
-		if($insert) {
-			$mutasi = $this->lib_mutasi->simpan_mutasi($id_barang, $qty, 2);
-			
-			if($mutasi === FALSE) {
-				$this->db->trans_rollback();
-				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal menambahkan Order';
-				return;
-			}
-		}
-		
-		if ($this->db->trans_status() === FALSE){
-			$this->db->trans_rollback();
-			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan Order';
-		}else{
-			$this->db->trans_commit();
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses menambahkan Order';
-		}
-
-		echo json_encode($retval);
-	}
+	
 
 	public function fetch()
 	{

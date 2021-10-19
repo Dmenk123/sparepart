@@ -149,10 +149,9 @@ function saveDataPenjualan()
     var txtAksi;
     const loadingCircle = $("#loading-circle");
  
-    url = base_url + 'penjualan/add_new_penjualan';
-    txtAksi = 'Tambah Invoice';
+    url = base_url + 'pembelian/save_new_pembelian';
+    txtAksi = 'Tambah Pembelian';
     var alert = "Menambah";
-    
     
     var form = $('#form-user')[0];
     var data = new FormData(form);
