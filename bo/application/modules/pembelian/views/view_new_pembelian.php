@@ -62,7 +62,7 @@
                     <input type="hidden" class="form-control" id="id_pembelian" name="id_pembelian"  value="<?php $value = (isset($id_pembelian))?$id_pembelian:''; echo $value; ?>">
                     <input type="hidden" class="form-control" id="mode" name="mode" value="<?php echo $mode;?>">
                     <label for="lbl_username" class="form-control-label">Agen:</label>
-                        <select name="agen" id="agen" class="form-control select2">
+                        <select name="id_agen" id="id_agen" class="form-control select2">
                             <option value="0">-PILIH-</option>
                             <?php foreach($agen->result() as $row):?>
                                 <option value="<?php echo $row->id_agen;?>"><?php echo $row->nama_perusahaan;?> | <?php echo $row->alamat;?></option>

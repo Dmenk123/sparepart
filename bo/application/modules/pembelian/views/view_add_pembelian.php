@@ -47,7 +47,7 @@
         <div class="kt-portlet__head-toolbar" >
           <div class="kt-portlet__head-wrapper">
             <div class="row" style="text-align:left!important;">
-              <h2>Tambah Pembelian</h>
+              <h2><?=$title;?></h>
             </div>
           </div>
         </div>
@@ -63,7 +63,8 @@
                    
         <div class="row invoice-info">
             <div class="col-sm-6 invoice-col">
-                <b>Kode Pembelian #<?= $kode_trans;?></b><br>
+                <b>Kode Pembelian #<?= (isset($agen->nama_perusahaan)) ? $kode_trans : '-';?></b><br>
+                <b>Agen :</b> <?= (isset($agen->nama_perusahaan)) ? $agen->nama_perusahaan : "";?><br>
             </div><!-- /.col -->
             <div class="col-sm-6 invoice-col">
                 <b>Petugas :</b>  <?= $data_user[0]->nama;?>
@@ -74,19 +75,10 @@
 
         <form id="regForm">
           <div class="row">
-              <div class="form-group col-sm-12">
-                  <label for="lbl_namabarang" class="form-control-label">Nama Agen :</label>
-                  <select name="id_agen" id="id_agen" class="form-control select2">
-                      <option value="0">-PILIH-</option>
-                      <?php foreach($agen->result() as $row):?>
-                          <option value="<?php echo $row->id_agen;?>"><?php echo $row->nama_perusahaan;?> | <?php echo $row->alamat;?></option>
-                      <?php endforeach;?>
-                  </select>
-                  <span class="help-block"></span>
-              </div>
               <div class="form-group col-sm-4">
                   <label for="lbl_namabarang" class="form-control-label">Nama Barang :</label>
-                  <input type="hidden" value="" name="id_pembelian" id="id_pembelian">
+                  <input type="hidden" name="id_pembelian" id="id_pembelian" value="<?=$id_pembelian;?>">
+                  <input type="hidden" name="id_agen" id="id_agen" value="<?=$id_agen;?>">
                   <select name="id_barang" id="id_barang" class="form-control select2">
                       <option value="0">-PILIH-</option>
                       <?php foreach($barang->result() as $row):?>

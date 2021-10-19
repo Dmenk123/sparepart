@@ -91,9 +91,9 @@ function edit_agen(id)
     });
 }
 
-function edit_penjualan(order_id)
+function edit_pembelian(kode)
 {
-  window.location.href = base_url +'penjualan/menu_edit?order_id='+order_id;
+  window.location.href = base_url +'pembelian/add_pembelian?kode_pembelian='+kode+'&update=true';
 }
 
 function editorder(order_id)
@@ -143,7 +143,7 @@ function reload_table()
     table.ajax.reload(null,false); //reload datatable ajax 
 }
 
-function saveDataPenjualan()
+function saveNewpembelian()
 {
     var url;
     var txtAksi;
@@ -186,9 +186,9 @@ function saveDataPenjualan()
                         $('#btnSave').text('Simpan');
                         loadingCircle.css("display", "block");
                         setTimeout(function(){
-                          ajax_send(data.no_faktur);
+                          ajax_send(data.kode);
                           loadingCircle.css("display", "none");
-                        }, 3000);
+                        }, 2000);
                     }else {
                         for (var i = 0; i < data.inputerror.length; i++) 
                         {
@@ -509,9 +509,9 @@ function createAlert(title, summary, details, severity, dismissible, autoDismiss
     }
 }
 
-function ajax_send(no_faktur)
+function ajax_send(kode)
 {
-    window.location.href = base_url+'penjualan/add_order?no_faktur='+no_faktur;
+    window.location.href = base_url+'pembelian/add_pembelian?kode_pembelian='+kode;
 }
  
   
@@ -552,11 +552,11 @@ $(document).ready(function(){
 
 });
 function getTable(){
-    var id = $('#id_penjualan').val();
+    var id = $('#id_pembelian').val();
     console.log(id);
     $.ajax({
         type: 'POST',
-        url: base_url + 'penjualan/fetch',
+        url: base_url + 'pembelian/fetch',
         data: {id:id},
         success:function(response){
             $('#tbody').html(response);
@@ -565,11 +565,11 @@ function getTable(){
 }
 
 function getTotal(){
-  var id = $('#id_penjualan').val();
+  var id = $('#id_pembelian').val();
   console.log(id);
   $.ajax({
       type: 'POST',
-      url: base_url + 'penjualan/total_order',
+      url: base_url + 'pembelian/total_pembelian',
       data: {id:id},
       dataType: "json",
       success:function(data){
@@ -627,7 +627,7 @@ function tes(id)
   var tes = '#qty_order_'+id;
   var qty = $(tes).val();
   $.ajax({
-    url : base_url + 'penjualan/change_qty',
+    url : base_url + 'pembelian/change_qty',
     type: "POST",
     dataType: "JSON",
     data : {id : id, qty : qty},

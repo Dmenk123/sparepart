@@ -133,9 +133,9 @@ class T_pembelian extends CI_Model
 		return $this->db->update($this->table, $data, $where);
 	}
 
-	public function updatePenjualandet($where, $data)
+	public function updatePembelianDet($where, $data)
 	{
-		return $this->db->update('t_penjualan_det', $data, $where);
+		return $this->db->update('t_pembelian_det', $data, $where);
 	}
 
 	public function softdelete_by_id($id)
@@ -192,7 +192,7 @@ class T_pembelian extends CI_Model
 		$this->db->query("truncate table m_user");
 	}
 
-	public function getPenjualan($no_faktur)
+	public function getPembelian($no_faktur)
 	{
 		$this->db->select('
 						pj.id_penjualan,
@@ -214,33 +214,27 @@ class T_pembelian extends CI_Model
 		return $q;
 	}
 
-	function getTotalOrder($id)
+	function getTotalPembelian($id)
 	{
 		$query = "
-				SELECT SUM(sub_total) as total
-				FROM t_penjualan_det
-				WHERE id_penjualan = $id
-				";
+			SELECT SUM(harga_total_fix) as total
+			FROM t_pembelian_det
+			WHERE id_pembelian = $id
+		";
 		return $this->db->query($query);
 	}
 
-	function getPenjualanDet($id)
+	function getPembelianDet($id)
 	{
 		$this->db->select('
-				pd.id_penjualan_det,
-				pd.id_penjualan,
-				pd.harga_awal,
-				pd.harga_diskon,
-				pd.besaran_diskon,
-				pd.qty,
-				pd.sub_total,
-				mb.nama,
-				mb.sku
-				');
-		$this->db->from('t_penjualan_det pd');
+			pd.*,
+			mb.nama,
+			mb.sku
+		');
+		$this->db->from('t_pembelian_det pd');
 		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
-		$this->db->where('pd.id_penjualan', $id);
-		$this->db->order_by('pd.id_penjualan_det', 'ASC');
+		$this->db->where('pd.id_pembelian', $id);
+		$this->db->order_by('pd.id_pembelian_det', 'ASC');
 		$q = $this->db->get();
 		return $q;
 	}
