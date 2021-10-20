@@ -23,9 +23,6 @@
         <div class="kt-portlet__head-toolbar">
           <div class="kt-portlet__head-wrapper">
             <div class="kt-portlet__head-actions row">
-              &nbsp;
-              <?= $this->template_view->getOpsiButton(); ?>
-              &nbsp;
               <div><?= $this->template_view->getAddButton(true, 'add_menu'); ?></div>
             </div>
           </div>
@@ -34,18 +31,12 @@
       <div class="kt-portlet__body">
 
         <!--begin: Datatable -->
-        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_user">
+        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_log_harga">
           <thead>
             <tr>
               <th style="width: 5%;">No</th>
-              <th>Kode SKU</th>
-              <th>Barcode</th>
               <th>Nama Barang</th>
-              <th>Stok (Qty)</th>
-              <th>Satuan</th>
               <th>Harga Jual</th>
-              <th>Kategori</th>
-              <th>Gambar</th>
               <th style="width: 5%;">Aksi</th>
             </tr>
           </thead>
