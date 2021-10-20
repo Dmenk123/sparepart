@@ -224,6 +224,17 @@ class T_pembelian extends CI_Model
 		return $this->db->query($query);
 	}
 
+	function getTotalDiskon($id)
+	{
+		$query = "
+			SELECT SUM(disc) as disc_total
+			FROM t_pembelian_det
+			WHERE id_pembelian = $id
+		";
+		return $this->db->query($query);
+	}
+
+
 	function getPembelianDet($id)
 	{
 		$this->db->select('

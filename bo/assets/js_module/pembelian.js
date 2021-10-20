@@ -228,128 +228,46 @@ function saveNewpembelian()
     });
 }
 
-function editDataPenjualan()
-{
-    var url;
-    var txtAksi;
-    const loadingCircle = $("#loading-circle");
- 
-    url = base_url + 'penjualan/update_new_invoice';
-    txtAksi = 'Edit Invoice';
-    var alert = "Mengupdate";
-    
-    
-    var form = $('#form-user')[0];
-    var data = new FormData(form);
-    
-    $("#btnSave").prop("disabled", true);
-    $('#btnSave').text('Menyimpan Data'); //change button text
-    swalConfirmDelete.fire({
-        title: 'Perhatian',
-        text: "Apakah Anda ingin "+alert+" Data ini ?",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya !',
-        cancelButtonText: 'Tidak !',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.value) {
-            $.ajax({
-                type: "POST",
-                enctype: 'multipart/form-data',
-                url: url,
-                data: data,
-                dataType: "JSON",
-                processData: false, // false, it prevent jQuery form transforming the data into a query string
-                contentType: false, 
-                cache: false,
-                timeout: 600000,
-                success: function (data) {
-                    if(data.status) {
-                        createAlert('','Berhasil!',''+data.pesan+'','success',true,true,'pageMessages');
-                        swal.fire("Sukses!!", "Aksi "+txtAksi+" Berhasil", "success");
-                        $("#btnSave").prop("disabled", false);
-                        $('#btnSave').text('Simpan');
-
-                        window.location.href = base_url+'penjualan';
-                        
-                    }else {
-                        for (var i = 0; i < data.inputerror.length; i++) 
-                        {
-                            if (data.inputerror[i] != 'pegawai') {
-                                $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
-                                $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
-                            }else{
-                                //ikut style global
-                                $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
-                            }
-                        }
-
-                        $("#btnSave").prop("disabled", false);
-                        $('#btnSave').text('Simpan');
-                    }
-                },
-                error: function (e) {
-                    console.log("ERROR : ", e);
-                    createAlert('Opps!','Terjadi Kesalahan','Coba Lagi nanti','danger',true,false,'pageMessages');
-                    $("#btnSave").prop("disabled", false);
-                    $('#btnSave').text('Simpan');
-
-                    // reset_modal_form();
-                    // $(".modal").modal('hide');
-                }
-            });
-        }else if (
-            /* Read more about handling dismissals below */
-            result.dismiss === Swal.DismissReason.cancel
-          ) {
-            swalConfirm.fire(
-              'Dibatalkan',
-              'Aksi Dibatalakan',
-              'error'
-            )
-          }
-    });
+function delete_pembelian(id){
+  swalConfirmDelete.fire({
+      title: 'Hapus Data ?',
+      text: "Data Akan dihapus permanen ?",
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus Data !',
+      cancelButtonText: 'Tidak, Batalkan!',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.value) {
+          $.ajax({
+              url : base_url + 'pembelian/delete_pembelian',
+              type: "POST",
+              dataType: "JSON",
+              data : {id:id},
+              success: function(data)
+              {
+                  swalConfirm.fire('Berhasil Hapus Data !', data.pesan, 'success');
+                  table.ajax.reload();
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                  Swal.fire('Terjadi Kesalahan');
+              }
+          });
+      } else if (
+        /* Read more about handling dismissals below */
+        result.dismiss === Swal.DismissReason.cancel
+      ) {
+        swalConfirm.fire(
+          'Dibatalkan',
+          'Aksi Dibatalakan',
+          'error'
+        )
+      }
+  });
 }
 
-function delete_agen(id){
-    swalConfirmDelete.fire({
-        title: 'Hapus Data ?',
-        text: "Data Akan dihapus permanen ?",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, Hapus Data !',
-        cancelButtonText: 'Tidak, Batalkan!',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.value) {
-            $.ajax({
-                url : base_url + 'master_agen/delete_agen',
-                type: "POST",
-                dataType: "JSON",
-                data : {id:id},
-                success: function(data)
-                {
-                    swalConfirm.fire('Berhasil Hapus Data Agen!', data.pesan, 'success');
-                    table.ajax.reload();
-                },
-                error: function (jqXHR, textStatus, errorThrown)
-                {
-                    Swal.fire('Terjadi Kesalahan');
-                }
-            });
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        ) {
-          swalConfirm.fire(
-            'Dibatalkan',
-            'Aksi Dibatalakan',
-            'error'
-          )
-        }
-    });
-}
+
 
 function reset_modal_form()
 {
@@ -539,7 +457,7 @@ $(document).ready(function(){
             },
             error: function (jqXHR, textStatus, errorThrown)
             {
-                Swal.fire('Terjadi Kesalahan');
+                Swal.fire('Terjadi Kesalahan ');
             }
            
         });
@@ -578,7 +496,7 @@ function getTotal(){
   });
 }
 
-function hapus_order(id)
+function hapus_trans_detail(id)
 {
   // alert('kesini'); exit;
   swalConfirm.fire({
@@ -592,7 +510,7 @@ function hapus_order(id)
   }).then((result) => {
     if (result.value) {
         $.ajax({
-            url : base_url + 'penjualan/hapus_order',
+            url : base_url + 'pembelian/hapus_trans_detail',
             type: "POST",
             dataType: "JSON",
             data : {id : id},

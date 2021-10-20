@@ -566,4 +566,145 @@ class Lib_mutasi extends CI_Controller {
 			return $retval;
 		}
 	}
+
+
+	############################## KEUANGAN ###################################
+	public function insertDataLap($nilaiRupiah,$id_kategori_trans,$kode_reff,$tanggal=null) {
+		try {
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			
+			if($tanggal) {
+				$obj_tanggal = DateTime::createFromFormat('Y-m-d', $tanggal);
+				$tgl = $obj_tanggal->format('Y-m-d');
+				$bulan = $obj_tanggal->format('m');
+				$tahun = $obj_tanggal->format('Y');
+			}else{
+				$tgl = $obj_date->format('Y-m-d');
+				$bulan = $obj_date->format('m');
+				$tahun = $obj_date->format('Y');
+			}
+
+			###### cek jika sudah ada transaksi, maka lakukan update
+			$cek = $this->_ci->m_global->single_row('*', ['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff, 'deleted_at' => null], 't_lap_keuangan');
+
+			if($cek) {
+				return $this->updateDataLap($nilaiRupiah,$id_kategori_trans,$kode_reff,$tanggal);
+			}else{
+				$this->_ci->db->trans_begin();
+				#### jika pembelian
+				#### lakukan insert saja ke tabel laporan
+				if($id_kategori_trans == 1) {
+					$max_mutasi = $this->_ci->m_global->max('id_laporan', 't_lap_keuangan', ['kode_reff' => $kode_reff]);
+					$max_mutasi_det = $this->_ci->m_global->max('id_laporan_det', 't_lap_keuangan', ['kode_reff' => $kode_reff]);
+
+					$id_laporan = $max_mutasi->id_laporan +1;
+					$id_laporan_det = $max_mutasi_det->id_laporan_det +1;
+
+					$arr_ins_laporan = [
+						'id_laporan' => $id_laporan,
+						'id_laporan_det' => $id_laporan_det,
+						'tgl_laporan' 	 => $tgl,
+						'bulan_laporan'  => $bulan,
+						'tahun_laporan'	 => $tahun,
+						'pengeluaran' 	 => $nilaiRupiah,
+						'piutang' 		 => $nilaiRupiah,
+						'kode_reff'		 => $kode_reff,
+						'id_kategori_trans' => $id_kategori_trans,
+						'created_at'	 => $timestamp
+					];
+
+					
+					// echo "<pre>";
+					// print_r ($arr_ins_laporan);
+					// echo "</pre>";
+					// exit;
+					
+					$this->_ci->m_global->save($arr_ins_laporan, 't_lap_keuangan');
+					
+				}
+				#### jika penerimaan pembelian
+				#### search laporan by kode_reff, ambil last id_det
+				#### isi kolom piutang dengan minus harga barang
+				else if($id_kategori_trans == 4) {
+
+				}
+
+				
+
+				if ($this->_ci->db->trans_status() === FALSE) {
+					$this->_ci->db->trans_rollback();
+					$retval = ['status' => false];		
+				} 
+				else {
+					$this->_ci->db->trans_commit();
+					$retval = ['status' => true];		
+				}
+
+				return $retval;
+			}
+		} catch (\Throwable $th) {
+			$this->_ci->db->trans_rollback();
+			$retval = ['status' => false, 'pesan' => $th];		
+			return $retval;
+		}
+	}
+
+	public function updateDataLap($nilaiRupiah,$id_kategori_trans,$kode_reff,$tanggal=null)
+	{
+		try {
+			$this->_ci->db->trans_begin();
+
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			
+			if($tanggal) {
+				$obj_tanggal = DateTime::createFromFormat('Y-m-d', $tanggal);
+				$tgl = $obj_tanggal->format('Y-m-d');
+				$bulan = $obj_tanggal->format('m');
+				$tahun = $obj_tanggal->format('Y');
+			}else{
+				$tgl = $obj_date->format('Y-m-d');
+				$bulan = $obj_date->format('m');
+				$tahun = $obj_date->format('Y');
+			}
+
+			#### jika pembelian
+			#### lakukan update saja ke tabel laporan
+			if($id_kategori_trans == 1) {
+				$arr_update = [
+					'pengeluaran' 	 => $nilaiRupiah,
+					'piutang' 		 => $nilaiRupiah,
+					'kode_reff'		 => $kode_reff,
+					'updated_at'	 => $timestamp
+				];
+
+
+				$this->_ci->m_global->update('t_lap_keuangan', $arr_update, ['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff]);
+				
+			}
+			#### jika penerimaan pembelian
+			#### search laporan by kode_reff, ambil last id_det
+			#### isi kolom piutang dengan minus harga barang
+			else if($id_kategori_trans == 4) {
+
+			}
+
+			if ($this->_ci->db->trans_status() === FALSE) {
+				$this->_ci->db->trans_rollback();
+				$retval = ['status' => false];		
+			} 
+			else {
+				$this->_ci->db->trans_commit();
+				$retval = ['status' => true];		
+			}
+
+			return $retval;
+
+		} catch (\Throwable $th) {
+			$this->_ci->db->trans_rollback();
+			$retval = ['status' => false, 'pesan' => $th];		
+			return $retval;
+		}
+	}
 }

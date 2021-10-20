@@ -63,20 +63,30 @@ class Pembelian extends CI_Controller {
 			$row[] = $value->nama_perusahaan;
 			$row[] = number_format($value->total_pembelian);
 			$row[] = $value->status_terima;
-			
+
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_pembelian(\''.$value->kode_pembelian.'\')">
-							<i class="la la-pencil"></i> Edit Invoice
-						</button>
-						<button class="dropdown-item" onclick="delete_pembelian(\''.$value->kode_pembelian.'\')">
-							<i class="la la-trash"></i> Hapus
+						<button class="dropdown-item" onclick="detail_pembelian(\''.$value->kode_pembelian.'\')">
+							<i class="la la-desktop"></i> Lihat Pembelian
 						</button>
 			';
+			
+			if($value->status_terima != 'Lunas') {
+				$str_aksi .= '
+					<button class="dropdown-item" onclick="edit_pembelian(\''.$value->kode_pembelian.'\')">
+						<i class="la la-pencil"></i> Edit Pembelian
+					</button>
+					<button class="dropdown-item" onclick="delete_pembelian(\''.$value->kode_pembelian.'\')">
+						<i class="la la-trash"></i> Hapus
+					</button>
+				';
+			}
 
 			$str_aksi .= '</div></div>';
+			
+			
 			$row[] = $str_aksi;
 
 			$data[] = $row;
@@ -270,7 +280,6 @@ class Pembelian extends CI_Controller {
 			$qty      = $this->input->post('qty');
 
 			$harga 	    	= trim($this->input->post('hsat'));
-			$harga      	= str_replace('.', '', $harga);
 
 			$diskon    		= str_replace('%', '', $this->input->post('dis'));
 			$diskon    		= str_replace(',', '.', $diskon);
@@ -287,13 +296,10 @@ class Pembelian extends CI_Controller {
 				echo json_encode($arr_valid);
 				return;
 			}
-
+			
 			$sub_total = $harga_satuan * $qty;
 
 			$cek_header = $this->m_global->single_row("*", ['id_pembelian' => $id_pembelian, 'deleted_at' => null], 't_pembelian');
-			
-			$grand_total = $sub_total + $cek_header->total_pembelian;
-			$grand_disc = $nilai + $cek_header->total_disc;
 
 			$data_detail = [
 				'id_pembelian' => $id_pembelian,
@@ -308,7 +314,20 @@ class Pembelian extends CI_Controller {
 			];
 
 			$insert_detail = $this->m_global->save($data_detail, 't_pembelian_det');
-			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $grand_total, 'total_disc' => $grand_disc, 'updated_at' => $timestamp], ['id_pembelian' => $id_pembelian]);
+
+			$q_grand_total = $this->t_pembelian->getTotalPembelian($id_pembelian)->row();
+			$q_disc_total = $this->t_pembelian->getTotalDiskon($id_pembelian)->row();
+
+			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $q_grand_total->total, 'total_disc' => $q_disc_total->disc_total, 'updated_at' => $timestamp], ['id_pembelian' => $id_pembelian]);
+			
+			$ins_laporan = $this->lib_mutasi->insertDataLap($q_grand_total->total ,1, $cek_header->kode_pembelian);
+			
+			if($ins_laporan['status'] == false) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menambahkan Pembelian';
+				return;
+			}
 
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();
@@ -341,7 +360,7 @@ class Pembelian extends CI_Controller {
                 <td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
                 <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_fix); ?></td>
                 <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_total_fix); ?></td>
-				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_order(<?php echo $row->id_pembelian_det; ?>)"><i class="fa fa-times"></i></button></td>
+				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_trans_detail(<?php echo $row->id_pembelian_det; ?>)"><i class="fa fa-times"></i></button></td>
             </tr>
             <?php
         }
@@ -398,6 +417,97 @@ class Pembelian extends CI_Controller {
 		}
 
 		echo json_encode($retval);
+	}
+
+	public function delete_pembelian()
+	{
+		try {
+			$this->db->trans_begin();
+
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			$tgl = $obj_date->format('Y-m-d');
+			$id_pembelian = $this->input->post('id');
+			
+			$cek_header = $this->m_global->single_row("*", ['id_pembelian' => $id_pembelian, 'deleted_at' => null], 't_pembelian');
+
+			if(!$cek_header) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal hapus Pembelian';
+				echo json_encode($retval);
+				return;
+			}
+
+			### harddeletes
+			$update = $this->m_global->force_delete(['id_pembelian' => $id_pembelian], 't_pembelian');
+			$update_lap = $this->m_global->force_delete(['id_kategori_trans' => 1, 'kode_reff' => $cek_header->kode_pembelian], 't_lap_keuangan');
+
+			if ($this->db->trans_status() === FALSE) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menghapus Pembelian';
+			} else {
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses menghapus Pembelian';
+			}
+
+		} catch (\Throwable $th) {
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = $th;
+		}
+
+		echo json_encode($retval);
+	}
+
+	public function hapus_trans_detail()
+	{
+		try {
+			$this->db->trans_begin();
+
+			$id = $this->input->post('id');
+			$pembelian_det     = $this->m_global->getSelectedData('t_pembelian_det', array('id_pembelian_det' => $id))->row();
+
+			$id_pembelian = $pembelian_det->id_pembelian;
+
+			$pembelian     = $this->m_global->getSelectedData('t_pembelian', array('id_pembelian' => $id_pembelian))->row();
+
+			$kode_pembelian = $pembelian->kode_pembelian;
+
+			$del = $this->m_global->force_delete(['id_pembelian_det' => $id], 't_pembelian_det');
+
+			$hasil_total = $this->t_pembelian->getTotalPembelian($id_pembelian)->row();
+			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $hasil_total->total], ['id_pembelian' => $id_pembelian]);
+		
+			$upd_laporan = $this->lib_mutasi->updateDataLap($hasil_total->total ,1, $kode_pembelian);
+				
+			if($upd_laporan['status'] == false) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menghapus detail Pembelian';
+				return;
+			}
+
+			if ($this->db->trans_status() === FALSE) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menghapus detail Pembelian';
+			} else {
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses menghapus detail Pembelian';
+			}
+		} catch (\Throwable $th) {
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = $th;
+		}
+		
+
+		echo json_encode($retval);
+
 	}
 
 	// ===============================================
@@ -580,22 +690,7 @@ class Pembelian extends CI_Controller {
 		return $no_faktur;
 	}
 
-	public function hapus_order()
-	{
-		$id = $this->input->post('id');
-		$data_where = array('id_penjualan_det' => $id);
-		$del = $this->m_global->force_delete($data_where, 't_penjualan_det');
-		if($del) {
-			$retval['status'] = TRUE;
-			$retval['pesan'] = 'Data Order berhasil dihapus';
-		}else{
-			$retval['status'] = FALSE;
-			$retval['pesan'] = 'Data Order berhasil dihapus';
-		}
-
-		echo json_encode($retval);
-
-	}
+	
 
 	
 
