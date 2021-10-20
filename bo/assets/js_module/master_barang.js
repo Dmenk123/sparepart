@@ -310,7 +310,7 @@ function reset_modal_form_import()
 
 function import_excel(){
     $('#modal_import_excel').modal('show');
-	$('#modal_import_title').text('Import data user'); 
+	$('#modal_import_title').text('Import Data Barang'); 
 }
 
 function import_data_excel(){
@@ -322,7 +322,7 @@ function import_data_excel(){
     $.ajax({
         type: "POST",
         enctype: 'multipart/form-data',
-        url: base_url + 'master_user/import_data_master',
+        url: base_url + 'master_barang/import_data_master',
         data: data,
         dataType: "JSON",
         processData: false, // false, it prevent jQuery form transforming the data into a query string
