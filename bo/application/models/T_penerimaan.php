@@ -1,16 +1,17 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-class T_pembelian extends CI_Model
+class T_penerimaan extends CI_Model
 {
-	var $table = 't_pembelian';
-	var $column_search = ['pb.kode_pembelian', 'pb.tanggal', 'm_agen.nama_perusahaan', 'pb.total_pembelian'];
+	var $table = 't_penerimaan';
+	var $column_search = ['pj.no_faktur'];
 	
 	var $column_order = [
 		null, 
-		'pb.tanggal',
-		'pb.kode_pembelian',
+		'pn.tanggal',
+		'pn.kode_penerimaan',
 		'm_agen.nama_perusahaan',
-		'pb.total_pembelian',
+		'pb.kode_pembelian',
+		'pn.total_harga',
 		null
 	];
 
@@ -26,13 +27,14 @@ class T_pembelian extends CI_Model
 	private function _get_datatables_query($term='')
 	{
 		$this->db->select("
-			pb.*,
-			m_agen.nama_perusahaan,
-			CASE WHEN pb.is_terima_all = 1 THEN 'Lunas' ELSE '-' END as status_terima
+			pn.*,
+			pb.kode_pembelian,
+			m_agen.nama_perusahaan
 		");
-		$this->db->from('t_pembelian pb');
-		$this->db->join('m_agen', 'pb.id_agen=m_agen.id_agen');
-		$this->db->where('pb.deleted_at is null');
+		$this->db->from('t_penerimaan pn');
+		$this->db->join('t_pembelian pb', 'pn.id_pembelian = pb.id_pembelian');
+		$this->db->join('m_agen', 'pb.id_agen = m_agen.id_agen');
+		$this->db->where('pn.deleted_at is null');
 		
 		$i = 0;
 		// loop column 
@@ -78,7 +80,7 @@ class T_pembelian extends CI_Model
 		}
 	}
 
-	function get_datatable_pembelian()
+	function get_datatable_penerimaan()
 	{
 		$term = $_REQUEST['search']['value'];
 		$this->_get_datatables_query($term);
@@ -147,11 +149,11 @@ class T_pembelian extends CI_Model
 		return $this->db->update($this->table, $data, $where);
 	}
 	
-	public function get_max_pembelian()
+	public function get_max_penerimaan()
 	{
 		$obj_date = new DateTime();
 		$tgl = $obj_date->format('Y-m-d');
-		$q = $this->db->query("SELECT count(*) as jml FROM t_pembelian WHERE DATE_FORMAT(created_at ,'%Y-%m-%d') = '$tgl' and deleted_at is null");
+		$q = $this->db->query("SELECT count(*) as jml FROM t_penerimaan WHERE DATE_FORMAT(created_at ,'%Y-%m-%d') = '$tgl' and deleted_at is null");
 		$kd = "";
 		if($q->num_rows()>0){
 			$kd = $q->row();
