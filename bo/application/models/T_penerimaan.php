@@ -237,6 +237,21 @@ class T_penerimaan extends CI_Model
 	}
 
 
+	function getPenerimaanDet($id)
+	{
+		$this->db->select('
+			pd.*,
+			mb.nama,
+			mb.sku
+		');
+		$this->db->from('t_penerimaan_det pd');
+		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
+		$this->db->where('pd.id_penerimaan', $id);
+		$this->db->order_by('pd.id_penerimaan_det', 'ASC');
+		$q = $this->db->get();
+		return $q;
+	}
+
 	function getPembelianDet($id)
 	{
 		$this->db->select('

@@ -63,10 +63,11 @@
                    
         <div class="row invoice-info">
             <div class="col-sm-6 invoice-col">
-                <b>Kode Pembelian #<?= (isset($agen->nama_perusahaan)) ? $kode_trans : '-';?></b><br>
-                <b>Agen :</b> <?= (isset($agen->nama_perusahaan)) ? $agen->nama_perusahaan : "";?><br>
+                <b>Kode Pembelian # <?= (isset($data->kode_pembeliaan)) ? $data->kode_pembeliaan : '-';?></b><br>
+                <b>Agen :</b> <?= (isset($data->nama_perusahaan)) ? $data->nama_perusahaan : "";?><br>
             </div><!-- /.col -->
             <div class="col-sm-6 invoice-col">
+                <b>Kode Penerimaan # <?= (isset($data->kode_penerimaan)) ? $data->kode_penerimaan : '-';?></b><br>
                 <b>Petugas :</b>  <?= $data_user[0]->nama;?>
             </div><!-- /.col -->
         </div>
@@ -74,45 +75,9 @@
         <hr>
 
         <form id="regForm">
+          <input type="hidden" name="id_penerimaan" id="id_penerimaan" value="<?=$data->id_penerimaan;?>">
+          <input type="hidden" name="id_pembelian" id="id_pembelian" value="<?=$data->id_pembelian;?>">
           <div class="row">
-              <div class="form-group col-sm-4">
-                  <label for="lbl_namabarang" class="form-control-label">Nama Barang :</label>
-                  <input type="hidden" name="id_pembelian" id="id_pembelian" value="<?=$id_pembelian;?>">
-                  <input type="hidden" name="id_agen" id="id_agen" value="<?=$id_agen;?>">
-                  <select name="id_barang" id="id_barang" class="form-control select2">
-                      <option value="0">-PILIH-</option>
-                      <?php foreach($barang->result() as $row):?>
-                          <option value="<?php echo $row->id_barang;?>"><?php echo $row->nama;?> | <?php echo $row->sku;?></option>
-                      <?php endforeach;?>
-                  </select>
-                  <span class="help-block"></span>
-              </div>
-              <div class="form-group col-sm-1">
-                  <label for="lbl_hargabarang" class="form-control-label">Qty :</label>
-                  <input type="number" class="form-control" id="qty" name="qty" autocomplete="off">
-                  <span class="help-block"></span>
-              </div>
-              <div class="form-group col-sm-2">
-                  <label for="lbl_hargabarang" class="form-control-label">Diskon :</label>
-                  <input type="text" class="form-control percent" id="dis" name="dis" value="0" autocomplete="off">
-                  <span class="help-block"></span>
-              </div>
-
-              <div class="form-group col-sm-2">
-                  <label for="lbl_hargabarang" class="form-control-label">Harga Satuan :</label>
-                  <input type="text" class="form-control uang" id="hsat" name="hsat" value="0" autocomplete="off">
-                  <span class="help-block"></span>
-              </div>
-
-              <div class="form-group col-sm-3" style="padding-top:25px;">
-                <button type="submit" class="btn btn-primary">Simpan</button>
-              </div>
-          </div>
-        </form>
-
-        <br />
-                        
-        <div class="row">
             <div class="col-xs-12 table-responsive">
                 <table class="table table-striped">
                     <thead>
@@ -128,23 +93,31 @@
                     </tbody>
                 </table>
             </div><!-- /.col -->
-        </div>
+          </div>
 
-        <div class="row">
-            <!-- accepted payments column -->
-            <div class="col-md-12">
-                <div class="table-responsive">
-                    <table class="table" width="100%" >
-                        <tbody>
-                            <tr>
-                                <td width="69%" >Total:</td>
-                                <td id="total">0</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div><!-- /.col -->
-        </div>
+          <div class="row">
+              <!-- accepted payments column -->
+              <div class="col-md-12">
+                  <div class="table-responsive">
+                      <table class="table" width="100%" >
+                          <tbody>
+                              <tr>
+                                  <td width="69%" >Total:</td>
+                                  <td id="total">0</td>
+                              </tr>
+                          </tbody>
+                      </table>
+                  </div>
+              </div><!-- /.col -->
+          </div>
+          <div class="row no-print">
+            <div class="form-group col-sm-3" style="padding-top:25px;">
+                <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </div>
+        </form>
+   
+        
 
         <!-- this row will not appear when printing -->
         <div class="row no-print">
@@ -153,7 +126,7 @@
                 <button class="btn btn-primary center" style="margin-right: 5px;"><i class="fa fa-download"></i> Generate PDF</button>
                   -->
                 
-                <button class="btn btn-success pull-right" ><i class="fa fa-credit-card"></i> Submit Payment</button>
+                <!-- <button class="btn btn-success pull-right" ><i class="fa fa-credit-card"></i> Submit Payment</button> -->
             </div>
         </div>
        

@@ -472,7 +472,7 @@ function getTable(){
     console.log(id);
     $.ajax({
         type: 'POST',
-        url: base_url + 'pembelian/fetch',
+        url: base_url + 'barang_masuk/fetch',
         data: {id:id},
         success:function(response){
             $('#tbody').html(response);
@@ -542,11 +542,15 @@ function tes(id)
 {
   var tes = '#qty_order_'+id;
   var qty = $(tes).val();
+  var current_url = window.location.href;
+  var url = new URL(current_url);
+  var kodereff = url.searchParams.get("reff");
+  
   $.ajax({
-    url : base_url + 'pembelian/change_qty',
+    url : base_url + 'barang_masuk/change_qty',
     type: "POST",
     dataType: "JSON",
-    data : {id : id, qty : qty},
+    data : {id : id, qty : qty, kodereff:kodereff},
     success: function(data)
     {
         // swalConfirm.fire('Berhasil !', data.pesan, 'success');

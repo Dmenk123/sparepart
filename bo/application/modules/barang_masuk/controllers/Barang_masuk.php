@@ -156,7 +156,11 @@ class Barang_masuk extends CI_Controller {
 		
 
 		### cek jika kode valid
-		$cek_kode = $this->m_global->single_row("*", ['kode_penerimaan' => $kode, 'deleted_at' => null], 't_penerimaan');
+		$join = [ 
+			['table' => 't_pembelian', 'on'	=> 't_penerimaan.id_pembelian = t_pembelian.id_pembelian'],
+			['table' => 'm_agen', 'on' => 't_pembelian.id_agen = m_agen.id_agen']
+		];
+		$cek_kode = $this->m_global->single_row('t_penerimaan.*, t_pembelian.kode_pembelian, m_agen.nama_perusahaan', ['kode_penerimaan' => $kode, 't_penerimaan.deleted_at' => null], 't_penerimaan', $join);
 		if(!$cek_kode) {
 			return redirect('barang_masuk');
 		}
@@ -170,20 +174,17 @@ class Barang_masuk extends CI_Controller {
 		/**
 		 * data passing ke halaman view content
 		 */
-		$data = array(
+		$retval = array(
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
+			'data' => $cek_kode
 		);
 
 		if($is_update == 'true') {
-			$data['title'] = 'Update Barang Masuk';
+			$retval['title'] = 'Update Barang Masuk';
 		}else{
-			$data['title'] = 'Barang Masuk Baru';
+			$retval['title'] = 'Barang Masuk Baru';
 		}
-
-		$data['kode_trans']  = $kode;
-		$data['id_penerimaan']  = $cek_kode->id_penerimaan;
-		$data['id_pembelian']  = $cek_kode->id_pembelian;
 		
 
 		/**
@@ -199,7 +200,7 @@ class Barang_masuk extends CI_Controller {
 			'view'	=> 'view_add_barang_masuk'
 		];
 
-		$this->template_view->load_view($content, $data);
+		$this->template_view->load_view($content, $retval);
 	}
 
 	public function save_new_penerimaan()
@@ -254,6 +255,27 @@ class Barang_masuk extends CI_Controller {
 
 		echo json_encode($retval);
 	}
+
+	public function fetch()
+	{
+		$id = $this->input->post('id');
+        $data = $this->t_penerimaan->getPembelianDet($id)->result();
+		
+        foreach($data as $row){
+            ?>
+            <tr>
+                <td width="10%">
+					<input type="number" min="1" max="<?=$row->qty;?>" class="form-control" width="5" id="qty_order_<?php echo $row->id_pembelian_det;?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id_pembelian_det ?>)">
+				</td>
+                <td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
+                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_fix); ?></td>
+                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_total_fix); ?></td>
+				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_trans_detail(<?php echo $row->id_pembelian_det; ?>)"><i class="fa fa-times"></i></button></td>
+            </tr>
+            <?php
+        }
+	}
+
 
 	public function save_pembelian()
 	{
@@ -340,23 +362,7 @@ class Barang_masuk extends CI_Controller {
 		echo json_encode($retval);
 	}
 
-	public function fetch()
-	{
-		$id = $this->input->post('id');
-        $data = $this->t_pembelian->getPembelianDet($id)->result();
-        foreach($data as $row){
-            ?>
-            <tr>
-                <td width="10%"><input type="number" class="form-control" width="5" id="qty_order_<?php echo $row->id_pembelian_det;?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id_pembelian_det ?>)"></td>
-                <td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
-                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_fix); ?></td>
-                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_total_fix); ?></td>
-				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_trans_detail(<?php echo $row->id_pembelian_det; ?>)"><i class="fa fa-times"></i></button></td>
-            </tr>
-            <?php
-        }
-	}
-
+	
 	public function total_pembelian()
 	{
 		
@@ -376,21 +382,77 @@ class Barang_masuk extends CI_Controller {
 
 	public function change_qty()
 	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tgl = $obj_date->format('Y-m-d');
+		
 		$this->db->trans_begin();
 		$id_pembelian_det = $this->input->post('id');
 		$qty              = $this->input->post('qty');
-		$pembelian_det     = $this->m_global->getSelectedData('t_pembelian_det', array('id_pembelian_det' => $id_pembelian_det))->row();
+		$kodereff		  = $this->input->post('kodereff');
 
+		$pembelian_det     = $this->m_global->getSelectedData('t_pembelian_det', array('id_pembelian_det' => $id_pembelian_det))->row();
+		$penerimaan = $this->m_global->getSelectedData('t_penerimaan', ['id_pembelian' => $pembelian_det->id_pembelian, 'kode_penerimaan' => $kodereff])->row();
+		$penerimaan_det     =  $this->m_global->getSelectedData('t_penerimaan_det', array('id_penerimaan' => $penerimaan->id_penerimaan, 'id_barang' => $pembelian_det->id_barang))->result();
+
+		$qty_in = 0;
 		
+		if($penerimaan_det) {
+			foreach ($penerimaan_det as $key => $value) {
+				$qty_in += $value->qty;
+			}
+		}
+
+		### jika qty inputan lebih besar dari seharusnya (bisa karena barang sudah diterima)
+		### return false
+		if(($qty > $qty_in) && ($qty_in > 0)) {
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Jumlah qty lebih dari sisa penerimaan';
+			echo json_encode($retval);
+			return;
+		}
+
+		$qty_remaining = $pembelian_det->qty - $qty_in;
+
+		### jika qty inputan lebih besar dari seharusnya (bisa karena barang sudah diterima)
+		### return false
+		if($qty > $qty_remaining) {
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Jumlah qty lebih dari sisa penerimaan';
+			echo json_encode($retval);
+			return;
+		}
+
 		$subtotal = $pembelian_det->harga_fix * $qty; 
 		
-		$data = array(
-			'qty' => $qty,
-			'harga_total_fix' => $subtotal
-		);
-				
-		$data_where = array('id_pembelian_det' => $id_pembelian_det);
-		$update = $this->t_pembelian->updatePembelianDet($data_where, $data);
+		#### insert/update penerimaan detail
+		$cek     =  $this->m_global->getSelectedData('t_penerimaan_det', ['id_penerimaan' => $penerimaan->id_penerimaan, 'id_barang' => $pembelian_det->id_barang])->row();
+		if($cek) {
+			##### update
+			$data = array(
+				'id_barang' => $pembelian_det->id_barang,
+				'qty' => $qty,
+				'harga_total' => $subtotal,
+				'harga' => $pembelian_det->harga_fix,
+				'updated_at' => $timestamp
+			);
+					
+			$data_where = array('id_pembelian_det' => $id_pembelian_det);
+			$update = $this->t_penerimaan->updatePenerimaanDet($data_where, $data);
+		}else{
+			##### insert
+			$data = array(
+				'id_barang' => $pembelian_det->id_barang,
+				'qty' => $qty,
+				'harga_total' => $subtotal,
+				'harga' => $pembelian_det->harga_fix,
+				'created_at' => $timestamp
+			);
+			$insert = $this->t_penerimaan->save($data);
+		}
+		
 		
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
