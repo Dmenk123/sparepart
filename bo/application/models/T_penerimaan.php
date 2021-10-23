@@ -225,6 +225,7 @@ class T_penerimaan extends CI_Model
 		";
 		return $this->db->query($query);
 	}
+	
 
 	function getTotalDiskon($id)
 	{

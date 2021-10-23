@@ -81,13 +81,13 @@
             <div class="col-xs-12 table-responsive">
                 <table class="table table-striped">
                     <thead>
-                        <tr>
-                            <th>Qty</th>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Sub Total</th>
-                            <th>&nbsp;</th>
-                        </tr>
+                      <tr>
+                        <th>Qty</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Sub Total</th>
+                        <th>&nbsp;</th>
+                      </tr>
                     </thead>
                     <tbody id="tbody">
                     </tbody>

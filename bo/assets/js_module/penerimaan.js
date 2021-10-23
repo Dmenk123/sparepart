@@ -9,8 +9,8 @@ $(document).ready(function() {
         return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
     });
 
-	//datatables
-	table = $('#tabel_penerimaan').DataTable({
+	  //datatables
+	  table = $('#tabel_penerimaan').DataTable({
 		responsive: true,
         searchDelay: 500,
         processing: true,
@@ -43,18 +43,42 @@ $(document).ready(function() {
         });
     });
    
-
     $(".modal").on("hidden.bs.modal", function(){
         reset_modal_form();
         reset_modal_form_import();
     });
+
+    getTable();
+
+    $('#regForm').submit(function(e){
+        e.preventDefault();
+        // var url = '<?php echo base_url(); ?>';
+        var reg = $('#regForm').serialize();
+        $.ajax({
+            type: 'POST',
+            data: reg,
+            dataType: 'json',
+            url: base_url + 'barang_masuk/simpan_penerimaan_barang',
+            success: function(data)
+            {
+                swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
+                $('#regForm')[0].reset();
+                getTable();
+                getTotal();
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+                Swal.fire('Terjadi Kesalahan ');
+            }
+           
+        });
+    });
 });	
 
 function add_menu()
-{
-    
-    reset_modal_form();
-    save_method = 'add';
+{  
+  reset_modal_form();
+  save_method = 'add';
 	$('#modal_agen_form').modal('show');
 	$('#modal_title').text('Tambah Master Agen'); 
 }
@@ -287,7 +311,7 @@ function reset_modal_form_import()
 }
 
 function import_excel(){
-    $('#modal_import_excel').modal('show');
+  $('#modal_import_excel').modal('show');
 	$('#modal_import_title').text('Import data user'); 
 }
 
@@ -425,105 +449,128 @@ function createAlert(title, summary, details, severity, dismissible, autoDismiss
     }
 }
 
-function ajax_send(kode)
-{
-    window.location.href = base_url+'barang_masuk/add_penerimaan?reff='+kode;
-}
+
  
-  
-$(document).ready(function(){
-  
-  // console.log(id);
-    getTable();
-    getTotal();
 
-    $('#regForm').submit(function(e){
-        e.preventDefault();
-        // var url = '<?php echo base_url(); ?>';
-        var reg = $('#regForm').serialize();
-        $.ajax({
-            type: 'POST',
-            data: reg,
-            dataType: 'json',
-            url: base_url + 'pembelian/save_pembelian',
-            success: function(data)
-            {
-                swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
-                $('#regForm')[0].reset();
-                getTable();
-                getTotal();
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                Swal.fire('Terjadi Kesalahan ');
-            }
-           
-        });
-    });
+// function hapus_trans_detail(id)
+// {
+//   // alert('kesini'); exit;
+//   swalConfirm.fire({
+//     title: 'Apakah Anda Yakin ?',
+//     text: "ingin menghapus daftar order ini ?",
+//     icon: 'warning',
+//     showCancelButton: true,
+//     confirmButtonText: 'Ya !',
+//     cancelButtonText: 'Tidak !',
+//     reverseButtons: true
+//   }).then((result) => {
+//     if (result.value) {
+//         $.ajax({
+//             url : base_url + 'barang_masuk/hapus_trans_detail',
+//             type: "POST",
+//             dataType: "JSON",
+//             data : {id : id},
+//             success: function(data)
+//             {
+//                 swalConfirm.fire('Berhasil !', data.pesan, 'success');
+//                 getTable();
+//                 getTotal();
+                
+//             },
+//             error: function (jqXHR, textStatus, errorThrown)
+//             {
+//                 Swal.fire('Terjadi Kesalahan');
+//             }
+//         });
+//     } else if (
+//       /* Read more about handling dismissals below */
+//       result.dismiss === Swal.DismissReason.cancel
+//     ) {
+//       swalConfirm.fire(
+//         'Dibatalkan',
+//         'Aksi Dibatalakan',
+//         'error'
+//       )
+//     }
+//   });
+// }
 
-
-    // $(document).on('click', '#clearMsg', function(){
-    //     $('#responseDiv').hide();
-    // });
-
-});
-function getTable(){
-    var id = $('#id_pembelian').val();
-    console.log(id);
-    $.ajax({
-        type: 'POST',
-        url: base_url + 'barang_masuk/fetch',
-        data: {id:id},
-        success:function(response){
-            $('#tbody').html(response);
-        }
-    });
+/////////////////////////////////////////////
+function ajax_send(kode) {
+  window.location.href = base_url+'barang_masuk/add_penerimaan?reff='+kode;
 }
 
-function getTotal(){
+function getTable(){
   var id = $('#id_pembelian').val();
   console.log(id);
   $.ajax({
       type: 'POST',
-      url: base_url + 'pembelian/total_pembelian',
+      url: base_url + 'barang_masuk/fetch',
       data: {id:id},
-      dataType: "json",
-      success:function(data){
-        $('#total').html(data.total);
+      success:function(response){
+          $('#tbody').html(response);
+          getTotal();
       }
   });
 }
 
-function hapus_trans_detail(id)
+function getTotal(){
+  let result = 0;
+  
+  $('#tbody tr td input.kelas_htotal').each(function(){
+    result += parseFloat(this.value);
+  });
+  console.log(result);
+  $('td#total').html('Rp '+numberWithCommas(result));
+}
+
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function tes(id)
 {
-  // alert('kesini'); exit;
-  swalConfirm.fire({
-    title: 'Apakah Anda Yakin ?',
-    text: "ingin menghapus daftar order ini ?",
-    icon: 'warning',
+  var tes = '#qty_order_'+id;
+  var row_harga = '#harga_total_'+id;
+  var row_harga_raw = '#harga_total_raw_'+id;
+  var qty = $(tes).val();
+  var current_url = window.location.href;
+  var url = new URL(current_url);
+  var kodereff = url.searchParams.get("reff");
+
+  $.ajax({
+    url : base_url + 'barang_masuk/change_qty',
+    type: "POST",
+    dataType: "JSON",
+    data : {id : id, qty : qty, kodereff:kodereff},
+    success: function(data)
+    {
+      $(tes).val(data.qty);
+      $(row_harga).text(data.harga_total);
+      $(row_harga_raw).val(data.harga_raw);
+      getTotal();
+    },
+    error: function (jqXHR, textStatus, errorThrown)
+    {
+        Swal.fire('Terjadi Kesalahan');
+    }
+  });
+}
+
+function hapus_trans_detail(elem)
+{
+  swalConfirmDelete.fire({
+    title: 'Hapus Data ?',
+    text: "Data Akan dihapus permanen ?",
+    type: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Ya !',
-    cancelButtonText: 'Tidak !',
+    confirmButtonText: 'Ya, Hapus Data !',
+    cancelButtonText: 'Tidak, Batalkan!',
     reverseButtons: true
   }).then((result) => {
     if (result.value) {
-        $.ajax({
-            url : base_url + 'pembelian/hapus_trans_detail',
-            type: "POST",
-            dataType: "JSON",
-            data : {id : id},
-            success: function(data)
-            {
-                swalConfirm.fire('Berhasil !', data.pesan, 'success');
-                getTable();
-                getTotal();
-                
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                Swal.fire('Terjadi Kesalahan');
-            }
-        });
+        $(elem).closest('tr').remove();
+        getTotal();
     } else if (
       /* Read more about handling dismissals below */
       result.dismiss === Swal.DismissReason.cancel
@@ -535,34 +582,5 @@ function hapus_trans_detail(id)
       )
     }
   });
-}
-
-
-function tes(id)
-{
-  var tes = '#qty_order_'+id;
-  var qty = $(tes).val();
-  var current_url = window.location.href;
-  var url = new URL(current_url);
-  var kodereff = url.searchParams.get("reff");
-  
-  $.ajax({
-    url : base_url + 'barang_masuk/change_qty',
-    type: "POST",
-    dataType: "JSON",
-    data : {id : id, qty : qty, kodereff:kodereff},
-    success: function(data)
-    {
-        // swalConfirm.fire('Berhasil !', data.pesan, 'success');
-        getTable();
-        getTotal();
-        
-    },
-    error: function (jqXHR, textStatus, errorThrown)
-    {
-        Swal.fire('Terjadi Kesalahan');
-    }
-});
-  
 }
   
