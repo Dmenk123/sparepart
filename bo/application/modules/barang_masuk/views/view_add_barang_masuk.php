@@ -77,6 +77,7 @@
         <form id="regForm">
           <input type="hidden" name="id_penerimaan" id="id_penerimaan" value="<?=$data->id_penerimaan;?>">
           <input type="hidden" name="id_pembelian" id="id_pembelian" value="<?=$data->id_pembelian;?>">
+          <input type="hidden" name="kode_penerimaan" id="kode_penerimaan" value="<?=$data->kode_penerimaan;?>">
           <div class="row">
             <div class="col-xs-12 table-responsive">
                 <table class="table table-striped">

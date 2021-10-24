@@ -520,7 +520,7 @@ function getTotal(){
   $('#tbody tr td input.kelas_htotal').each(function(){
     result += parseFloat(this.value);
   });
-  console.log(result);
+  
   $('td#total').html('Rp '+numberWithCommas(result));
 }
 

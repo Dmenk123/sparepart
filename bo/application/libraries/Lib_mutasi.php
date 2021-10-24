@@ -586,10 +586,45 @@ class Lib_mutasi extends CI_Controller {
 			}
 
 			###### cek jika sudah ada transaksi, maka lakukan update
-			$cek = $this->_ci->m_global->single_row('*', ['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff, 'deleted_at' => null], 't_lap_keuangan');
-
+			$cek = $this->_ci->m_global->single_row('*', ['kode_reff' => $kode_reff, 'deleted_at' => null], 't_lap_keuangan');
+			
 			if($cek) {
-				return $this->updateDataLap($nilaiRupiah,$id_kategori_trans,$kode_reff,$tanggal);
+				#### jika kode transaksi (4) penerimaan pembelian maka insert sebagai pengurangan piutang
+				if($id_kategori_trans == 4) {
+					$this->_ci->db->trans_begin();
+					$max_mutasi_det = $this->_ci->m_global->max('id_laporan_det', 't_lap_keuangan', ['kode_reff' => $kode_reff]);
+					$id_laporan_det = $max_mutasi_det->id_laporan_det +1;
+
+					$arr_ins_laporan = [
+						'id_laporan' 	 => $cek->id_laporan,
+						'id_laporan_det' => $id_laporan_det,
+						'tgl_laporan' 	 => $tgl,
+						'bulan_laporan'  => $bulan,
+						'tahun_laporan'	 => $tahun,
+						'pengeluaran' 	 => 0,
+						'piutang' 		 => -$nilaiRupiah,
+						'kode_reff'		 => $kode_reff,
+						'id_kategori_trans' => $id_kategori_trans,
+						'created_at'	 => $timestamp
+					];
+
+					var_dump($arr_ins_laporan);exit;
+					
+					$this->_ci->m_global->save($arr_ins_laporan, 't_lap_keuangan');
+
+					if ($this->_ci->db->trans_status() === FALSE) {
+						$this->_ci->db->trans_rollback();
+						$retval = ['status' => false];		
+					} 
+					else {
+						$this->_ci->db->trans_commit();
+						$retval = ['status' => true];		
+					}
+	
+					return $retval;
+				}else{
+					return $this->updateDataLap($nilaiRupiah,$id_kategori_trans,$kode_reff,$tanggal);
+				}
 			}else{
 				$this->_ci->db->trans_begin();
 				#### jika pembelian

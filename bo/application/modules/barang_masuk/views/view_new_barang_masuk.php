@@ -58,7 +58,7 @@
     
         <form id="form-user" name="form-user">
             <div class="row">
-                <div class="form-group col-sm-6">
+                <div class="form-group col-sm-4">
                     <input type="hidden" class="form-control" id="id_penerimaan" name="id_penerimaan"  value="<?php $value = (isset($id_penerimaan))?$id_penerimaan:''; echo $value; ?>">
                     <input type="hidden" class="form-control" id="mode" name="mode" value="<?php echo $mode;?>">
                     <label for="lbl_username" class="form-control-label">Kode Pembelian :</label>
@@ -70,7 +70,17 @@
                         </select>
                     <span class="help-block"></span>
                 </div>
-                <div class="form-group col-sm-6">
+                <div class="form-group col-sm-4">
+                    <label for="lbl_username" class="form-control-label">Gudang :</label>
+                      <select name="id_gudang" id="id_gudang" class="form-control select2">
+                          <option value="0">-PILIH-</option>
+                          <?php foreach($data_gudang as $val):?>
+                              <option value="<?php echo $val->id_gudang;?>"><?php echo $val->nama_gudang;?></option>
+                          <?php endforeach;?>
+                      </select>
+                    <span class="help-block"></span>
+                </div>
+                <div class="form-group col-sm-4">
                     <label for="lbl_namabarang" class="form-control-label">Kode Penerimaan :</label>
                     <input type="text" class="form-control" value="<?= $kode_trans; ?>" disabled>
                     <input type="hidden" class="form-control" id="kode_penerimaan" name="kode_penerimaan" value="<?= $kode_trans; ?>">

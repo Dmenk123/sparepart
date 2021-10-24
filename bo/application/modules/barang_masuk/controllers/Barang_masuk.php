@@ -11,6 +11,7 @@ class Barang_masuk extends CI_Controller {
 		}
 
 		$this->load->model('t_penerimaan');
+		$this->load->model('t_pembelian');
 		$this->load->model('m_user');
 		$this->load->model('m_global');
 		$this->load->model('set_role/m_set_role', 'm_role');
@@ -58,7 +59,7 @@ class Barang_masuk extends CI_Controller {
 			$row = array();
 			//loop value tabel db
 			$row[] = $no;
-			$row[] = DateTime::createFromFormat('Y-m-d H:i:s', $value->tanggal)->format('d-m-Y');
+			$row[] = $value->tanggal;
 			$row[] = $value->kode_penerimaan;
 			$row[] = $value->nama_perusahaan;
 			$row[] = $value->kode_pembelian;
@@ -114,6 +115,7 @@ class Barang_masuk extends CI_Controller {
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
 			'data_beli' => $this->m_global->getSelectedData('t_pembelian', array('deleted_at' => NULL, 'is_terima_all' => NULL)),
+			'data_gudang' => $this->m_global->multi_row('*', ['deleted_at' => null], 'm_gudang', null, 'nama_gudang'),
 			'kode_trans'=> generate_kode_transaksi($tgl, $counter_penerimaan, 'RCV'),
 			'mode'		=> 'add',
 		);
@@ -235,6 +237,7 @@ class Barang_masuk extends CI_Controller {
 			'id_pembelian' 	=> $id_pembelian,
 			'kode_penerimaan' => $kode_penerimaan_fix,
 			'id_user' 	=> $this->session->userdata('id_user'),
+			'id_gudang' => $this->input->post('id_gudang'),
 			'tanggal' 	=> $tgl,
 			'total_harga' => 0,
 			'created_at' => $timestamp,
@@ -265,8 +268,10 @@ class Barang_masuk extends CI_Controller {
             ?>
             <tr>
                 <td width="10%">
-					<input type="number" min="1" max="<?=$row->qty;?>" class="form-control" width="5" id="qty_order_<?php echo $row->id_pembelian_det;?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id_pembelian_det ?>)">
-					<input type="hidden" class="form-control kelas_htotal" name="harga_total_raw_<?php echo $row->id_pembelian_det;?>" id="harga_total_raw_<?php echo $row->id_pembelian_det;?>" value="<?php echo $row->harga_total_fix; ?>">
+					<input type="number" min="1" max="<?=$row->qty;?>" class="form-control" width="5" id="qty_order_<?php echo $row->id_pembelian_det;?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id_pembelian_det ?>)" name="qty[]">
+					<input type="hidden" class="form-control kelas_htotal" name="harga_total_raw[]" id="harga_total_raw_<?php echo $row->id_pembelian_det;?>" value="<?php echo $row->harga_total_fix; ?>">
+					<input type="hidden" class="form-control" value="<?php echo $row->id_pembelian_det; ?>" name="pembelian_det[]">
+					<input type="hidden" class="form-control" value="<?php echo $row->id_barang; ?>" name="id_barang[]">
 				</td>
                 <td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
                 <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_fix); ?></td>
@@ -278,52 +283,51 @@ class Barang_masuk extends CI_Controller {
 	}
 
 	// public function hapus_trans_detail() {
-	// 	try {
-	// 		$this->db->trans_begin();
+		// 	try {
+		// 		$this->db->trans_begin();
 
-	// 		$id = $this->input->post('id');
-	// 		$pembelian_det = $this->m_global->getSelectedData('t_pembelian_det', array('id_pembelian_det' => $id))->row();
+		// 		$id = $this->input->post('id');
+		// 		$pembelian_det = $this->m_global->getSelectedData('t_pembelian_det', array('id_pembelian_det' => $id))->row();
 
-	// 		$id_pembelian = $pembelian_det->id_pembelian;
+		// 		$id_pembelian = $pembelian_det->id_pembelian;
 
-	// 		$pembelian     = $this->m_global->getSelectedData('t_pembelian', array('id_pembelian' => $id_pembelian))->row();
+		// 		$pembelian     = $this->m_global->getSelectedData('t_pembelian', array('id_pembelian' => $id_pembelian))->row();
 
-	// 		$kode_pembelian = $pembelian->kode_pembelian;
+		// 		$kode_pembelian = $pembelian->kode_pembelian;
 
-	// 		$del = $this->m_global->force_delete(['id_pembelian_det' => $id], 't_pembelian_det');
+		// 		$del = $this->m_global->force_delete(['id_pembelian_det' => $id], 't_pembelian_det');
 
-	// 		$hasil_total = $this->t_pembelian->getTotalPembelian($id_pembelian)->row();
-	// 		$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $hasil_total->total], ['id_pembelian' => $id_pembelian]);
-		
-	// 		$upd_laporan = $this->lib_mutasi->updateDataLap($hasil_total->total ,1, $kode_pembelian);
-				
-	// 		if($upd_laporan['status'] == false) {
-	// 			$this->db->trans_rollback();
-	// 			$retval['status'] = false;
-	// 			$retval['pesan'] = 'Gagal menghapus detail Pembelian';
-	// 			return;
-	// 		}
+		// 		$hasil_total = $this->t_pembelian->getTotalPembelian($id_pembelian)->row();
+		// 		$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $hasil_total->total], ['id_pembelian' => $id_pembelian]);
+			
+		// 		$upd_laporan = $this->lib_mutasi->updateDataLap($hasil_total->total ,1, $kode_pembelian);
+					
+		// 		if($upd_laporan['status'] == false) {
+		// 			$this->db->trans_rollback();
+		// 			$retval['status'] = false;
+		// 			$retval['pesan'] = 'Gagal menghapus detail Pembelian';
+		// 			return;
+		// 		}
 
-	// 		if ($this->db->trans_status() === FALSE) {
-	// 			$this->db->trans_rollback();
-	// 			$retval['status'] = false;
-	// 			$retval['pesan'] = 'Gagal menghapus detail Pembelian';
-	// 		} else {
-	// 			$this->db->trans_commit();
-	// 			$retval['status'] = true;
-	// 			$retval['pesan'] = 'Sukses menghapus detail Pembelian';
-	// 		}
-	// 	} catch (\Throwable $th) {
-	// 		$this->db->trans_rollback();
-	// 		$retval['status'] = false;
-	// 		$retval['pesan'] = $th;
-	// 	}
-		
+		// 		if ($this->db->trans_status() === FALSE) {
+		// 			$this->db->trans_rollback();
+		// 			$retval['status'] = false;
+		// 			$retval['pesan'] = 'Gagal menghapus detail Pembelian';
+		// 		} else {
+		// 			$this->db->trans_commit();
+		// 			$retval['status'] = true;
+		// 			$retval['pesan'] = 'Sukses menghapus detail Pembelian';
+		// 		}
+		// 	} catch (\Throwable $th) {
+		// 		$this->db->trans_rollback();
+		// 		$retval['status'] = false;
+		// 		$retval['pesan'] = $th;
+		// 	}
+			
 
-	// 	echo json_encode($retval);
+		// 	echo json_encode($retval);
 
 	// }
-
 
 	public function simpan_penerimaan_barang()
 	{
@@ -333,83 +337,94 @@ class Barang_masuk extends CI_Controller {
 			$obj_date = new DateTime();
 			$timestamp = $obj_date->format('Y-m-d H:i:s');
 			$tgl = $obj_date->format('Y-m-d');
-			$arr_valid = $this->rule_validasi_pembelian();
 			
-			$id_agen = $this->input->post('id_agen');
+			$id_penerimaan = $this->input->post('id_penerimaan');
 			$id_pembelian = $this->input->post('id_pembelian');
-			$id_barang 	= $this->input->post('id_barang');
-			$qty      = $this->input->post('qty');
+			$kode_penerimaan = $this->input->post('kode_penerimaan');
+			
+			$cek_penerimaan = $this->m_global->single_row("*", ['id_penerimaan' => $id_penerimaan, 'deleted_at' => null], 't_penerimaan');
 
-			$harga 	    	= trim($this->input->post('hsat'));
+			$sum_harga_total = 0;
+			for ($i=0; $i < count($this->input->post('qty')); $i++) { 
+				$sum_harga_total += $this->input->post('harga_total_raw')[$i];
+				
+				$joni = [ 
+					['table' => 't_pembelian', 'on'	=> 't_pembelian_det.id_pembelian = t_pembelian.id_pembelian'],
+				];
 
-			$diskon    		= str_replace('%', '', $this->input->post('dis'));
-			$diskon    		= str_replace(',', '.', $diskon);
+				$cek_pembelian_det = $this->m_global->single_row("t_pembelian_det.*, t_pembelian.kode_pembelian", ['id_pembelian_det' => $this->input->post('pembelian_det')[$i], 't_pembelian_det.deleted_at' => null], 't_pembelian_det', $joni);
 
-			if ($diskon > 0) {
-				$nilai = ($diskon / 100) * $harga;
-			} else {
-				$nilai = 0;
+				### insert penerimaan det
+				$arr_penerimaan_det = [
+					'qty' => $this->input->post('qty')[$i],
+					'id_penerimaan' => $id_penerimaan,
+					'id_barang' => $this->input->post('id_barang')[$i],
+					'harga' => $cek_pembelian_det->harga,
+					'harga_total' => $this->input->post('harga_total_raw')[$i],
+					'created_at' => $timestamp,
+				];
+
+				$insert_det = $this->m_global->save($arr_penerimaan_det, 't_penerimaan_det');
+				
+				#### update pembelian det
+				$where_update = ['id_pembelian_det' => $this->input->post('pembelian_det')[$i]];
+				$data_update['qty_terima'] = $this->input->post('qty')[$i];
+				$data_update['tgl_terima'] = $tgl;
+				$data_update['reff_terima'] = $kode_penerimaan;
+
+				### cek qty tabel pembelian det, jika qty penerimaan / sum penerimaan sesuai jumlah, set flag is_terima
+				if($cek_pembelian_det->qty == $this->t_penerimaan->sum_barang_masuk_pertransaksi($this->input->post('id_barang')[$i], $id_penerimaan)) {
+					$data_update['is_terima'] = 1;
+				} 
+
+				$update = $this->t_pembelian->updatePembelianDet($where_update, $data_update);
+
+				#### mutasi
+				$mutasi = $this->lib_mutasi->mutasiMasuk(
+					$this->input->post('id_barang')[$i], 
+					$this->input->post('qty')[$i], 
+					null, 
+					4, 
+					null, 
+					$cek_pembelian_det->harga, 
+					$cek_penerimaan->id_gudang, 
+					$cek_penerimaan->kode_penerimaan
+				);
+
+				#### insert laporan keuangan (pengurangan piutang pembelian)
+				$lap = $this->lib_mutasi->insertDataLap(
+					$this->input->post('harga_total_raw')[$i], 
+					4, 
+					$cek_pembelian_det->kode_pembelian
+				);
+				
 			}
 
-			$harga_satuan 	= $harga - $nilai;
-
-			if ($arr_valid['status'] == FALSE) {
-				echo json_encode($arr_valid);
-				return;
-			}
-			
-			$sub_total = $harga_satuan * $qty;
-
-			$cek_header = $this->m_global->single_row("*", ['id_pembelian' => $id_pembelian, 'deleted_at' => null], 't_pembelian');
-
-			$data_detail = [
-				'id_pembelian' => $id_pembelian,
-				'id_barang' => $id_barang,
-				'qty' => $qty,
-				'harga' => $harga,
-				'disc' => $nilai,
-				'disc_persen' => $diskon,
-				'harga_fix' => $harga_satuan,
-				'harga_total_fix' => $sub_total,
-				'created_at' => $timestamp
-			];
-
-			$insert_detail = $this->m_global->save($data_detail, 't_pembelian_det');
-
-			$q_grand_total = $this->t_pembelian->getTotalPembelian($id_pembelian)->row();
-			$q_disc_total = $this->t_pembelian->getTotalDiskon($id_pembelian)->row();
-
-			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $q_grand_total->total, 'total_disc' => $q_disc_total->disc_total, 'updated_at' => $timestamp], ['id_pembelian' => $id_pembelian]);
-			
-			$ins_laporan = $this->lib_mutasi->insertDataLap($q_grand_total->total ,1, $cek_header->kode_pembelian);
-			
-			if($ins_laporan['status'] == false) {
-				$this->db->trans_rollback();
-				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal menambahkan Pembelian';
-				return;
-			}
+			### update t_penerimaan (total_harga)
+			$data_where = ['id_penerimaan' => $id_penerimaan];
+			$this->m_global->update('t_penerimaan', ['total_harga' => $sum_harga_total + $cek_penerimaan->total_harga], $data_where);
 
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();
 				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal menambahkan Pembelian';
+				$retval['pesan'] = 'Gagal menambahkan Penerimaan';
 			} else {
 				$this->db->trans_commit();
 				$retval['status'] = true;
-				$retval['pesan'] = 'Sukses menambahkan Pembelian';
+				$retval['pesan'] = 'Sukses menambahkan Penerimaan';
 			}
 
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses menambahkan Penerimaan';
 			
 		} catch (\Throwable $th) {
-			$this->db->trans_rollback();
+			// $this->db->trans_rollback();
 			$retval['status'] = false;
 			$retval['pesan'] = $th;
 		}
 
 		echo json_encode($retval);
 	}
-
 
 	public function change_qty()
 	{
@@ -551,46 +566,17 @@ class Barang_masuk extends CI_Controller {
 			$data['status'] = FALSE;
 		}
 
+		if ($this->input->post('id_gudang') == '') {
+			$data['inputerror'][] = 'id_gudang';
+			$data['error_string'][] = 'Wajib Memilih Gudang';
+			$data['status'] = FALSE;
+		}
+
 		if ($this->input->post('kode_penerimaan') == '') {
 			$data['inputerror'][] = 'kode_penerimaan';
 			$data['error_string'][] = 'Wajib Menginputkan kode penerimaan';
 			$data['status'] = FALSE;
 		}
-
-		return $data;
-	}
-
-	private function rule_validasi_pembelian($is_update = false, $skip_pass = false)
-	{
-		$data = array();
-		$data['error_string'] = array();
-		$data['inputerror'] = array();
-		$data['status'] = TRUE;
-
-		if ($this->input->post('id_barang') == '') {
-			$data['inputerror'][] = 'id_barang';
-			$data['error_string'][] = 'Wajib Memilih Barang';
-			$data['status'] = FALSE;
-		}
-
-		if ($this->input->post('qty') == '') {
-			$data['inputerror'][] = 'qty';
-			$data['error_string'][] = 'Wajib Menginputkan qty';
-			$data['status'] = FALSE;
-		}
-
-		// if ($this->input->post('dis') == '') {
-		// 	$data['inputerror'][] = 'dis';
-		// 	$data['error_string'][] = 'Wajib Menginputkan diskon';
-		// 	$data['status'] = FALSE;
-		// }
-
-		if ($this->input->post('hsat') == '') {
-			$data['inputerror'][] = 'hsat';
-			$data['error_string'][] = 'Wajib Menginputkan satuan';
-			$data['status'] = FALSE;
-		}
-
 
 		return $data;
 	}
@@ -625,10 +611,6 @@ class Barang_masuk extends CI_Controller {
 	}
 
 	// ===============================================
-
-
-
-
 
 	public function update_new_invoice()
 	{
@@ -677,15 +659,6 @@ class Barang_masuk extends CI_Controller {
 		echo json_encode($retval);
 	}
 	
-	
-	
-
-	
-
-	
-	
-	
-	
 	function generateRandomString($tgl) {
 		$bulan      = date('m', strtotime($tgl));
 		$tgl_date   = date('d', strtotime($tgl));
@@ -717,10 +690,6 @@ class Barang_masuk extends CI_Controller {
 		return $no_faktur;
 	}
 
-	
-
-	
-
 	public function cetak_invoice()
 	{
 		$order_id = $this->input->get('order_id');
@@ -728,6 +697,4 @@ class Barang_masuk extends CI_Controller {
 		$data['invoice'] = $this->m_penjualan->getPenjualanDet($pen->id_penjualan)->result();
 		$this->load->view('view_cetak_invoice_penjualan', $data);
 	}
-
-	
 }
