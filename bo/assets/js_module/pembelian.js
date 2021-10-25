@@ -59,38 +59,6 @@ function add_menu()
 	$('#modal_title').text('Tambah Master Agen'); 
 }
 
-function edit_agen(id)
-{
-    reset_modal_form();
-    save_method = 'update';
-    //Ajax Load data from ajax
-    $.ajax({
-        url : base_url + 'master_agen/edit_agen',
-        type: "POST",
-        dataType: "JSON",
-        data : {id:id},
-        success: function(data)
-        {
-            // data.data_menu.forEach(function(dataLoop) {
-            //     $("#parent_menu").append('<option value = '+dataLoop.id+' class="append-opt">'+dataLoop.nama+'</option>');
-            // });
-            $('[name="id_agen"]').val(data.old_data.id_agen);
-            $('[name="nama_pers"]').val(data.old_data.nama_perusahaan);
-            $('[name="produk"]').val(data.old_data.produk);
-            $('[name="alamat"]').val(data.old_data.alamat);
-            $('[name="telp"]').val(data.old_data.telp);
-    
-            $('#modal_agen_form').modal('show');
-	        $('#modal_title').text('Edit Master Agen'); 
-            // console.log(data.foto_encoded);
-        },
-        error: function (jqXHR, textStatus, errorThrown)
-        {
-            alert('Error get data from ajax');
-        }
-    });
-}
-
 function edit_pembelian(kode)
 {
   window.location.href = base_url +'pembelian/add_pembelian?kode_pembelian='+kode+'&update=true';
@@ -115,7 +83,7 @@ function simpanedit()
 {
   swalConfirmDelete.fire({
     title: 'Perhatian',
-    text: "Apakah Anda ingin Menyimpan Invoice ini ?",
+    text: "Apakah Anda ingin Menyimpan Pembelian ini ?",
     type: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya !',

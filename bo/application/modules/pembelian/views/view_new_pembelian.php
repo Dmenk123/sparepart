@@ -58,7 +58,7 @@
     
         <form id="form-user" name="form-user">
             <div class="row">
-                <div class="form-group col-sm-6">
+                <div class="form-group col-sm-4">
                     <input type="hidden" class="form-control" id="id_pembelian" name="id_pembelian"  value="<?php $value = (isset($id_pembelian))?$id_pembelian:''; echo $value; ?>">
                     <input type="hidden" class="form-control" id="mode" name="mode" value="<?php echo $mode;?>">
                     <label for="lbl_username" class="form-control-label">Agen:</label>
@@ -70,7 +70,18 @@
                         </select>
                     <span class="help-block"></span>
                 </div>
-                <div class="form-group col-sm-6">
+
+                <div class="form-group col-sm-4">
+                    <label for="" class="form-control-label">Metode Pembayaran:</label>
+                        <select name="method_bayar" id="method_bayar" class="form-control select2">
+                            <option value="">-PILIH-</option>
+                            <option value="1">Cash</option>
+                            <option value="2">Kredit</option>
+                        </select>
+                    <span class="help-block"></span>
+                </div>
+
+                <div class="form-group col-sm-4">
                     <label for="lbl_namabarang" class="form-control-label">Kode Transaksi :</label>
                     <input type="text" class="form-control" value="<?= $kode_trans; ?>" disabled>
                     <input type="hidden" class="form-control" id="kode_pembelian" name="kode_pembelian" value="<?= $kode_trans; ?>">

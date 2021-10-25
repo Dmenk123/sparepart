@@ -187,6 +187,7 @@ class Pembelian extends CI_Controller {
 			$data['title'] = 'Pembelian Baru';
 		}
 
+		$data['pembelian']  = $cek_kode;
 		$data['kode_trans']  = $kode;
 		$data['id_pembelian']  = $cek_kode->id_pembelian;
 		$data['id_agen']  = $cek_kode->id_agen;
@@ -218,8 +219,9 @@ class Pembelian extends CI_Controller {
 		$tgl = $obj_date->format('Y-m-d');
 		$arr_valid = $this->rule_validasi();
 
-		$id_agen 				= $this->input->post('id_agen');
+		$id_agen 			= $this->input->post('id_agen');
 		$kode_pembelian 	= $this->input->post('kode_pembelian');
+		$is_kredit 			= ($this->input->post('method_bayar') == '2') ? 1 : null;
 
 		$counter_pembelian = $this->t_pembelian->get_max_pembelian();
 		$cek_kode = generate_kode_transaksi($tgl, $counter_pembelian, 'ORD');
@@ -229,6 +231,15 @@ class Pembelian extends CI_Controller {
 			$kode_pembelian_fix = $kode_pembelian;
 		}else{
 			$kode_pembelian_fix = $cek_kode;
+		}
+
+		### jika is_kredit flag is_lunas = null
+		if($is_kredit == 1) {
+			$is_lunas = null;
+			$tgl_lunas = null;
+		}else{
+			$is_lunas = 1;
+			$tgl_lunas = $tgl;
 		}
 
 		if ($arr_valid['status'] == FALSE) {
@@ -245,6 +256,9 @@ class Pembelian extends CI_Controller {
 			'tanggal' 	=> $tgl,
 			'total_pembelian' => 0,
 			'total_disc'     => 0,
+			'is_kredit'	=> $is_kredit,
+			'is_lunas' => $is_lunas,
+			'tgl_lunas' => $tgl_lunas,
 			'created_at' => $timestamp,
 		];
 
@@ -253,11 +267,11 @@ class Pembelian extends CI_Controller {
 		if ($this->db->trans_status() === FALSE) {
 			$this->db->trans_rollback();
 			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan Data Invoice';
+			$retval['pesan'] = 'Gagal menambahkan Data Pembelian';
 		} else {
 			$this->db->trans_commit();
 			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Menambahkan Data Invoice';
+			$retval['pesan'] = 'Sukses Menambahkan Data Pembelian';
 			$retval['kode'] = $kode_pembelian_fix;
 		}
 
@@ -427,10 +441,10 @@ class Pembelian extends CI_Controller {
 			$obj_date = new DateTime();
 			$timestamp = $obj_date->format('Y-m-d H:i:s');
 			$tgl = $obj_date->format('Y-m-d');
-			$id_pembelian = $this->input->post('id');
+			$kode_pembelian = $this->input->post('id');
 			
-			$cek_header = $this->m_global->single_row("*", ['id_pembelian' => $id_pembelian, 'deleted_at' => null], 't_pembelian');
-
+			$cek_header = $this->m_global->single_row("*", ['kode_pembelian' => $kode_pembelian, 'deleted_at' => null], 't_pembelian');
+			
 			if(!$cek_header) {
 				$this->db->trans_rollback();
 				$retval['status'] = false;
@@ -440,8 +454,13 @@ class Pembelian extends CI_Controller {
 			}
 
 			### harddeletes
-			$update = $this->m_global->force_delete(['id_pembelian' => $id_pembelian], 't_pembelian');
-			$update_lap = $this->m_global->force_delete(['id_kategori_trans' => 1, 'kode_reff' => $cek_header->kode_pembelian], 't_lap_keuangan');
+			$del = $this->m_global->force_delete(['id_pembelian' => $cek_header->id_pembelian], 't_pembelian');
+
+			$cek_lap_keu = $this->m_global->single_row("*", ['id_kategori_trans' => 1, 'kode_reff' => $cek_header->kode_pembelian], 't_lap_keuangan');
+			if($cek_lap_keu) {
+				$del_lap = $this->m_global->force_delete(['id_kategori_trans' => 1, 'kode_reff' => $cek_header->kode_pembelian], 't_lap_keuangan');
+			}
+			
 
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();

@@ -63,11 +63,12 @@
                    
         <div class="row invoice-info">
             <div class="col-sm-6 invoice-col">
-                <b>Kode Pembelian #<?= (isset($agen->nama_perusahaan)) ? $kode_trans : '-';?></b><br>
+                <b>Kode Pembelian : <?= (isset($agen->nama_perusahaan)) ? $kode_trans : '-';?></b><br>
                 <b>Agen :</b> <?= (isset($agen->nama_perusahaan)) ? $agen->nama_perusahaan : "";?><br>
             </div><!-- /.col -->
             <div class="col-sm-6 invoice-col">
-                <b>Petugas :</b>  <?= $data_user[0]->nama;?>
+                <b>Petugas :</b>  <?= $data_user[0]->nama;?><br>
+                <b>Metode Pembayaran :</b> <?= (isset($pembelian->is_kredit)) ? 'Kredit' : "Cash";?><br>
             </div><!-- /.col -->
         </div>
 
