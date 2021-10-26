@@ -96,11 +96,18 @@ class M_global extends CI_Model
 		return $this->db->get($table)->num_rows();
 	}
     
-    function max($field, $table){
-        $q =$this->db->select_max($field);
-        $q = $this->db->get($table); 
+  
+    function max($field, $table, $array_where = null)
+    {
+        $this->db->select_max($field);
+
+        if (isset($array_where)) {
+            $this->db->where($array_where);
+        }
+
+        $q = $this->db->get($table);
         return $q->row();
-	}
+    }
 
 	public function getSelectedData($table,$datawhere,$data_like=null, $datawhere_or = null, $datawhere1=null,$wherein=null,$where_in=null,$in=null,$where_sekda=null,$datalike_or=null,$not_in=null,$not_like=null)
     {

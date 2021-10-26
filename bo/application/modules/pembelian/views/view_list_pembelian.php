@@ -39,6 +39,7 @@
               <th>Kode</th>
               <th>Supplier</th>
               <th>Total Harga</th>
+              <th>Metode</th>
               <th>Status</th>
               <th style="width: 5%;">Aksi</th>
             </tr>

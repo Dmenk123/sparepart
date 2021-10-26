@@ -62,6 +62,7 @@ class Pembelian extends CI_Controller {
 			$row[] = $value->kode_pembelian;
 			$row[] = $value->nama_perusahaan;
 			$row[] = number_format($value->total_pembelian);
+			$row[] = $value->metode_bayar;
 			$row[] = $value->status_terima;
 
 			$str_aksi = '
@@ -294,6 +295,7 @@ class Pembelian extends CI_Controller {
 			$qty      = $this->input->post('qty');
 
 			$harga 	    	= trim($this->input->post('hsat'));
+			$harga    		= str_replace('.', '', $harga);
 
 			$diskon    		= str_replace('%', '', $this->input->post('dis'));
 			$diskon    		= str_replace(',', '.', $diskon);
@@ -334,7 +336,7 @@ class Pembelian extends CI_Controller {
 
 			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $q_grand_total->total, 'total_disc' => $q_disc_total->disc_total, 'updated_at' => $timestamp], ['id_pembelian' => $id_pembelian]);
 			
-			$ins_laporan = $this->lib_mutasi->insertDataLap($q_grand_total->total ,1, $cek_header->kode_pembelian);
+			$ins_laporan = $this->lib_mutasi->insertDataLap($q_grand_total->total ,1, $cek_header->kode_pembelian, $cek_header->is_kredit);
 			
 			if($ins_laporan['status'] == false) {
 				$this->db->trans_rollback();
@@ -500,7 +502,12 @@ class Pembelian extends CI_Controller {
 			$hasil_total = $this->t_pembelian->getTotalPembelian($id_pembelian)->row();
 			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $hasil_total->total], ['id_pembelian' => $id_pembelian]);
 		
-			$upd_laporan = $this->lib_mutasi->updateDataLap($hasil_total->total ,1, $kode_pembelian);
+			$upd_laporan = $this->lib_mutasi->updateDataLap(
+				$hasil_total->total,
+				1, 
+				$kode_pembelian,
+				$pembelian->is_kredit,
+			);
 				
 			if($upd_laporan['status'] == false) {
 				$this->db->trans_rollback();

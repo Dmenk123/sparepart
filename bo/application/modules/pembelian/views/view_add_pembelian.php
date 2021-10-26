@@ -149,12 +149,11 @@
 
         <!-- this row will not appear when printing -->
         <div class="row no-print">
+          <div class="col-sm-6">
+              <a class="btn btn-default pull-left" href="<?=base_url($this->uri->segment(1));?>"><i class="fa fa-arrow-left"></i> Kembali</a>
+            </div>
             <div class="col-sm-6">
-                <!-- <a href="" class="btn btn-default"><i class="fa fa-print"></i> Print</a>
-                <button class="btn btn-primary center" style="margin-right: 5px;"><i class="fa fa-download"></i> Generate PDF</button>
-                  -->
-                
-                <button class="btn btn-success pull-right" ><i class="fa fa-credit-card"></i> Submit Payment</button>
+              <button class="btn btn-success pull-right" ><i class="fa fa-credit-card"></i> Submit Payment</button>
             </div>
         </div>
        

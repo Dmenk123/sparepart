@@ -161,7 +161,7 @@ if ( ! function_exists('generate_kode_transaksi'))
         }
 
         $txt_urut = sprintf("%03s", $counter);
-        return $singkatan.'-'.$txt_bln.$d.$txt_urut.$y;
+        return $singkatan.'-'.$txt_bln.$d.$y.$txt_urut;
     }
 }
 ?>

@@ -11,6 +11,8 @@ class T_pembelian extends CI_Model
 		'pb.kode_pembelian',
 		'm_agen.nama_perusahaan',
 		'pb.total_pembelian',
+		'metode_bayar',
+		'status_terima',
 		null
 	];
 
@@ -28,6 +30,7 @@ class T_pembelian extends CI_Model
 		$this->db->select("
 			pb.*,
 			m_agen.nama_perusahaan,
+			CASE WHEN pb.is_kredit = 1 THEN 'Kredit' ELSE 'Cash' END as metode_bayar,
 			CASE WHEN pb.is_terima_all = 1 THEN 'Lunas' ELSE '-' END as status_terima
 		");
 		$this->db->from('t_pembelian pb');
@@ -50,13 +53,15 @@ class T_pembelian extends CI_Model
 				}
 				else
 				{
-					if($item == 'penjamin') {
+					if($item == 'status_terima') {
 						/**
 						 * param both untuk wildcard pada awal dan akhir kata
 						 * param false untuk disable escaping (karena pake subquery)
 						 */
-						$this->db->or_like('(CASE WHEN pl.is_terima_all = 1 THEN \'Lunas\' ELSE \'-\' END)', $_POST['search']['value'],'both',false);
-					}else{
+						$this->db->or_like('(CASE WHEN pb.is_terima_all = 1 THEN \'Lunas\' ELSE \'-\' END)', $_POST['search']['value'],'both',false);
+					} elseif ($item == 'metode_bayar') {
+						$this->db->or_like('(CASE WHEN pb.is_kredit = 1 THEN \'Kredit\' ELSE \'Cash\' END)', $_POST['search']['value'], 'both', false);
+					} else{
 						$this->db->or_like($item, $_POST['search']['value']);
 					}
 				}
