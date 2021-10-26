@@ -457,6 +457,7 @@ class Pembelian extends CI_Controller {
 
 			### harddeletes
 			$del = $this->m_global->force_delete(['id_pembelian' => $cek_header->id_pembelian], 't_pembelian');
+			$del_det = $this->m_global->force_delete(['id_pembelian' => $cek_header->id_pembelian], 't_pembelian_det');
 
 			$cek_lap_keu = $this->m_global->single_row("*", ['id_kategori_trans' => 1, 'kode_reff' => $cek_header->kode_pembelian], 't_lap_keuangan');
 			if($cek_lap_keu) {
@@ -612,7 +613,8 @@ class Pembelian extends CI_Controller {
 		$cek_mutasi = $q_mutasi->row();
 		
 		if($cek_mutasi) {
-			$hpp = $cek_mutasi->hpp;
+			// $hpp = number_format((float)$cek_mutasi->hpp, 2, '.', '');
+			$hpp = (int)$cek_mutasi->hpp;
 		}else{
 			#####
 			$hpp = 0;

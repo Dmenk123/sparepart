@@ -38,7 +38,8 @@ $(document).ready(function() {
           data: {id_barang:data.id},
           dataType: "json",
           success: function (response) {
-            $('#hsat').val(response.hpp);
+            // $('#hsat').val(response.hpp);
+            $('#hsat').mask('000.000.000.000', {reverse: true}).val(response.hpp).trigger('input');
           }
         });
     });
