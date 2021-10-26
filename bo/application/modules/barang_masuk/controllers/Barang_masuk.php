@@ -70,10 +70,10 @@ class Barang_masuk extends CI_Controller {
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
 						<button class="dropdown-item" onclick="detail_penerimaan(\''.$value->kode_penerimaan.'\')">
-							<i class="la la-desktop"></i> Lihat Pembelian
+							<i class="la la-desktop"></i> Lihat Penerimaan
 						</button>
 						<button class="dropdown-item" onclick="edit_penerimaan(\''.$value->kode_penerimaan.'\')">
-							<i class="la la-pencil"></i> Edit Pembelian
+							<i class="la la-pencil"></i> Edit Penerimaan
 						</button>
 						<button class="dropdown-item" onclick="delete_penerimaan(\''.$value->kode_penerimaan.'\')">
 							<i class="la la-trash"></i> Hapus
@@ -162,7 +162,8 @@ class Barang_masuk extends CI_Controller {
 			['table' => 't_pembelian', 'on'	=> 't_penerimaan.id_pembelian = t_pembelian.id_pembelian'],
 			['table' => 'm_agen', 'on' => 't_pembelian.id_agen = m_agen.id_agen']
 		];
-		$cek_kode = $this->m_global->single_row('t_penerimaan.*, t_pembelian.kode_pembelian, m_agen.nama_perusahaan', ['kode_penerimaan' => $kode, 't_penerimaan.deleted_at' => null], 't_penerimaan', $join);
+		$cek_kode = $this->m_global->single_row('t_penerimaan.*, t_pembelian.kode_pembelian, t_pembelian.tanggal as tanggal_beli, m_agen.nama_perusahaan', ['kode_penerimaan' => $kode, 't_penerimaan.deleted_at' => null], 't_penerimaan', $join);
+
 		if(!$cek_kode) {
 			return redirect('barang_masuk');
 		}
@@ -352,14 +353,14 @@ class Barang_masuk extends CI_Controller {
 					['table' => 't_pembelian', 'on'	=> 't_pembelian_det.id_pembelian = t_pembelian.id_pembelian'],
 				];
 
-				$cek_pembelian_det = $this->m_global->single_row("t_pembelian_det.*, t_pembelian.kode_pembelian", ['id_pembelian_det' => $this->input->post('pembelian_det')[$i], 't_pembelian_det.deleted_at' => null], 't_pembelian_det', $joni);
+				$cek_pembelian_det = $this->m_global->single_row("t_pembelian_det.*, t_pembelian.kode_pembelian, t_pembelian.is_kredit", ['id_pembelian_det' => $this->input->post('pembelian_det')[$i], 't_pembelian_det.deleted_at' => null], 't_pembelian_det', $joni);
 
 				### insert penerimaan det
 				$arr_penerimaan_det = [
 					'qty' => $this->input->post('qty')[$i],
 					'id_penerimaan' => $id_penerimaan,
 					'id_barang' => $this->input->post('id_barang')[$i],
-					'harga' => $cek_pembelian_det->harga,
+					'harga' => $cek_pembelian_det->harga_fix,
 					'harga_total' => $this->input->post('harga_total_raw')[$i],
 					'created_at' => $timestamp,
 				];
@@ -386,7 +387,7 @@ class Barang_masuk extends CI_Controller {
 					null, 
 					4, 
 					null, 
-					$cek_pembelian_det->harga, 
+					$cek_pembelian_det->harga_fix, 
 					$cek_penerimaan->id_gudang, 
 					$cek_penerimaan->kode_penerimaan
 				);
@@ -395,7 +396,8 @@ class Barang_masuk extends CI_Controller {
 				$lap = $this->lib_mutasi->insertDataLap(
 					$this->input->post('harga_total_raw')[$i], 
 					4, 
-					$cek_pembelian_det->kode_pembelian
+					$cek_pembelian_det->kode_pembelian,
+					$cek_pembelian_det->is_kredit
 				);
 				
 			}

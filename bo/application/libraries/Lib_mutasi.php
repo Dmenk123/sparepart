@@ -59,7 +59,7 @@ class Lib_mutasi extends CI_Controller {
          	{
 				### ambil last id pada t_stok_mutasi
 				// $id_stok_mutasi_det = d_stock_mutation::where('sm_item',$item)->where('sm_comp',$comp)->where('sm_position',$position)->max('sm_detailid')+$k+1;
-				$max_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', ['id_stok_mutasi' => $getBarang[$k]->id_stok, 'id_barang' => $id_barang]);
+				$max_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', ['id_stok' => $getBarang[$k]->id_stok, 'id_barang' => $id_barang]);
 				$id_max_stok_mutasi_det = $max_mutasi_det->id_stok_mutasi_det + $k +1;
 
 				$totalQty = $getBarang[$k]->qty_sisa;                                  
@@ -355,7 +355,7 @@ class Lib_mutasi extends CI_Controller {
 				$this->_ci->m_global->update('t_stok', ['qty' => $qty], ['id_barang' => $id_barang, 'id_gudang' => $id_gudang, 'deleted_at' => null]);
 			}
 
-			$max_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', ['id_stok_mutasi' => $id_stok]);
+			$max_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', ['id_stok' => $id_stok]);
 			$id_max_stok_mutasi_det = $max_mutasi_det->id_stok_mutasi_det +1;
 
 			$newMutasi['id_stok'] = $id_stok;

@@ -63,11 +63,12 @@
                    
         <div class="row invoice-info">
             <div class="col-sm-6 invoice-col">
-                <b>Kode Pembelian # <?= (isset($data->kode_pembeliaan)) ? $data->kode_pembeliaan : '-';?></b><br>
+                <b>Kode Pembelian : <?= (isset($data->kode_pembelian)) ? $data->kode_pembelian : '-';?></b><br>
+                <b>Tanggal Pembelian : <?= (isset($data->tanggal_beli)) ? DateTime::createFromFormat('Y-m-d',$data->tanggal_beli)->format('d/m/Y') : '-';?></b><br>
                 <b>Agen :</b> <?= (isset($data->nama_perusahaan)) ? $data->nama_perusahaan : "";?><br>
             </div><!-- /.col -->
             <div class="col-sm-6 invoice-col">
-                <b>Kode Penerimaan # <?= (isset($data->kode_penerimaan)) ? $data->kode_penerimaan : '-';?></b><br>
+                <b>Kode Penerimaan : <?= (isset($data->kode_penerimaan)) ? $data->kode_penerimaan : '-';?></b><br>
                 <b>Petugas :</b>  <?= $data_user[0]->nama;?>
             </div><!-- /.col -->
         </div>
