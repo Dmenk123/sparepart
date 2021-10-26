@@ -40,7 +40,7 @@ class Log_harga extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => 'modal_log_harga',
+			'modal' => ['modal_log_harga','modal_detail_log'],
 			'js'	=> 'log_harga.js',
 			'view'	=> 'view_log_harga'
 		];
@@ -63,7 +63,7 @@ class Log_harga extends CI_Controller {
 			
 			$str_aksi = '
 				
-						<button class="btn btn-sm btn-primary" onclick="detail(\''.$log->id_barang.'\')">
+						<button class="btn btn-sm btn-primary" onclick="detail2(\''.$log->id_barang.'\')">
 							<i class="la la-navicon"></i> Log harga
 						</button>
 						
@@ -353,5 +353,32 @@ class Log_harga extends CI_Controller {
 	    //Convert whitespaces and underscore to dash
 	    $string = preg_replace("/[\s_]/", "-", $string);
 	    return $string;
+	}
+
+	function get_datatable_detail()
+    {
+		$id_log = $this->input->post('id_log');
+		$data_table = $this->m_log_harga->get_datatable_detail($id_log);
+		// var_dump($data_table); die();
+		$data = [];
+        foreach ($data_table as $key => $value) {
+			
+			$data[$key][] = $key+1;
+			$data[$key][] = $value->nama_barang;
+			$data[$key][] = 'Rp '.number_format($value->harga_jual); 
+			$data[$key][] = $value->tanggal; 
+			$data[$key][] = $value->nama_user;     
+			// $data[$key][] = $value->jenis_kelamin;
+			// $data[0][] = $value->created_at;
+			
+
+			
+		}
+		
+		// $this->output->enable_profiler(TRUE);
+
+        echo json_encode([
+            'data' => $data
+        ]);
 	}
 }

@@ -237,4 +237,20 @@ class M_log_harga extends CI_Model
 	{
 		$this->db->query("truncate table m_user");
 	}
+
+	public function get_datatable_detail($id)
+	{
+		$this->db->select('log.*,m.nama as nama_user, b.nama as nama_barang');
+		$this->db->from('t_log_harga_jual log');
+		$this->db->join('m_user m', 'm.id=log.created_by', 'left');
+		$this->db->join('m_barang b', 'b.id_barang=log.id_barang');
+		$this->db->where('log.id_barang', $id);
+		$this->db->order_by('id_log_harga_jual', 'desc');
+
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        }
+	}
 }

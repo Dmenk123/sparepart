@@ -50,9 +50,9 @@
 					</div>
 					
 					<div class="text-right p-t-8 p-b-31">
-						<a href="#">
+						<!-- <a href="#">
 							Forgot password?
-						</a>
+						</a> -->
 					</div>
 					
 					<div class="container-login100-form-btn">
@@ -64,7 +64,7 @@
 						</div>
 					</div>
 
-					<div class="txt1 text-center p-t-54 p-b-20">
+					<!-- <div class="txt1 text-center p-t-54 p-b-20">
 						<span>
 							Or Sign Up Using
 						</span>
@@ -82,7 +82,7 @@
 						<a href="#" class="login100-social-item bg3">
 							<i class="fa fa-google"></i>
 						</a>
-					</div>
+					</div> -->
 
 					<!-- <div class="flex-col-c p-t-155">
 						<span class="txt1 p-b-17">

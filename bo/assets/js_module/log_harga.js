@@ -232,3 +232,28 @@ function import_data_excel(){
         }
     });
 }
+
+function detail2(id)
+{
+    // alert('kesini');
+    $('#modal_detail').modal('show');
+	$('#modal_title2').text('Detail Log Harga Jual'); 
+    tableswab = $('#tabel_detail_log').DataTable({
+        processing: true,
+        serverSide: false,
+        bDestroy: true,
+        paging: true,
+        order: [],
+        columnDefs: [{
+            targets: [-1],
+            orderable: false,
+        }],
+        ajax: {
+            url: base_url + 'log_harga/get_datatable_detail',
+            type: "POST",
+            data: function(data) {
+                data.id_log = id
+            }
+        }
+    });
+}
