@@ -40,7 +40,7 @@ class Barang_masuk extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => null,
+			'modal' => 'modal_detail_barang_masuk',
 			'js'	=> 'penerimaan.js',
 			'view'	=> 'view_list_barang_masuk'
 		];
@@ -65,20 +65,32 @@ class Barang_masuk extends CI_Controller {
 			$row[] = $value->kode_pembelian;
 			$row[] = number_format($value->total_harga);
 
+			// $str_aksi = '
+			// 	<div class="btn-group">
+			// 		<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
+			// 		<div class="dropdown-menu">
+			// 			<button class="dropdown-item" onclick="detail_penerimaan(\''.$value->kode_penerimaan.'\')">
+			// 				<i class="la la-desktop"></i> Lihat Penerimaan
+			// 			</button>
+			// 			<button class="dropdown-item" onclick="edit_penerimaan(\''.$value->kode_penerimaan.'\')">
+			// 				<i class="la la-pencil"></i> Edit Penerimaan
+			// 			</button>
+			// 			<button class="dropdown-item" onclick="delete_penerimaan(\''.$value->kode_penerimaan.'\')">
+			// 				<i class="la la-trash"></i> Hapus
+			// 			</button>
+			// 		';
+
 			$str_aksi = '
-				<div class="btn-group">
-					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
-					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="detail_penerimaan(\''.$value->kode_penerimaan.'\')">
-							<i class="la la-desktop"></i> Lihat Penerimaan
-						</button>
-						<button class="dropdown-item" onclick="edit_penerimaan(\''.$value->kode_penerimaan.'\')">
-							<i class="la la-pencil"></i> Edit Penerimaan
-						</button>
-						<button class="dropdown-item" onclick="delete_penerimaan(\''.$value->kode_penerimaan.'\')">
-							<i class="la la-trash"></i> Hapus
-						</button>
-					';
+			<div class="btn-group">
+				<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
+				<div class="dropdown-menu">
+					<button class="dropdown-item" onclick="detail_penerimaan(\''.$value->kode_penerimaan.'\',\''.$value->id_penerimaan.'\')">
+						<i class="la la-desktop"></i> Lihat Penerimaan
+					</button>
+					<button class="dropdown-item" onclick="delete_penerimaan(\''.$value->kode_penerimaan.'\')">
+						<i class="la la-trash"></i> Hapus
+					</button>
+				';
 
 			$str_aksi .= '</div></div>';
 			$row[] = $str_aksi;
@@ -180,7 +192,8 @@ class Barang_masuk extends CI_Controller {
 		$retval = array(
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
-			'data' => $cek_kode
+			'data' => $cek_kode,
+			'is_update' => $is_update
 		);
 
 		if($is_update == 'true') {
@@ -263,26 +276,92 @@ class Barang_masuk extends CI_Controller {
 	public function fetch()
 	{
 		$id = $this->input->post('id');
-        $data = $this->t_penerimaan->getPembelianDet($id)->result();
+		$id_masuk = $this->input->post('idMasuk');
+		$flag_is_update = false;
+		$flag_has_transaksi = false;
+		$data_beli_det = null;
 		
-        foreach($data as $row){
-            ?>
+		$data_masuk = $this->t_penerimaan->getPenerimaanDet($id_masuk)->result();
+		
+		if($data_masuk == null) {			
+			### transaksi baru
+			$data = $this->t_penerimaan->getPembelianDet($id)->result();
+			$flag_has_transaksi = true;
+		}else{
+			### transaksi update
+			$data = $data_masuk;
+			$flag_is_update = true;
+		}
+        
+        foreach($data as $row){ 
+			$idx_row = ($flag_is_update) ? $row->id_penerimaan_det : $row->id_pembelian_det;
+			$harga = ($flag_is_update) ? $row->harga : $row->harga_fix;
+			$harga_total = ($flag_is_update) ? $row->harga_total : $row->harga_total_fix;
+
+			if($flag_has_transaksi) {
+				### qty pembelian - qty diterima (jika pembelian ini sudah pernah diterima)
+				$qty = $row->qty - $row->qty_terima;
+				### replace value harga_total
+				$harga_total = $qty * $harga;
+			}else{
+				$qty = $row->qty;
+			}
+
+			if(!$qty == 0) {  ?>
             <tr>
                 <td width="10%">
-					<input type="number" min="1" max="<?=$row->qty;?>" class="form-control" width="5" id="qty_order_<?php echo $row->id_pembelian_det;?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id_pembelian_det ?>)" name="qty[]">
-					<input type="hidden" class="form-control kelas_htotal" name="harga_total_raw[]" id="harga_total_raw_<?php echo $row->id_pembelian_det;?>" value="<?php echo $row->harga_total_fix; ?>">
-					<input type="hidden" class="form-control" value="<?php echo $row->id_pembelian_det; ?>" name="pembelian_det[]">
+					<input type="number" min="1" max="<?=$qty;?>" class="form-control" width="5" id="qty_order_<?php echo $idx_row;?>" value="<?php echo $qty; ?>" onchange="tes(<?php echo $idx_row ?>)" name="qty[]">
+					<input type="hidden" class="form-control kelas_htotal" name="harga_total_raw[]" id="harga_total_raw_<?php echo $idx_row;?>" value="<?php echo $harga_total; ?>">
+					<input type="hidden" class="form-control" value="<?php echo $idx_row; ?>" name="pembelian_det[]">
 					<input type="hidden" class="form-control" value="<?php echo $row->id_barang; ?>" name="id_barang[]">
 				</td>
                 <td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
-                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_fix); ?></td>
-                <td style="vertical-align: middle;" id="harga_total_<?php echo $row->id_pembelian_det;?>"><?php echo 'Rp '.number_format($row->harga_total_fix); ?></td>
+                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($harga); ?></td>
+                <td style="vertical-align: middle;" id="harga_total_<?php echo $idx_row;?>"><?php echo 'Rp '.number_format($harga_total); ?></td>
 				<td style="vertical-align: middle;"><button type="button" class="btn-danger" alt="batalkan" onclick="hapus_trans_detail(this)"><i class="fa fa-times"></i></button></td>
             </tr>
             <?php
+			}
         }
 	}
 
+	public function get_detail_penerimaan()
+	{
+		$id = $this->input->get('id');
+		$kode = $this->input->get('kode');
+		
+		$join = [ 
+			['table' => 't_pembelian', 'on'	=> 't_penerimaan.id_pembelian = t_pembelian.id_pembelian'],
+			['table' => 'm_agen', 'on' => 't_pembelian.id_agen = m_agen.id_agen'],
+			['table' => 'm_user', 'on' => 't_pembelian.id_user = m_user.id'],
+		];
+		$header = $this->m_global->single_row('t_penerimaan.*, t_pembelian.kode_pembelian, t_pembelian.tanggal as tanggal_beli, m_agen.nama_perusahaan, m_user.nama as nama_user', ['kode_penerimaan' => $kode, 't_penerimaan.deleted_at' => null], 't_penerimaan', $join);
+
+		$detail = $this->t_penerimaan->getPenerimaanDet($id)->result();
+		$html_det = '';
+		if($detail) {
+			$total_harga_sum = 0;
+			foreach ($detail as $key => $value) {
+				$total_harga_sum += $value->harga_total;
+				$html_det .= '<tr>
+					<td style="vertical-align: middle;">'.$value->qty.'</td>
+					<td style="vertical-align: middle;">'.$value->nama.'</td>
+					<td style="vertical-align: middle;" align="right">'.number_format($value->harga).'</td>
+					<td style="vertical-align: middle;" align="right">'.number_format($value->harga_total).'</td>
+				</tr>';
+			}
+			$html_det .= '<tr>
+				<td colspan="3" style="vertical-align: middle;font-weight:bold;" align="center">Grand Total</td>
+				<td style="vertical-align: middle;font-weight:bold;" align="right">'.number_format($total_harga_sum).'</td>
+			</tr>';
+		}
+		
+		echo json_encode([
+			'header' => $header,
+			'html_det' => $html_det
+		]);
+		
+	}
 	// public function hapus_trans_detail() {
 		// 	try {
 		// 		$this->db->trans_begin();
@@ -353,7 +432,12 @@ class Barang_masuk extends CI_Controller {
 					['table' => 't_pembelian', 'on'	=> 't_pembelian_det.id_pembelian = t_pembelian.id_pembelian'],
 				];
 
-				$cek_pembelian_det = $this->m_global->single_row("t_pembelian_det.*, t_pembelian.kode_pembelian, t_pembelian.is_kredit", ['id_pembelian_det' => $this->input->post('pembelian_det')[$i], 't_pembelian_det.deleted_at' => null], 't_pembelian_det', $joni);
+				$cek_pembelian_det = $this->m_global->single_row(
+					"t_pembelian_det.*, t_pembelian.kode_pembelian, t_pembelian.is_kredit", 
+					['id_pembelian_det' => $this->input->post('pembelian_det')[$i], 't_pembelian_det.deleted_at' => null], 
+					't_pembelian_det', 
+					$joni
+				);
 
 				### insert penerimaan det
 				$arr_penerimaan_det = [
@@ -369,7 +453,7 @@ class Barang_masuk extends CI_Controller {
 				
 				#### update pembelian det
 				$where_update = ['id_pembelian_det' => $this->input->post('pembelian_det')[$i]];
-				$data_update['qty_terima'] = $this->input->post('qty')[$i];
+				$data_update['qty_terima'] = $cek_pembelian_det->qty_terima + $this->input->post('qty')[$i];
 				$data_update['tgl_terima'] = $tgl;
 				$data_update['reff_terima'] = $kode_penerimaan;
 
@@ -412,6 +496,26 @@ class Barang_masuk extends CI_Controller {
 				$retval['pesan'] = 'Gagal menambahkan Penerimaan';
 			} else {
 				$this->db->trans_commit();
+
+				$data_pembelian_det = $this->m_global->multi_row('*', ['id_pembelian' => $id_pembelian], 't_pembelian_det');
+				$arr = [];
+				foreach ($data_pembelian_det as $key => $value) {
+					if($value->qty == $value->qty_terima) {
+						$txt = 'ok';	
+					}else{
+						$txt = 'belum';
+					}
+
+					$arr[] = $txt; 
+				}
+
+				### jika tidak ada yg belum
+				### update t_pembelian set flag is_terima_all = 1 where is_terima di masing-masing det not null
+				if(!in_array('belum', $arr)) {
+					$data_where = ['id_pembelian' => $id_pembelian];
+					$this->m_global->update('t_penerimaan', ['is_terima_all' => 1], $data_where);
+				}
+				
 				$retval['status'] = true;
 				$retval['pesan'] = 'Sukses menambahkan Penerimaan';
 			}

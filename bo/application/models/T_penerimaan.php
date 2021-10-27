@@ -107,7 +107,7 @@ class T_penerimaan extends CI_Model
 	public function get_by_id($id)
 	{
 		$this->db->from($this->table);
-		$this->db->where('id_agen',$id);
+		$this->db->where('id_penerimaan',$id);
 		$query = $this->db->get();
 
 		return $query->row();

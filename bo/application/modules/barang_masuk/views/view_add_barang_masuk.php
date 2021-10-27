@@ -63,13 +63,32 @@
                    
         <div class="row invoice-info">
             <div class="col-sm-6 invoice-col">
-                <b>Kode Pembelian : <?= (isset($data->kode_pembelian)) ? $data->kode_pembelian : '-';?></b><br>
-                <b>Tanggal Pembelian : <?= (isset($data->tanggal_beli)) ? DateTime::createFromFormat('Y-m-d',$data->tanggal_beli)->format('d/m/Y') : '-';?></b><br>
-                <b>Agen :</b> <?= (isset($data->nama_perusahaan)) ? $data->nama_perusahaan : "";?><br>
+              <table class="table table-borderless">
+                <tr>
+                  <th>Kode Pembelian</th>
+                  <td><?= (isset($data->kode_pembelian)) ? $data->kode_pembelian : '-';?></span></td>
+                </tr>
+                <tr>
+                  <th>Tanggal Pembelian</th>
+                  <td><?= (isset($data->tanggal_beli)) ? DateTime::createFromFormat('Y-m-d',$data->tanggal_beli)->format('d/m/Y') : '-';?></td>
+                </tr>
+                <tr>
+                  <th>Agen</th>
+                  <td><?= (isset($data->nama_perusahaan)) ? $data->nama_perusahaan : "";?></span></td>
+                </tr>
+              </table>
             </div><!-- /.col -->
             <div class="col-sm-6 invoice-col">
-                <b>Kode Penerimaan : <?= (isset($data->kode_penerimaan)) ? $data->kode_penerimaan : '-';?></b><br>
-                <b>Petugas :</b>  <?= $data_user[0]->nama;?>
+              <table class="table table-borderless">
+                <tr>
+                  <th>Kode Penerimaan</th>
+                  <td><?= (isset($data->kode_penerimaan)) ? $data->kode_penerimaan : '-';?></span></td>
+                </tr>
+                <tr>
+                  <th>Petugas</th>
+                  <td><?= $data_user[0]->nama;?></td>
+                </tr>
+              </table>
             </div><!-- /.col -->
         </div>
 
@@ -113,8 +132,11 @@
               </div><!-- /.col -->
           </div>
           <div class="row no-print">
-            <div class="form-group col-sm-3" style="padding-top:25px;">
-                <button type="submit" class="btn btn-primary">Simpan</button>
+            <div class="form-group col-sm-6" style="padding-top:25px;">
+              <a class="btn btn-default pull-left" href="<?=base_url($this->uri->segment(1));?>"><i class="fa fa-arrow-left"></i> Kembali</a>
+            </div>
+            <div class="form-group col-sm-6" style="padding-top:25px;">
+                <button type="submit" class="btn btn-primary pull-right">Simpan</button>
             </div>
           </div>
         </form>
@@ -122,15 +144,11 @@
         
 
         <!-- this row will not appear when printing -->
-        <div class="row no-print">
+        <!-- <div class="row no-print">
             <div class="col-sm-6">
-                <!-- <a href="" class="btn btn-default"><i class="fa fa-print"></i> Print</a>
-                <button class="btn btn-primary center" style="margin-right: 5px;"><i class="fa fa-download"></i> Generate PDF</button>
-                  -->
-                
-                <!-- <button class="btn btn-success pull-right" ><i class="fa fa-credit-card"></i> Submit Payment</button> -->
+              
             </div>
-        </div>
+        </div> -->
        
       </div>
     </div>
