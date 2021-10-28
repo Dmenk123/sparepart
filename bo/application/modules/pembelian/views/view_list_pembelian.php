@@ -40,7 +40,8 @@
               <th>Supplier</th>
               <th>Total Harga</th>
               <th>Metode</th>
-              <th>Status</th>
+              <th>Status Lunas</th>
+              <th>Status Terima</th>
               <th style="width: 5%;">Aksi</th>
             </tr>
           </thead>

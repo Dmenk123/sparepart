@@ -458,7 +458,7 @@ class Barang_masuk extends CI_Controller {
 				$data_update['reff_terima'] = $kode_penerimaan;
 
 				### cek qty tabel pembelian det, jika qty penerimaan / sum penerimaan sesuai jumlah, set flag is_terima
-				if($cek_pembelian_det->qty == $this->t_penerimaan->sum_barang_masuk_pertransaksi($this->input->post('id_barang')[$i], $id_penerimaan)) {
+				if($cek_pembelian_det->qty == $this->t_penerimaan->sum_barang_masuk_pertransaksi($this->input->post('id_barang')[$i], $id_pembelian)) {
 					$data_update['is_terima'] = 1;
 				} 
 
@@ -513,7 +513,7 @@ class Barang_masuk extends CI_Controller {
 				### update t_pembelian set flag is_terima_all = 1 where is_terima di masing-masing det not null
 				if(!in_array('belum', $arr)) {
 					$data_where = ['id_pembelian' => $id_pembelian];
-					$this->m_global->update('t_penerimaan', ['is_terima_all' => 1], $data_where);
+					$this->m_global->update('t_pembelian', ['is_terima_all' => 1], $data_where);
 				}
 				
 				$retval['status'] = true;

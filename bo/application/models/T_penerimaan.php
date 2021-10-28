@@ -268,13 +268,13 @@ class T_penerimaan extends CI_Model
 		return $q;
 	}
 
-	function sum_barang_masuk_pertransaksi($id_barang, $id_penerimaan)
+	function sum_barang_masuk_pertransaksi($id_barang, $id_pembelian)
 	{
 		$query = "
 			SELECT COALESCE(SUM(pd.qty),0) as total_qty_masuk
 			FROM t_penerimaan p
 			LEFT JOIN t_penerimaan_det pd on pd.id_penerimaan = p.id_penerimaan
-			WHERE p.id_penerimaan = '$id_penerimaan' AND pd.id_barang = '$id_barang'
+			WHERE p.id_pembelian = '$id_pembelian' AND pd.id_barang = '$id_barang'
 		";
 		$q = $this->db->query($query)->row();
 		return $q->total_qty_masuk;

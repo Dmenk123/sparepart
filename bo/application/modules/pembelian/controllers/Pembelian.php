@@ -39,7 +39,7 @@ class Pembelian extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => null,
+			'modal' => 'modal_detail_pembelian',
 			'js'	=> 'pembelian.js',
 			'view'	=> 'view_list_pembelian'
 		];
@@ -50,7 +50,7 @@ class Pembelian extends CI_Controller {
 	public function list_pembelian()
 	{
 		$list = $this->t_pembelian->get_datatable_pembelian();
-		
+				
 		$data = array();
 		$no =$_POST['start'];
 		foreach ($list as $value) {
@@ -63,18 +63,29 @@ class Pembelian extends CI_Controller {
 			$row[] = $value->nama_perusahaan;
 			$row[] = number_format($value->total_pembelian);
 			$row[] = $value->metode_bayar;
-			$row[] = $value->status_terima;
+			$row[] = $value->status_lunas;
+			
+			if ($value->status_terima == 'Complete') {
+				$row[] = '<span style="color:green;font-weight:bold;">'.$value->status_terima.'</span>';
+			}else{
+				if((int)$value->count_terima == 0) {
+					$row[] = '<span style="color:red;font-weight:bold;">Not Received</span>';
+				}else{
+					$row[] = '<span style="color:blue;font-weight:bold;">On Progress</span>';
+				}
+				
+			}
 
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="detail_pembelian(\''.$value->kode_pembelian.'\')">
+						<button class="dropdown-item" onclick="detail_pembelian(\''.$value->kode_pembelian.'\',\''.$value->id_pembelian.'\')">
 							<i class="la la-desktop"></i> Lihat Pembelian
 						</button>
 			';
 			
-			if($value->status_terima != 'Lunas') {
+			if((int)$value->count_terima == 0) {
 				$str_aksi .= '
 					<button class="dropdown-item" onclick="edit_pembelian(\''.$value->kode_pembelian.'\')">
 						<i class="la la-pencil"></i> Edit Pembelian
@@ -535,6 +546,43 @@ class Pembelian extends CI_Controller {
 
 		echo json_encode($retval);
 
+	}
+
+	public function get_detail_pembelian()
+	{
+		$id = $this->input->get('id');
+		$kode = $this->input->get('kode');
+		
+		$join = [ 
+			['table' => 'm_agen', 'on' => 't_pembelian.id_agen = m_agen.id_agen'],
+			['table' => 'm_user', 'on' => 't_pembelian.id_user = m_user.id'],
+		];
+		$header = $this->m_global->single_row('t_pembelian.*, m_agen.nama_perusahaan, m_user.nama as nama_user', ['kode_penerimaan' => $kode, 't_penerimaan.deleted_at' => null], 't_penerimaan', $join);
+
+		$detail = $this->t_penerimaan->getPenerimaanDet($id)->result();
+		$html_det = '';
+		if($detail) {
+			$total_harga_sum = 0;
+			foreach ($detail as $key => $value) {
+				$total_harga_sum += $value->harga_total;
+				$html_det .= '<tr>
+					<td style="vertical-align: middle;">'.$value->qty.'</td>
+					<td style="vertical-align: middle;">'.$value->nama.'</td>
+					<td style="vertical-align: middle;" align="right">'.number_format($value->harga).'</td>
+					<td style="vertical-align: middle;" align="right">'.number_format($value->harga_total).'</td>
+				</tr>';
+			}
+			$html_det .= '<tr>
+				<td colspan="3" style="vertical-align: middle;font-weight:bold;" align="center">Grand Total</td>
+				<td style="vertical-align: middle;font-weight:bold;" align="right">'.number_format($total_harga_sum).'</td>
+			</tr>';
+		}
+		
+		echo json_encode([
+			'header' => $header,
+			'html_det' => $html_det
+		]);
+		
 	}
 
 	// ===============================================

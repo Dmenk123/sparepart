@@ -173,6 +173,10 @@
 				}
 			}
 
+			.highlight_row_success {
+				background-color: greenyellow !important;
+			}
+
 		</style>
 		<!-- load file css per modul -->
 		<?php if(isset($link_css)){ ?>

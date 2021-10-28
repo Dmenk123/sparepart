@@ -11,23 +11,29 @@ $(document).ready(function() {
 
 	//datatables
 	table = $('#tabel_pembelian').DataTable({
-		responsive: true,
+    responsive: true,
         searchDelay: 500,
         processing: true,
         serverSide: true,
-		ajax: {
-			url  : base_url + "pembelian/list_pembelian",
-			type : "POST" 
-		},
+    ajax: {
+      url  : base_url + "pembelian/list_pembelian",
+      type : "POST" 
+    },
 
-		//set column definition initialisation properties
-		columnDefs: [
-			{
-				targets: [-1], //last column
-				orderable: false, //set not orderable
-			},
-		],
-    });
+    //set column definition initialisation properties
+    columnDefs: [
+      {
+        targets: [-1], //last column
+        orderable: false, //set not orderable
+      },
+    ],
+
+    createdRow: function( row, data, dataIndex){
+      if(data[6] ==  'Lunas'){
+          $(row).addClass('highlight_row_success');
+      }
+    }
+  });
     
     $('#id_barang').on('select2:select', function (e) {
         var data = e.params.data;
@@ -237,7 +243,6 @@ function delete_pembelian(id){
 }
 
 
-
 function reset_modal_form()
 {
     $('#form-user')[0].reset();
@@ -251,57 +256,57 @@ function reset_modal_form()
     $('#username').attr('disabled', false);
 }
 
-function reset_modal_form_import()
-{
-    $('#form_import_excel')[0].reset();
-    $('#label_file_excel').text('Pilih file excel yang akan diupload');
-}
+// function reset_modal_form_import()
+// {
+//     $('#form_import_excel')[0].reset();
+//     $('#label_file_excel').text('Pilih file excel yang akan diupload');
+// }
 
-function import_excel(){
-    $('#modal_import_excel').modal('show');
-	$('#modal_import_title').text('Import data user'); 
-}
+// function import_excel(){
+//     $('#modal_import_excel').modal('show');
+// 	$('#modal_import_title').text('Import data user'); 
+// }
 
-function import_data_excel(){
-    var form = $('#form_import_excel')[0];
-    var data = new FormData(form);
+// function import_data_excel(){
+//     var form = $('#form_import_excel')[0];
+//     var data = new FormData(form);
     
-    $("#btnSaveImport").prop("disabled", true);
-    $('#btnSaveImport').text('Import Data');
-    $.ajax({
-        type: "POST",
-        enctype: 'multipart/form-data',
-        url: base_url + 'master_user/import_data_master',
-        data: data,
-        dataType: "JSON",
-        processData: false, // false, it prevent jQuery form transforming the data into a query string
-        contentType: false, 
-        success: function (data) {
-            if(data.status) {
-                swal.fire("Sukses!!", data.pesan, "success");
-                $("#btnSaveImport").prop("disabled", false);
-                $('#btnSaveImport').text('Simpan');
-            }else {
-                swal.fire("Gagal!!", data.pesan, "error");
-                $("#btnSaveImport").prop("disabled", false);
-                $('#btnSaveImport').text('Simpan');
-            }
+//     $("#btnSaveImport").prop("disabled", true);
+//     $('#btnSaveImport').text('Import Data');
+//     $.ajax({
+//         type: "POST",
+//         enctype: 'multipart/form-data',
+//         url: base_url + 'master_user/import_data_master',
+//         data: data,
+//         dataType: "JSON",
+//         processData: false, // false, it prevent jQuery form transforming the data into a query string
+//         contentType: false, 
+//         success: function (data) {
+//             if(data.status) {
+//                 swal.fire("Sukses!!", data.pesan, "success");
+//                 $("#btnSaveImport").prop("disabled", false);
+//                 $('#btnSaveImport').text('Simpan');
+//             }else {
+//                 swal.fire("Gagal!!", data.pesan, "error");
+//                 $("#btnSaveImport").prop("disabled", false);
+//                 $('#btnSaveImport').text('Simpan');
+//             }
 
-            reset_modal_form_import();
-            $(".modal").modal('hide');
-            table.ajax.reload();
-        },
-        error: function (e) {
-            console.log("ERROR : ", e);
-            $("#btnSaveImport").prop("disabled", false);
-            $('#btnSaveImport').text('Simpan');
+//             reset_modal_form_import();
+//             $(".modal").modal('hide');
+//             table.ajax.reload();
+//         },
+//         error: function (e) {
+//             console.log("ERROR : ", e);
+//             $("#btnSaveImport").prop("disabled", false);
+//             $('#btnSaveImport').text('Simpan');
 
-            reset_modal_form_import();
-            $(".modal").modal('hide');
-            table.ajax.reload();
-        }
-    });
-}
+//             reset_modal_form_import();
+//             $(".modal").modal('hide');
+//             table.ajax.reload();
+//         }
+//     });
+// }
 
 function readURL(input) {
     if (input.files && input.files[0]) {
@@ -438,6 +443,7 @@ $(document).ready(function(){
     // });
 
 });
+
 function getTable(){
     var id = $('#id_pembelian').val();
     console.log(id);
@@ -508,7 +514,6 @@ function hapus_trans_detail(id)
   });
 }
 
-
 function tes(id)
 {
   var tes = '#qty_order_'+id;
@@ -532,4 +537,31 @@ function tes(id)
 });
   
 }
-  
+
+const detail_pembelian = (kode, id) => {  
+  // reset_modal_form();
+  $.ajax({
+    type: 'GET',
+    data: {kode:kode, id:id},
+    dataType: 'json',
+    url: base_url + 'pembelian/get_detail_pembelian',
+    success: function(data)
+    {
+        let header = data.header;
+        $('#span_kode_beli_det').text(header.kode_pembelian);
+        $('#span_tgl_beli_det').text(header.tanggal_beli);
+        $('#span_agen_det').text(header.nama_perusahaan);
+        $('#span_kode_masuk_det').text(header.kode_penerimaan);
+        $('#span_petugas_det').text(header.nama_user);
+        $('#tbl_konten_detail tbody').html(data.html_det);
+        $('#modal_det_masuk').modal('show');
+        $('#modal_title').text('Detail Barang Masuk'); 
+    },
+    error: function (jqXHR, textStatus, errorThrown)
+    {
+        Swal.fire('Terjadi Kesalahan ');
+    }
+    
+  });
+	
+}  

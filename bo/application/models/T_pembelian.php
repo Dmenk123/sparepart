@@ -12,6 +12,7 @@ class T_pembelian extends CI_Model
 		'm_agen.nama_perusahaan',
 		'pb.total_pembelian',
 		'metode_bayar',
+		'status_lunas',
 		'status_terima',
 		null
 	];
@@ -31,11 +32,23 @@ class T_pembelian extends CI_Model
 			pb.*,
 			m_agen.nama_perusahaan,
 			CASE WHEN pb.is_kredit = 1 THEN 'Kredit' ELSE 'Cash' END as metode_bayar,
-			CASE WHEN pb.is_terima_all = 1 THEN 'Lunas' ELSE '-' END as status_terima
+			CASE 
+				WHEN pb.is_terima_all = 1 THEN 'Complete' 
+				ELSE '-' 
+			END as status_terima,
+			CASE 
+				WHEN pb.is_lunas = 1 THEN 'Lunas' 
+				ELSE 'Belum Lunas' 
+			END as status_lunas,
+			count(pnd.id_barang) as count_terima
 		");
 		$this->db->from('t_pembelian pb');
 		$this->db->join('m_agen', 'pb.id_agen=m_agen.id_agen');
+		//  join untuk mengetahui apakah ada transaksi di penerimaan
+		$this->db->join('t_penerimaan pn', 'pb.id_pembelian=pn.id_pembelian', 'left');
+		$this->db->join('t_penerimaan_det pnd', 'pn.id_penerimaan=pnd.id_penerimaan and pnd.deleted_at is null', 'left');
 		$this->db->where('pb.deleted_at is null');
+		$this->db->group_by('pb.id_pembelian');
 		
 		$i = 0;
 		// loop column 
@@ -58,9 +71,11 @@ class T_pembelian extends CI_Model
 						 * param both untuk wildcard pada awal dan akhir kata
 						 * param false untuk disable escaping (karena pake subquery)
 						 */
-						$this->db->or_like('(CASE WHEN pb.is_terima_all = 1 THEN \'Lunas\' ELSE \'-\' END)', $_POST['search']['value'],'both',false);
+						$this->db->or_like('(CASE WHEN pb.is_terima_all = 1 THEN \'Complete\' ELSE \'-\' END)', $_POST['search']['value'],'both',false);
 					} elseif ($item == 'metode_bayar') {
 						$this->db->or_like('(CASE WHEN pb.is_kredit = 1 THEN \'Kredit\' ELSE \'Cash\' END)', $_POST['search']['value'], 'both', false);
+					} elseif ($item == 'status_lunas') {
+						$this->db->or_like('(CASE WHEN pb.is_lunas = 1 THEN \'Lunas\' ELSE \'Belum Lunas\' END)', $_POST['search']['value'], 'both', false);
 					} else{
 						$this->db->or_like($item, $_POST['search']['value']);
 					}

@@ -11,22 +11,22 @@ $(document).ready(function() {
 
 	  //datatables
 	  table = $('#tabel_penerimaan').DataTable({
-		responsive: true,
-        searchDelay: 500,
-        processing: true,
-        serverSide: true,
-		ajax: {
-			url  : base_url + "barang_masuk/list_barang_masuk",
-			type : "POST" 
-		},
+		  responsive: true,
+      searchDelay: 500,
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url  : base_url + "barang_masuk/list_barang_masuk",
+        type : "POST" 
+      },
 
-		//set column definition initialisation properties
-		columnDefs: [
-			{
-				targets: [-1], //last column
-				orderable: false, //set not orderable
-			},
-		],
+		  //set column definition initialisation properties
+      columnDefs: [
+        {
+          targets: [-1], //last column
+          orderable: false, //set not orderable
+        },
+      ],
     });
     
     $('#id_barang').on('select2:select', function (e) {
@@ -52,27 +52,77 @@ $(document).ready(function() {
 
     $('#regForm').submit(function(e){
         e.preventDefault();
-        // var url = '<?php echo base_url(); ?>';
-        var reg = $('#regForm').serialize();
-        $.ajax({
-            type: 'POST',
-            data: reg,
-            dataType: 'json',
-            url: base_url + 'barang_masuk/simpan_penerimaan_barang',
-            success: function(data)
-            {
-                swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
-                $('#regForm')[0].reset();
-                // getTable();
-                // getTotal();
-                window.location.href = base_url +'barang_masuk';
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                Swal.fire('Terjadi Kesalahan ');
-            }
-           
+        $("#btnSaveAdd").prop("disabled", true);
+        $('#btnSaveAdd').text('Menyimpan Data ....');
+
+        var form = $('#regForm')[0];
+        var reg = new FormData(form);
+        let alert = "Menerima";
+
+        swalConfirm.fire({
+          title: 'Perhatian',
+          text: "Apakah Anda ingin "+alert+" Data ini ?",
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Ya !',
+          cancelButtonText: 'Tidak !',
+          reverseButtons: false
+        }).then((result) => {
+          if (result.value) {
+            $.ajax({
+                type: "POST",
+                enctype: 'multipart/form-data',
+                url: base_url + 'barang_masuk/simpan_penerimaan_barang',
+                data: reg,
+                dataType: "JSON",
+                processData: false, // false, it prevent jQuery form transforming the data into a query string
+                contentType: false, 
+                cache: false,
+                timeout: 600000,
+                success: function (data) {
+                    if(data.status) {
+                      swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
+                      $('#regForm')[0].reset();
+                      window.location.href = base_url +'barang_masuk';
+                    }else {
+                      for (var i = 0; i < data.inputerror.length; i++) 
+                      {
+                          if (data.inputerror[i] != 'pegawai') {
+                              $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
+                              $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
+                          }else{
+                              //ikut style global
+                              $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
+                          }
+                      }
+
+                      $("#btnSaveAdd").prop("disabled", false);
+                      $('#btnSaveAdd').text('Simpan');
+                    }
+                },
+                error: function (e) {
+                    console.log("ERROR : ", e);
+                    createAlert('Opps!','Terjadi Kesalahan','Coba Lagi nanti','danger',true,false,'pageMessages');
+                    $("#btnSaveAdd").prop("disabled", false);
+                    $('#btnSaveAdd').text('Simpan');
+                }
+            });
+          }else if (
+            /* Read more about handling dismissals below */
+            result.dismiss === Swal.DismissReason.cancel
+          ) {
+            swalConfirm.fire(
+              'Dibatalkan',
+              'Aksi Dibatalakan',
+              'error'
+            );
+
+            $("#btnSaveAdd").prop("disabled", false);
+            $('#btnSaveAdd').text('Simpan');
+          }
         });
+
+        
     });
 });	
 

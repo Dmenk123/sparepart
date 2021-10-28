@@ -136,7 +136,7 @@
               <a class="btn btn-default pull-left" href="<?=base_url($this->uri->segment(1));?>"><i class="fa fa-arrow-left"></i> Kembali</a>
             </div>
             <div class="form-group col-sm-6" style="padding-top:25px;">
-                <button type="submit" class="btn btn-primary pull-right">Simpan</button>
+                <button type="submit" id="btnSaveAdd" class="btn btn-primary pull-right">Simpan</button>
             </div>
           </div>
         </form>
