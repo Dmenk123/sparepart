@@ -137,7 +137,7 @@ const detail_penerimaan = (kode, id) => {
     {
         let header = data.header;
         $('#span_kode_beli_det').text(header.kode_pembelian);
-        $('#span_tgl_beli_det').text(header.tanggal_beli);
+        $('#span_tgl_beli_det').text(moment(header.tanggal_beli).format('LL'));
         $('#span_agen_det').text(header.nama_perusahaan);
         $('#span_kode_masuk_det').text(header.kode_penerimaan);
         $('#span_petugas_det').text(header.nama_user);
@@ -291,7 +291,7 @@ function saveNewPenerimaan()
     });
 }
 
-function delete_pembelian(id){
+function delete_penerimaan(kode, id){
   swalConfirmDelete.fire({
       title: 'Hapus Data ?',
       text: "Data Akan dihapus permanen ?",
@@ -303,10 +303,13 @@ function delete_pembelian(id){
     }).then((result) => {
       if (result.value) {
           $.ajax({
-              url : base_url + 'pembelian/delete_pembelian',
+              url : base_url + 'barang_masuk/delete_penerimaan',
               type: "POST",
               dataType: "JSON",
-              data : {id:id},
+              data : {
+                kode:kode, 
+                id:id
+              },
               success: function(data)
               {
                   swalConfirm.fire('Berhasil Hapus Data !', data.pesan, 'success');

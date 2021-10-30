@@ -1,5 +1,5 @@
 
-<div class="modal fade modal_add_form" tabindex="-1" role="dialog" aria-labelledby="add_menu" aria-hidden="true" id="modal_det_masuk">
+<div class="modal fade modal_add_form" tabindex="-1" role="dialog" aria-labelledby="add_menu" aria-hidden="true" id="modal_det_beli">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -17,20 +17,16 @@
                 </tr>
                 <tr>
                   <th>Tanggal Pembelian</th>
-                  <td><span id="span_agen_det"></span></td>
+                  <td><span id="span_tgl_beli_det"></span></td>
                 </tr>
                 <tr>
                   <th>Agen</th>
-                  <td><span id="span_tgl_beli_det"></span></td>
+                  <td><span id="span_agen_det"></span></td>
                 </tr>
               </table>
             </div><!-- /.col -->
             <div class="col-sm-6 invoice-col">
               <table class="table table-borderless">
-                <tr>
-                  <th>Kode Penerimaan</th>
-                  <td><span id="span_kode_masuk_det"></span></td>
-                </tr>
                 <tr>
                   <th>Petugas</th>
                   <td><span id="span_petugas_det"></span></td>

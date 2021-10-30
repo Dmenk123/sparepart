@@ -50,6 +50,7 @@
         <script src="<?= base_url('assets/'); ?>plugins/ckeditor/ckeditor.js" type="text/javascript"></script>
         <script src="<?= base_url('assets/'); ?>plugins/ckeditor/adapters/jquery.js" type="text/javascript"></script>
         <script src="<?= base_url('assets/'); ?>plugins/jquery-mask/jquery.mask.min.js" type="text/javascript"></script>
+        <script src="<?= base_url('assets/'); ?>plugins/moment/moment.min.js" type="text/javascript"></script>
         <!-- <script src="<?= base_url('assets/'); ?>loader/modernizr-2.6.2.min.js" type="text/javascript"></script>
         <script src="<?= base_url('assets/'); ?>loader/main.js" type="text/javascript"></script> -->
         <!--end::Global Theme Bundle -->
@@ -107,6 +108,8 @@
             }
 
             $(document).ready(function () {
+                // set global moment.js
+                moment.locale('id');  
                 // Format mata uang.
                 $('.uang' ).mask('000.000.000.000', {reverse: true});
                 $('.phone').mask('0000-0000');

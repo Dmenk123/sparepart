@@ -549,13 +549,12 @@ const detail_pembelian = (kode, id) => {
     {
         let header = data.header;
         $('#span_kode_beli_det').text(header.kode_pembelian);
-        $('#span_tgl_beli_det').text(header.tanggal_beli);
+        $('#span_tgl_beli_det').text(moment(header.tanggal).format('LL'));
         $('#span_agen_det').text(header.nama_perusahaan);
-        $('#span_kode_masuk_det').text(header.kode_penerimaan);
         $('#span_petugas_det').text(header.nama_user);
         $('#tbl_konten_detail tbody').html(data.html_det);
-        $('#modal_det_masuk').modal('show');
-        $('#modal_title').text('Detail Barang Masuk'); 
+        $('#modal_det_beli').modal('show');
+        $('#modal_title').text('Detail Pembelian'); 
     },
     error: function (jqXHR, textStatus, errorThrown)
     {

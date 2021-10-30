@@ -3,7 +3,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class T_penerimaan extends CI_Model
 {
 	var $table = 't_penerimaan';
-	var $column_search = ['pj.no_faktur'];
+	var $column_search = [
+		'pn.tanggal',
+		'pn.kode_penerimaan',
+		'm_agen.nama_perusahaan',
+		'pb.kode_pembelian',
+		'pn.total_harga',
+	];
 	
 	var $column_order = [
 		null, 

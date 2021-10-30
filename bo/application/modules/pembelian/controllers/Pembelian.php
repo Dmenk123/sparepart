@@ -557,19 +557,20 @@ class Pembelian extends CI_Controller {
 			['table' => 'm_agen', 'on' => 't_pembelian.id_agen = m_agen.id_agen'],
 			['table' => 'm_user', 'on' => 't_pembelian.id_user = m_user.id'],
 		];
-		$header = $this->m_global->single_row('t_pembelian.*, m_agen.nama_perusahaan, m_user.nama as nama_user', ['kode_penerimaan' => $kode, 't_penerimaan.deleted_at' => null], 't_penerimaan', $join);
+		$header = $this->m_global->single_row('t_pembelian.*, m_agen.nama_perusahaan, m_user.nama as nama_user', ['kode_pembelian' => $kode, 't_pembelian.deleted_at' => null], 't_pembelian', $join);
 
-		$detail = $this->t_penerimaan->getPenerimaanDet($id)->result();
+		$detail = $this->t_pembelian->getPembelianDet($id)->result();
+		
 		$html_det = '';
 		if($detail) {
 			$total_harga_sum = 0;
 			foreach ($detail as $key => $value) {
-				$total_harga_sum += $value->harga_total;
+				$total_harga_sum += $value->harga_total_fix;
 				$html_det .= '<tr>
 					<td style="vertical-align: middle;">'.$value->qty.'</td>
 					<td style="vertical-align: middle;">'.$value->nama.'</td>
-					<td style="vertical-align: middle;" align="right">'.number_format($value->harga).'</td>
-					<td style="vertical-align: middle;" align="right">'.number_format($value->harga_total).'</td>
+					<td style="vertical-align: middle;" align="right">'.number_format($value->harga_fix).'</td>
+					<td style="vertical-align: middle;" align="right">'.number_format($value->harga_total_fix).'</td>
 				</tr>';
 			}
 			$html_det .= '<tr>
