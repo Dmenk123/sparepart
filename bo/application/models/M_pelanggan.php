@@ -235,4 +235,47 @@ class M_pelanggan extends CI_Model
 	{
 		$this->db->query("truncate table m_user");
 	}
+
+	public function get_datatable_monitoring($id_pelanggan)
+	{
+		$this->db->select('det.*, b.nama as nama_barang, pl.nama_pembeli as nama_pelanggan, p.created_at as tanggal_order');
+		$this->db->from('t_penjualan_det det');
+		$this->db->join('t_penjualan p', 'p.id_penjualan=det.id_penjualan', 'left');
+		$this->db->join('m_barang b', 'b.id_barang=det.id_barang', 'left');
+		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=p.id_pelanggan');
+		$this->db->where('p.id_pelanggan', $id_pelanggan);
+		$this->db->where('det.id_barang !=', 0);
+		$this->db->order_by('det.id_penjualan_det', 'desc');
+
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        }
+	}
+
+	public function monitoring_cart($id_pelanggan)
+	{
+		$query = $this->db->query(
+            "
+			select
+				b.nama,
+				sum(det.qty) as total,
+				count(*) as jumlah
+			FROM
+				t_penjualan_det det
+			LEFT JOIN
+				t_penjualan p ON p.id_penjualan=det.id_penjualan
+			LEFT JOIN
+				m_barang b ON b.id_barang=det.id_barang
+			WHERE
+				p.id_pelanggan = $id_pelanggan
+				AND (det.id_barang IS NOT NULL AND det.id_barang <> 0)
+			group by
+				det.id_barang
+            "
+        );
+        return $query;
+
+	}
 }
