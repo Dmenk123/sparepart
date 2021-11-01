@@ -19,7 +19,15 @@ class Lib_mutasi extends CI_Controller {
 	 * tanggal = optional, jika null is date now
 	 * id_gudang = optional (jika terdapat multi gudang)
 	 */
-	function simpan_mutasi($id_barang, $totalPermintaan, $id_kategori_trans, $tanggal = null, $hpp, $id_gudang = null) {
+	function simpan_mutasi(
+		$id_barang, 
+		$totalPermintaan, 
+		$id_kategori_trans, 
+		$kode_reff,
+		$id_gudang,
+		$tanggal = null, 
+		$hpp = null
+	) {
 		try {
 			$this->_ci->db->trans_begin();
 
@@ -32,8 +40,16 @@ class Lib_mutasi extends CI_Controller {
 				$tgl = $obj_date->format('Y-m-d');
 			}
 
+			$totalHpp = '';
+
 			#### ambil data dari t_stok
-			$data_stok = $this->_ci->m_global->single_row('*', ['id_barang' => $id_barang, 'deleted_at' => null], 't_stok');
+			$data_stok = $this->_ci->m_global->single_row('*', ['id_barang' => $id_barang, 'id_gudang' => $id_gudang, 'deleted_at' => null], 't_stok');
+
+			if(!$data_stok) {
+				$this->_ci->db->trans_rollback();
+				$retval = ['status' => false, 'pesan' => 'Data Stok Tidak Diketemukan'];		
+				return $retval;
+			}
 			
 			### cek jika qty stock >= qty
 			if($data_stok->qty >= $totalPermintaan) {
@@ -49,7 +65,7 @@ class Lib_mutasi extends CI_Controller {
 			}
 
 			### ambil data barang pada t_stok_mutasi  
-			$getBarang = $this->_ci->m_global->multi_row('*', ['qty_sisa > ' => 0, 'id_barang' => $id_barang], 't_stok_mutasi'); 
+			$getBarang = $this->_ci->m_global->multi_row('*', ['qty_sisa > ' => 0, 'id_barang' => $id_barang, 'id_gudang' => $id_gudang], 't_stok_mutasi', null, 'created_at asc'); 
 			// echo $this->_ci->db->last_query();exit;
 			
 			$newMutasi = [];
@@ -59,7 +75,12 @@ class Lib_mutasi extends CI_Controller {
          	{
 				### ambil last id pada t_stok_mutasi
 				// $id_stok_mutasi_det = d_stock_mutation::where('sm_item',$item)->where('sm_comp',$comp)->where('sm_position',$position)->max('sm_detailid')+$k+1;
-				$max_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', ['id_stok' => $getBarang[$k]->id_stok, 'id_barang' => $id_barang]);
+				$max_mutasi_det = $this->_ci->m_global->max('id_stok_mutasi_det', 't_stok_mutasi', [
+					'id_stok' => $getBarang[$k]->id_stok, 
+					'id_barang' => $id_barang,
+					'id_gudang' => $id_gudang,
+				]);
+
 				$id_max_stok_mutasi_det = $max_mutasi_det->id_stok_mutasi_det + $k +1;
 
 				$totalQty = $getBarang[$k]->qty_sisa;                                  
@@ -68,7 +89,6 @@ class Lib_mutasi extends CI_Controller {
 				if ($totalPermintaan <= $totalQty) {
 					$qty_pakai = $getBarang[$k]->qty_pakai + $totalPermintaan;
 					$qty_sisa = $getBarang[$k]->qty_sisa - $totalPermintaan;
-
 					$id_stok = $getBarang[$k]->id_stok;
 					$id_stok_mutasi_det = $getBarang[$k]->id_stok_mutasi_det;
 
@@ -81,17 +101,18 @@ class Lib_mutasi extends CI_Controller {
 					$newMutasi[$k]['id_stok'] = $getBarang[$k]->id_stok;
 					$newMutasi[$k]['id_stok_mutasi_det'] = $id_max_stok_mutasi_det; 
 					$newMutasi[$k]['tanggal'] = $tgl;
-					$newMutasi[$k]['sm_hpp'] = $hpp;
-					// $newMutasi[$k]['sm_comp'] = $comp;
-					// $newMutasi[$k]['sm_position'] = $position;
-					
-					// $newMutasi[$k]['sm_reff'] = $sm_reff; 
-
+					$newMutasi[$k]['hpp'] = $getBarang[$k]->hpp;
+					$newMutasi[$k]['id_gudang'] = $id_gudang;
+					$newMutasi[$k]['kode_reff'] = $kode_reff;
 					$newMutasi[$k]['id_kategori_trans'] = $id_kategori_trans;
 					$newMutasi[$k]['id_barang'] = $id_barang;
 					$newMutasi[$k]['qty'] = -$totalPermintaan;
 					$newMutasi[$k]['keterangan'] = 'PENGURANGAN';
-					$newMutasi[$k]['created_at'] = $timestamp;              
+					$newMutasi[$k]['created_at'] = $timestamp;
+
+					// $newMutasi[$k]['sm_comp'] = $comp;
+					            
+					## set index loop ke akhir loop, agar tidak diloop kembali
 					$k = count($getBarang);
             	} 
 				#### jika permintaan barang > dari stok sisa tiap loop
@@ -111,17 +132,18 @@ class Lib_mutasi extends CI_Controller {
 					$newMutasi[$k]['id_stok'] = $getBarang[$k]->id_stok;
 					$newMutasi[$k]['id_stok_mutasi_det'] = $id_max_stok_mutasi_det;
 					$newMutasi[$k]['tanggal'] = $tgl;
-
-					// $newMutasi[$k]['sm_comp'] = $comp;
-					// $newMutasi[$k]['sm_position'] = $position;
-					// $newMutasi[$k]['sm_hpp'] = $getBarang[$k]->sm_hpp;
-					// $newMutasi[$k]['sm_reff'] = $sm_reff; 
-					
+					$newMutasi[$k]['hpp'] = $getBarang[$k]->hpp;
 					$newMutasi[$k]['qty'] = -$totalQty;
 					$newMutasi[$k]['id_kategori_trans'] = $id_kategori_trans;
 					$newMutasi[$k]['id_barang'] = $id_barang;
 					$newMutasi[$k]['keterangan'] = 'PENGURANGAN';
+					$newMutasi[$k]['kode_reff'] = $kode_reff; 
+					$newMutasi[$k]['id_gudang'] = $id_gudang;
 					$newMutasi[$k]['created_at'] = $timestamp;
+
+					// $newMutasi[$k]['sm_comp'] = $comp;
+					
+					### kurangi total qty permintaan, agar sisa kurang diproses lagi di next loop
 					$totalPermintaan = $totalPermintaan - $totalQty;
 				}
          	}

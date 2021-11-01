@@ -352,11 +352,22 @@ class Penjualan extends CI_Controller {
 		$diskon    		= str_replace(',','.',$diskon);
 		$nilai     		= ($diskon/100)*$barang->harga;
 		$harga_diskon 	= $barang->harga - $nilai;
+		
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
 		}
 
+		$data_header = $this->m_global->getSelectedData('t_penjualan', ['id_penjualan' => $id_penjualan])->row();
+
+		if(!$data_header) {
+			$retval['status'] = false;
+			$retval['pesan'] = 'Data Penjualan Tidak Ditemukan';
+			echo json_encode($retval);
+			return;
+		}
+
+		$faktur = $data_header->no_faktur;
 		$sub_total = $harga_diskon * $qty;
 		$this->db->trans_begin();
 		
@@ -373,7 +384,7 @@ class Penjualan extends CI_Controller {
 		$insert = $this->m_global->save($data_order, 't_penjualan_det');
 
 		if($insert) {
-			$mutasi = $this->lib_mutasi->simpan_mutasi($id_barang, $qty, 2);
+			$mutasi = $this->lib_mutasi->simpan_mutasi($id_barang, $qty, 2, $faktur, );
 			
 			if($mutasi === FALSE) {
 				$this->db->trans_rollback();
