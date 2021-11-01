@@ -298,6 +298,46 @@ class Penjualan extends CI_Controller {
 		echo json_encode($retval);
 	}
 
+	public function get_option_barang()
+	{
+		$id_gudang = $this->input->get('id_gudang');
+		$select = 't_stok.*, m_barang.nama';
+		$where = ['t_stok.id_gudang' => $id_gudang, 't_stok.deleted_at' => null];
+		$join = [ 
+			['table' => 'm_barang', 'on' => 't_stok.id_barang = m_barang.id_barang'],
+			// ['table' => 'm_agen', 'on' => 't_pembelian.id_agen = m_agen.id_agen'],
+			// ['table' => 'm_user', 'on' => 't_pembelian.id_user = m_user.id'],
+		];
+
+		$order_by = 'm_barang.nama asc';
+		$data_stok = $this->m_global->multi_row($select, $where, 't_stok', $join, $order_by);
+		
+		$html = '<option value="0">-PILIH-</option>';
+		if($data_stok) {
+			foreach ($data_stok as $key => $value) {
+				$html .= "<option value='$value->id_barang'>".$value->nama."</option>";
+			}
+		}
+
+		echo json_encode([
+			'html' => $html,
+		]);		
+	}
+
+	public function select_qty_barang()
+	{
+		$id_barang = $this->input->get('id_barang');
+		$id_gudang = $this->input->get('id_gudang');
+		$data_stok = $this->m_global->single_row('*', ['id_gudang' => $id_gudang, 'id_barang' => $id_barang, 'deleted_at' => null], 't_stok');
+
+		if($data_stok) {
+			$qty = $data_stok->qty;
+		}else{
+			$qty = 0;
+		}
+
+		echo json_encode($qty);		
+	}
 
 	public function add_order()
 	{
@@ -318,7 +358,8 @@ class Penjualan extends CI_Controller {
 		);
 
 		$data['invoice'] = $this->m_penjualan->getPenjualan($no_faktur)->row();
-		$data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL));
+		$data['gudang']  = $this->m_global->getSelectedData('m_gudang', array('deleted_at'=>NULL));
+		// $data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL));
 
 		/**
 		 * content data untuk template
@@ -345,6 +386,8 @@ class Penjualan extends CI_Controller {
 		
 		$id_penjualan 	= $this->input->post('id_penjualan');
 		$id_barang      = $this->input->post('id_barang');
+		$id_gudang      = $this->input->post('id_gudang');
+
 		$data_where     = array('id_barang'=> $id_barang);
 		$barang         = $this->m_global->getSelectedData('m_barang', $data_where)->row();
 		$qty            = $this->input->post('qty');
@@ -384,7 +427,7 @@ class Penjualan extends CI_Controller {
 		$insert = $this->m_global->save($data_order, 't_penjualan_det');
 
 		if($insert) {
-			$mutasi = $this->lib_mutasi->simpan_mutasi($id_barang, $qty, 2, $faktur, );
+			$mutasi = $this->lib_mutasi->simpan_mutasi($id_barang, $qty, 2, $faktur, $id_gudang);
 			
 			if($mutasi === FALSE) {
 				$this->db->trans_rollback();
@@ -392,6 +435,16 @@ class Penjualan extends CI_Controller {
 				$retval['pesan'] = 'Gagal menambahkan Order';
 				return;
 			}
+
+			$laporan = $this->lib_mutasi->insertDataLap($sub_total, 2, $faktur, $data_header->is_kredit);
+
+			if($laporan['status'] === FALSE) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menambahkan Order';
+				return;
+			}
+
 		}
 		
 		if ($this->db->trans_status() === FALSE){

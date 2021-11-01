@@ -106,15 +106,22 @@
             <form id="regForm">
             <div class="row">
                 <div class="form-group col-sm-4">
-                    <label for="lbl_namabarang" class="form-control-label">Nama Barang :</label>
-                    <input type="hidden" value="<?= (isset($invoice->id_penjualan))?$invoice->id_penjualan:"";?>" name="id_penjualan" id="id_penjualan">
-                    <select name="id_barang" id="id_barang" class="form-control ">
-                        <option value="0">-PILIH-</option>
-                        <?php foreach($barang->result() as $row):?>
-                            <option value="<?php echo $row->id_barang;?>"><?php echo $row->nama;?> | <?php echo $row->sku;?></option>
-                        <?php endforeach;?>
-                    </select>
-                    <span class="help-block"></span>
+                  <label for="lbl_gudang" class="form-control-label">Gudang :</label>
+                  <input type="hidden" value="<?= (isset($invoice->id_penjualan))?$invoice->id_penjualan:"";?>" name="id_penjualan" id="id_penjualan">
+                  <select name="id_gudang" id="id_gudang" class="form-control" onchange="getSelectBarang(this)">
+                      <option value="0">-PILIH-</option>
+                      <?php foreach($gudang->result() as $row):?>
+                          <option value="<?php echo $row->id_gudang;?>"><?php echo $row->nama_gudang;?></option>
+                      <?php endforeach;?>
+                  </select>
+                  <span class="help-block"></span>
+                </div>
+                <div class="form-group col-sm-4">
+                  <label for="lbl_namabarang" class="form-control-label">Nama Barang :</label>
+                  <select name="id_barang" id="id_barang" class="form-control ">
+                      <option value="0">-PILIH-</option>
+                  </select>
+                  <span class="help-block"></span>
                 </div>
                 <div class="form-group col-sm-1">
                     <label for="lbl_hargabarang" class="form-control-label">Qty :</label>

@@ -25,8 +25,7 @@ class Lib_mutasi extends CI_Controller {
 		$id_kategori_trans, 
 		$kode_reff,
 		$id_gudang,
-		$tanggal = null, 
-		$hpp = null
+		$tanggal = null
 	) {
 		try {
 			$this->_ci->db->trans_begin();
@@ -595,7 +594,7 @@ class Lib_mutasi extends CI_Controller {
 		$nilaiRupiah,
 		$id_kategori_trans,
 		$kode_reff,
-		$is_kredit,
+		$is_kredit = null,
 		$tanggal=null
 	) {
 		try {
@@ -694,10 +693,38 @@ class Lib_mutasi extends CI_Controller {
 					$this->_ci->m_global->save($arr_ins_laporan, 't_lap_keuangan');
 					
 				}
-
-				/* #### jika penerimaan pembelian
+				#### jika penjualan
 				#### search laporan by kode_reff, ambil last id_det
-				#### isi kolom piutang dengan minus harga barang
+				#### isi kolom pengeluaran
+				else if($id_kategori_trans == 2) {
+					$max_mutasi = $this->_ci->m_global->max('id_laporan', 't_lap_keuangan');
+					$max_mutasi_det = $this->_ci->m_global->max('id_laporan_det', 't_lap_keuangan', ['kode_reff' => $kode_reff]);
+
+					$id_laporan = $max_mutasi->id_laporan +1;
+					$id_laporan_det = $max_mutasi_det->id_laporan_det +1;
+
+					$arr_ins_laporan['id_laporan'] = $id_laporan;
+					$arr_ins_laporan['id_laporan_det'] = $id_laporan_det;
+					$arr_ins_laporan['tgl_laporan'] = $tgl;
+					$arr_ins_laporan['bulan_laporan'] = $bulan;
+					$arr_ins_laporan['tahun_laporan'] = $tahun;
+					
+					$arr_ins_laporan['kode_reff'] = $kode_reff;
+					$arr_ins_laporan['id_kategori_trans'] = $id_kategori_trans;
+					$arr_ins_laporan['created_at'] = $timestamp;
+
+					if($is_kredit) {
+						$arr_ins_laporan['piutang'] = $nilaiRupiah;
+						$arr_ins_laporan['penerimaan'] = 0;
+					}else{
+						$arr_ins_laporan['piutang'] = 0;
+						$arr_ins_laporan['penerimaan'] = $nilaiRupiah;
+					}
+
+					$this->_ci->m_global->save($arr_ins_laporan, 't_lap_keuangan');
+				}
+
+				/* 
 				else if($id_kategori_trans == 4) {
 
 				} */

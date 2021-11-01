@@ -79,13 +79,56 @@ $(document).ready(function() {
         reset_modal_form();
         reset_modal_form_import();
     });
+
+    $('#id_barang').change(function(){
+      let res = $(this).val();
+      let id_gudang = $('#id_gudang').val();
+      
+      if(res == 0) {
+        
+        $('#qty').val('0').attr({
+          "max" : 0,
+          "min" : 0
+        });
+
+      }else{
+        $.ajax({
+          type: "get",
+          url: base_url+"penjualan/select_qty_barang",
+          data: {id_barang:res, id_gudang:id_gudang},
+          dataType: "json",
+          success: function (response) {
+            $('#qty').val(response).attr({
+              "max" : response,
+              "min" : 0
+           });
+          }
+        });
+      }
+    });
 });	
+
+const getSelectBarang = (obj) => {
+  let id_gudang = obj.value;
+  if(id_gudang == 0) {
+    $('#id_barang').empty().append('<option value="0">-PILIH-</option>');
+  }else{
+    $.ajax({
+      type: "get",
+      url: base_url+"penjualan/get_option_barang",
+      data: {id_gudang:id_gudang},
+      dataType: "json",
+      success: function (response) {
+        $('#id_barang').html(response.html);
+      }
+    });
+  }
+}
 
 function add_menu()
 {
-    
-    reset_modal_form();
-    save_method = 'add';
+  reset_modal_form();
+  save_method = 'add';
 	$('#modal_agen_form').modal('show');
 	$('#modal_title').text('Tambah Master Agen'); 
 }
