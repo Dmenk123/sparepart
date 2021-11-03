@@ -248,10 +248,12 @@ class T_penerimaan extends CI_Model
 	{
 		$this->db->select('
 			pd.*,
+			p.id_pembelian,
 			mb.nama,
 			mb.sku
 		');
 		$this->db->from('t_penerimaan_det pd');
+		$this->db->join('t_penerimaan p', 'pd.id_penerimaan=p.id_penerimaan');
 		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
 		$this->db->where('pd.id_penerimaan', $id);
 		$this->db->order_by('pd.id_penerimaan_det', 'ASC');
