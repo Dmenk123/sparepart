@@ -454,8 +454,9 @@ class Barang_masuk extends CI_Controller {
 				#### update pembelian det
 				$where_update = ['id_pembelian_det' => $this->input->post('pembelian_det')[$i]];
 				$data_update['qty_terima'] = $cek_pembelian_det->qty_terima + $this->input->post('qty')[$i];
-				$data_update['tgl_terima'] = $tgl;
-				$data_update['reff_terima'] = $kode_penerimaan;
+
+				// $data_update['tgl_terima'] = $tgl;
+				// $data_update['reff_terima'] = $kode_penerimaan;
 
 				### cek qty tabel pembelian det, jika qty penerimaan / sum penerimaan sesuai jumlah, set flag is_terima
 				if($cek_pembelian_det->qty == $this->t_penerimaan->sum_barang_masuk_pertransaksi($this->input->post('id_barang')[$i], $id_pembelian)) {
@@ -648,7 +649,7 @@ class Barang_masuk extends CI_Controller {
 			}
 
 			foreach ($arr_temp_detail as $key => $value) {
-				#### hapus stpk mutasi
+				#### hapus stok mutasi
 				$mutasi = $this->lib_mutasi->hapusMutasiMasuk(
 					$value->id_barang, 
 					$value->qty, 
@@ -657,20 +658,34 @@ class Barang_masuk extends CI_Controller {
 					$cek_header->id_gudang, 
 					$cek_header->kode_penerimaan,
 				);
+
+				// rollback pembelian
+				$joni = [ 
+					['table' => 't_pembelian', 'on'	=> 't_pembelian_det.id_pembelian = t_pembelian.id_pembelian'],
+				];
+
+				$cek_pembelian_det = $this->m_global->single_row(
+					"t_pembelian_det.*, t_pembelian.kode_pembelian, t_pembelian.is_kredit", 
+					['t_pembelian_det.id_pembelian' => $value->id_pembelian, 't_pembelian_det.id_barang' => $value->id_barang, 't_pembelian_det.deleted_at' => null], 
+					't_pembelian_det', 
+					$joni
+				);
+
+				if($cek_pembelian_det) {
+					$where_update = ['id_pembelian' => $value->id_pembelian, 'id_barang' => $value->id_barang, 'deleted_at' => null];
+					$data_update['is_terima'] = null;
+					$data_update['qty_terima'] = $cek_pembelian_det->qty_terima - $value->qty;
+
+					// $data_update['tgl_terima'] = $cek_pembelian_det->qty_terima - $value->qty;
+					// $data_update['reff_terima'] = $cek_pembelian_det->qty_terima - $value->qty;
+					
+					$update = $this->t_pembelian->updatePembelianDet($where_update, $data_update);
+				}
 			}
 
 			### harddeletes
 			$del = $this->m_global->force_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan');
 			$del_det = $this->m_global->force_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan_det');
-
-			foreach ($arr_temp_detail as $key => $value) {
-				$where_update = ['id_pembelian' => $value->id_pembelian, 'id_barang' => $value->id_barang, 'deleted_at' => null];
-				$data_update['is_terima'] = null;
-				$data_update['qty_terima'] = null;
-				$data_update['tgl_terima'] = null;
-				$data_update['reff_terima'] = null;
-				$update = $this->t_pembelian->updatePembelianDet($where_update, $data_update);
-			}
 			
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();
@@ -695,9 +710,13 @@ class Barang_masuk extends CI_Controller {
 				### jika tidak ada yg belum
 				### update t_pembelian set flag is_terima_all = 1 where is_terima di masing-masing det not null
 				if (!in_array('belum', $arr)) {
-					$data_where = ['id_pembelian' => $cek_header->id_pembelian];
-					$this->m_global->update('t_pembelian', ['is_terima_all' => 1], $data_where);
+					$data_upd = ['is_terima_all' => 1];
+				}else{
+					$data_upd = ['is_terima_all' => null];
 				}
+
+				$data_where = ['id_pembelian' => $cek_header->id_pembelian];
+				$this->m_global->update('t_pembelian', $data_upd, $data_where);
 
 				$retval['status'] = true;
 				$retval['pesan'] = 'Sukses menghapus Penerimaan';

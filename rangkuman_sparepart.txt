@@ -1,0 +1,31 @@
+(retur pembelian) potong nota / ganti barang
+1. (potong nota) mengurangi harga pembelian selanjutnya di supplier yg bersangkutan
+2. (ganti barang) ganti barang saja (uange tetap)
+
+
+(pembelian) pada opsi di list tabel di sertakan tombol shortcut untuk edit penerimaan
+
+(peneriman) jika barang yg diterima kebetulan sudah terjual, maka dipenerimaan tidak bisa di edit / hapus
+
+bayar hutang pembelian
+mencatatat hutang dari customer
+pengeluaran lain-lain
+penerimaan lain-lain
+
+
+harga penjualan tidak boleh dibawah harga log 
+
+monitoring pelanggan ()
+
+
+
+program (berjalan secara periodik tanggal terpilih)
+
+ada harga
+ada buy 1 get 1 free
+ada buy a get b free
+
+
+
+bug (hapus penjualan)
+ketika hapus penjualan maka stok belum dikembalikan ke awal

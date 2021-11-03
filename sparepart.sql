@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 02/11/2021 01:40:46
+ Date: 04/11/2021 04:00:58
 */
 
 SET NAMES utf8mb4;
@@ -63,13 +63,14 @@ CREATE TABLE `m_barang`  (
   `gambar_keempat` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `deskripsi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
   PRIMARY KEY (`id_barang`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of m_barang
 -- ----------------------------
 INSERT INTO `m_barang` VALUES (3, 1, 'SKU001', 'Handle Kuning', 10000, 'handle-kuning-sku001.jpg', 2, NULL, '2021-10-14 23:40:52', NULL, '', '', '', '', 'handle-kuning-sku001-2.jpg', 'user_default.png', 'user_default.png', NULL);
 INSERT INTO `m_barang` VALUES (4, 1, 'SKU0002', 'Oke', 20000, 'oke-sku0002.jpg', 4, NULL, NULL, NULL, '', '', '', '', 'oke-sku0002-2.jpg', 'oke-sku0002-3.jpg', 'user_default.png', NULL);
+INSERT INTO `m_barang` VALUES (5, 1, 'ABC-010101', 'setang bmx', 30000, 'setang-bmx-abc-010101.png', 3, NULL, NULL, NULL, '', '', '', '', 'setang-bmx-abc-010101-2.png', 'user_default.png', 'user_default.png', NULL);
 
 -- ----------------------------
 -- Table structure for m_barang_copy1
@@ -211,6 +212,10 @@ INSERT INTO `m_menu` VALUES (15, 0, 'Transaksi', 'Transaksi', '', 'flaticon-list
 INSERT INTO `m_menu` VALUES (16, 15, 'Pembelian', 'Pembelian', 'pembelian', 'flaticon2-shopping-cart-1', 1, 2, 1, 1, 1, 1);
 INSERT INTO `m_menu` VALUES (17, 15, 'Penjualan', 'Penjualan', 'penjualan', 'flaticon-truck', 1, 2, 2, 1, 1, 1);
 INSERT INTO `m_menu` VALUES (18, 13, 'Penerimaan Barang', 'Penerimaan Barang', 'barang_masuk', 'flaticon2-box-1', 1, 2, 4, 1, 1, 1);
+INSERT INTO `m_menu` VALUES (19, 6, 'Data Profil', 'Data Profil', 'master_profil', 'flaticon-user', 1, 2, 5, 1, 1, 1);
+INSERT INTO `m_menu` VALUES (20, 15, 'Setting Harga Jual', 'Setting Harga Jual', 'log_harga', 'flaticon-cart', 1, 2, 3, 1, 1, 1);
+INSERT INTO `m_menu` VALUES (21, 0, 'Monitoring', 'Monitoring', '', 'flaticon-book', 1, 1, 4, 0, 0, 0);
+INSERT INTO `m_menu` VALUES (22, 21, 'Pelanggan', 'Pelanggan', 'monitoring_pelanggan', 'flaticon-user', 1, 2, 1, 0, 0, 0);
 
 -- ----------------------------
 -- Table structure for m_pelanggan
@@ -327,7 +332,7 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-11-01 22:39:13', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
+INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-11-04 02:25:57', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
 INSERT INTO `m_user` VALUES (2, 1, 'coba', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50', 'coba saja');
 INSERT INTO `m_user` VALUES (3, 6, 'alsyafin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00003', 'user_default.png', '2021-01-15 09:07:51', NULL, NULL, 'Alsuafinollah');
 INSERT INTO `m_user` VALUES (4, 6, 'zamroni', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00004', 'user_default.png', '2021-01-15 09:08:19', NULL, NULL, 'Moch Zamroni');
@@ -882,18 +887,16 @@ CREATE TABLE `t_lap_keuangan`  (
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id_laporan`, `id_laporan_det`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_lap_keuangan
 -- ----------------------------
-INSERT INTO `t_lap_keuangan` VALUES (1, 1, '2021-11-02', '11', '2021', 0.00, 0.00, 460000.00, 460000.00, 1, 'ORD-K022021001', '2021-11-02 01:34:05', '2021-11-02 01:34:15', NULL);
-INSERT INTO `t_lap_keuangan` VALUES (1, 2, '2021-11-02', '11', '2021', 0.00, 0.00, 0.00, -90000.00, 4, 'ORD-K022021001', '2021-11-02 01:35:44', NULL, NULL);
-INSERT INTO `t_lap_keuangan` VALUES (1, 3, '2021-11-02', '11', '2021', 0.00, 0.00, 0.00, -100000.00, 4, 'ORD-K022021001', '2021-11-02 01:35:44', NULL, NULL);
-INSERT INTO `t_lap_keuangan` VALUES (1, 4, '2021-11-02', '11', '2021', 0.00, 0.00, 0.00, -126000.00, 4, 'ORD-K022021001', '2021-11-02 01:36:16', NULL, NULL);
-INSERT INTO `t_lap_keuangan` VALUES (1, 5, '2021-11-02', '11', '2021', 0.00, 0.00, 0.00, -144000.00, 4, 'ORD-K022021001', '2021-11-02 01:36:47', NULL, NULL);
-INSERT INTO `t_lap_keuangan` VALUES (2, 1, '2021-11-02', '11', '2021', 0.00, 210000.00, 0.00, 210000.00, 1, 'ORD-K022021002', '2021-11-02 01:35:06', NULL, NULL);
-INSERT INTO `t_lap_keuangan` VALUES (3, 1, '2021-11-02', '11', '2021', 0.00, 0.00, 0.00, 380000.00, 2, 'K020012021', '2021-11-02 01:38:28', NULL, NULL);
+INSERT INTO `t_lap_keuangan` VALUES (1, 1, '2021-11-04', '11', '2021', 0.00, 250000.00, 0.00, 250000.00, 1, 'ORD-K042021001', '2021-11-04 02:46:38', NULL, NULL);
+INSERT INTO `t_lap_keuangan` VALUES (1, 2, '2021-11-04', '11', '2021', 0.00, 0.00, 0.00, -200000.00, 4, 'ORD-K042021001', '2021-11-04 02:49:11', NULL, NULL);
+INSERT INTO `t_lap_keuangan` VALUES (1, 3, '2021-11-04', '11', '2021', 0.00, 0.00, 0.00, -50000.00, 4, 'ORD-K042021001', '2021-11-04 02:49:46', NULL, NULL);
+INSERT INTO `t_lap_keuangan` VALUES (2, 1, '2021-11-04', '11', '2021', 0.00, 0.00, 250000.00, 250000.00, 1, 'ORD-K042021002', '2021-11-04 02:51:25', NULL, NULL);
+INSERT INTO `t_lap_keuangan` VALUES (2, 2, '2021-11-04', '11', '2021', 0.00, 0.00, 0.00, -125000.00, 4, 'ORD-K042021002', '2021-11-04 02:52:27', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_log_harga_jual
@@ -905,14 +908,17 @@ CREATE TABLE `t_log_harga_jual`  (
   `harga_jual` float(20, 2) NULL DEFAULT NULL,
   `tanggal` date NULL DEFAULT NULL,
   `is_harga_awal` int(1) NULL DEFAULT NULL,
+  `created_by` int(32) NULL DEFAULT NULL,
   PRIMARY KEY (`id_log_harga_jual`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_log_harga_jual
 -- ----------------------------
-INSERT INTO `t_log_harga_jual` VALUES (1, 3, 10000.00, '2021-10-14', 1);
-INSERT INTO `t_log_harga_jual` VALUES (2, 4, 20000.00, '2021-10-20', 1);
+INSERT INTO `t_log_harga_jual` VALUES (1, 3, 10000.00, '2021-10-14', 1, NULL);
+INSERT INTO `t_log_harga_jual` VALUES (2, 4, 20000.00, '2021-10-20', 1, NULL);
+INSERT INTO `t_log_harga_jual` VALUES (3, 5, 30000.00, '2021-11-02', 1, NULL);
+INSERT INTO `t_log_harga_jual` VALUES (4, 4, 25000.00, '2021-11-02', NULL, 1);
 
 -- ----------------------------
 -- Table structure for t_pembelian
@@ -939,8 +945,8 @@ CREATE TABLE `t_pembelian`  (
 -- ----------------------------
 -- Records of t_pembelian
 -- ----------------------------
-INSERT INTO `t_pembelian` VALUES (1, 'ORD-K022021001', 1, 1, '2021-11-02', 460000.00, 2000.00, 1, '2021-11-02 01:33:37', '2021-11-02 01:34:15', NULL, 1, NULL, NULL);
-INSERT INTO `t_pembelian` VALUES (2, 'ORD-K022021002', 2, 1, '2021-11-02', 210000.00, 0.00, NULL, '2021-11-02 01:34:49', '2021-11-02 01:35:06', NULL, NULL, 1, '2021-11-02');
+INSERT INTO `t_pembelian` VALUES (1, 'ORD-K042021001', 1, 1, '2021-11-04', 250000.00, 0.00, NULL, '2021-11-04 02:39:23', '2021-11-04 02:46:38', NULL, NULL, 1, '2021-11-04');
+INSERT INTO `t_pembelian` VALUES (2, 'ORD-K042021002', 2, 1, '2021-11-04', 250000.00, 0.00, NULL, '2021-11-04 02:51:11', '2021-11-04 02:51:25', NULL, 1, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_pembelian_det
@@ -961,17 +967,14 @@ CREATE TABLE `t_pembelian_det`  (
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   `is_terima` int(1) NULL DEFAULT NULL,
   `qty_terima` int(11) NULL DEFAULT NULL,
-  `tgl_terima` date NULL DEFAULT NULL,
-  `reff_terima` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id_pembelian_det`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_pembelian_det
 -- ----------------------------
-INSERT INTO `t_pembelian_det` VALUES (1, '1', '3', 20, 20000.00, 2000.00, 10.00, 18000.00, 360000.00, '2021-11-02 01:34:05', NULL, NULL, 1, 20, '2021-11-02', 'RCV-K022021003');
-INSERT INTO `t_pembelian_det` VALUES (2, '1', '4', 5, 20000.00, 0.00, 0.00, 20000.00, 100000.00, '2021-11-02 01:34:15', NULL, NULL, 1, 5, '2021-11-02', 'RCV-K022021001');
-INSERT INTO `t_pembelian_det` VALUES (3, '2', '4', 14, 15000.00, 0.00, 0.00, 15000.00, 210000.00, '2021-11-02 01:35:06', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `t_pembelian_det` VALUES (1, '1', '3', 10, 25000.00, 0.00, 0.00, 25000.00, 250000.00, '2021-11-04 02:46:38', NULL, NULL, NULL, 0);
+INSERT INTO `t_pembelian_det` VALUES (2, '2', '4', 10, 25000.00, 0.00, 0.00, 25000.00, 250000.00, '2021-11-04 02:51:25', NULL, NULL, NULL, 0);
 
 -- ----------------------------
 -- Table structure for t_penerimaan
@@ -994,9 +997,6 @@ CREATE TABLE `t_penerimaan`  (
 -- ----------------------------
 -- Records of t_penerimaan
 -- ----------------------------
-INSERT INTO `t_penerimaan` VALUES (1, 1, 1, 'RCV-K022021001', '2021-11-02', 1, 190000.00, '2021-11-02 01:35:29', NULL, NULL);
-INSERT INTO `t_penerimaan` VALUES (2, 1, 1, 'RCV-K022021002', '2021-11-02', 1, 126000.00, '2021-11-02 01:36:02', NULL, NULL);
-INSERT INTO `t_penerimaan` VALUES (3, 1, 1, 'RCV-K022021003', '2021-11-02', 1, 144000.00, '2021-11-02 01:36:39', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_penerimaan_det
@@ -1013,15 +1013,11 @@ CREATE TABLE `t_penerimaan_det`  (
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id_penerimaan_det`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_penerimaan_det
 -- ----------------------------
-INSERT INTO `t_penerimaan_det` VALUES (1, 1, 3, 5, '18000.00', 90000.00, '2021-11-02 01:35:44', NULL, NULL);
-INSERT INTO `t_penerimaan_det` VALUES (2, 1, 4, 5, '20000.00', 100000.00, '2021-11-02 01:35:44', NULL, NULL);
-INSERT INTO `t_penerimaan_det` VALUES (3, 2, 3, 7, '18000.00', 126000.00, '2021-11-02 01:36:16', NULL, NULL);
-INSERT INTO `t_penerimaan_det` VALUES (4, 3, 3, 8, '18000.00', 144000.00, '2021-11-02 01:36:47', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_penjualan
@@ -1038,12 +1034,11 @@ CREATE TABLE `t_penjualan`  (
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   `is_kredit` int(1) NULL DEFAULT NULL,
   PRIMARY KEY (`id_penjualan`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_penjualan
 -- ----------------------------
-INSERT INTO `t_penjualan` VALUES (1, 'K020012021', 3, 4, '1970-01-01 07:00:00', '2021-11-02 01:37:58', NULL, NULL, 1);
 
 -- ----------------------------
 -- Table structure for t_penjualan_det
@@ -1059,12 +1054,11 @@ CREATE TABLE `t_penjualan_det`  (
   `sub_total` float NULL DEFAULT NULL,
   `qty` int(32) NULL DEFAULT NULL,
   PRIMARY KEY (`id_penjualan_det`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_penjualan_det
 -- ----------------------------
-INSERT INTO `t_penjualan_det` VALUES (1, 1, 3, 10000, 10000, 0, 380000, 38);
 
 -- ----------------------------
 -- Table structure for t_provinsi
@@ -1139,17 +1133,20 @@ INSERT INTO `t_role_menu` VALUES (7, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (8, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (9, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (10, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (19, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (11, 1, 0, 0, 0);
-INSERT INTO `t_role_menu` VALUES (12, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (13, 1, 0, 0, 0);
 INSERT INTO `t_role_menu` VALUES (14, 1, 1, 1, 1);
-INSERT INTO `t_role_menu` VALUES (2, 1, 0, 0, 0);
-INSERT INTO `t_role_menu` VALUES (4, 1, 1, 1, 1);
-INSERT INTO `t_role_menu` VALUES (3, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (18, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (21, 1, 0, 0, 0);
+INSERT INTO `t_role_menu` VALUES (22, 1, 0, 0, 0);
 INSERT INTO `t_role_menu` VALUES (15, 1, 0, 0, 0);
 INSERT INTO `t_role_menu` VALUES (16, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (17, 1, 1, 1, 1);
-INSERT INTO `t_role_menu` VALUES (18, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (20, 1, 1, 0, 0);
+INSERT INTO `t_role_menu` VALUES (2, 1, 0, 0, 0);
+INSERT INTO `t_role_menu` VALUES (4, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (3, 1, 1, 1, 1);
 
 -- ----------------------------
 -- Table structure for t_stok
@@ -1171,8 +1168,8 @@ CREATE TABLE `t_stok`  (
 -- ----------------------------
 -- Records of t_stok
 -- ----------------------------
-INSERT INTO `t_stok` VALUES (1, 3, 1, 2, 5, '2021-11-02 01:32:28', NULL, NULL);
-INSERT INTO `t_stok` VALUES (2, 4, 1, 20, 3, '2021-11-02 01:32:46', NULL, NULL);
+INSERT INTO `t_stok` VALUES (1, 3, 1, 20, 5, '2021-11-04 02:46:12', '2021-11-04 03:59:07', NULL);
+INSERT INTO `t_stok` VALUES (2, 4, 1, 40, 10, '2021-11-04 02:50:46', '2021-11-04 03:59:27', NULL);
 
 -- ----------------------------
 -- Table structure for t_stok_mutasi
@@ -1201,16 +1198,8 @@ CREATE TABLE `t_stok_mutasi`  (
 -- ----------------------------
 -- Records of t_stok_mutasi
 -- ----------------------------
-INSERT INTO `t_stok_mutasi` VALUES (1, 1, 3, 3, 1, 20, 20, 0, 0, 20000.00, 'STOK AWAL', '2021-11-02', 'PENAMBAHAN', '2021-11-02 01:32:28', NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (1, 2, 3, 4, 1, 5, 5, 0, 0, 18000.00, 'RCV-K022021001', '2021-11-02', 'PENAMBAHAN', '2021-11-02 01:35:44', NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (1, 3, 3, 4, 1, 7, 7, 0, 0, 18000.00, 'RCV-K022021002', '2021-11-02', 'PENAMBAHAN', '2021-11-02 01:36:16', NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (1, 4, 3, 4, 1, 8, 6, 2, 0, 18000.00, 'RCV-K022021003', '2021-11-02', 'PENAMBAHAN', '2021-11-02 01:36:47', NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (1, 5, 3, 2, 1, -20, 0, 0, 0, 20000.00, 'K020012021', '2021-11-02', 'PENGURANGAN', '2021-11-02 01:38:28', NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (1, 6, 3, 2, 1, -5, 0, 0, 0, 18000.00, 'K020012021', '2021-11-02', 'PENGURANGAN', '2021-11-02 01:38:28', NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (1, 7, 3, 2, 1, -7, 0, 0, 0, 18000.00, 'K020012021', '2021-11-02', 'PENGURANGAN', '2021-11-02 01:38:28', NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (1, 8, 3, 2, 1, -6, 0, 0, 0, 18000.00, 'K020012021', '2021-11-02', 'PENGURANGAN', '2021-11-02 01:38:28', NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (2, 1, 4, 3, 0, 15, 0, 15, 0, 15000.00, 'STOK AWAL', '2021-11-02', 'PENAMBAHAN', '2021-11-02 01:32:46', NULL, NULL);
-INSERT INTO `t_stok_mutasi` VALUES (2, 2, 4, 4, 1, 5, 0, 5, 0, 20000.00, 'RCV-K022021001', '2021-11-02', 'PENAMBAHAN', '2021-11-02 01:35:44', NULL, NULL);
+INSERT INTO `t_stok_mutasi` VALUES (1, 1, 3, 3, 1, 20, 0, 20, 0, 25000.00, 'STOK AWAL', '2021-11-04', 'PENAMBAHAN', '2021-11-04 02:46:12', NULL, NULL);
+INSERT INTO `t_stok_mutasi` VALUES (2, 1, 4, 3, 1, 40, 0, 40, 0, 10000.00, 'STOK AWAL', '2021-11-04', 'PENAMBAHAN', '2021-11-04 02:50:46', NULL, NULL);
 
 -- ----------------------------
 -- Function structure for dm
