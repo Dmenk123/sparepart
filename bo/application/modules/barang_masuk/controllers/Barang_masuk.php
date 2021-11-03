@@ -641,8 +641,13 @@ class Barang_masuk extends CI_Controller {
 			}
 
 			$data_detail = $this->t_penerimaan->getPenerimaanDet($cek_header->id_penerimaan)->result();
+			
+			$arr_temp_detail = null;
+			if($data_detail) {
+				$arr_temp_detail = $data_detail;
+			}
 
-			foreach ($data_detail as $key => $value) {
+			foreach ($arr_temp_detail as $key => $value) {
 				#### hapus stpk mutasi
 				$mutasi = $this->lib_mutasi->hapusMutasiMasuk(
 					$value->id_barang, 
@@ -656,15 +661,44 @@ class Barang_masuk extends CI_Controller {
 
 			### harddeletes
 			$del = $this->m_global->force_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan');
-
 			$del_det = $this->m_global->force_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan_det');
 
+			foreach ($arr_temp_detail as $key => $value) {
+				$where_update = ['id_pembelian' => $value->id_pembelian, 'id_barang' => $value->id_barang, 'deleted_at' => null];
+				$data_update['is_terima'] = null;
+				$data_update['qty_terima'] = null;
+				$data_update['tgl_terima'] = null;
+				$data_update['reff_terima'] = null;
+				$update = $this->t_pembelian->updatePembelianDet($where_update, $data_update);
+			}
+			
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();
 				$retval['status'] = false;
 				$retval['pesan'] = 'Gagal menghapus Penerimaan';
 			} else {
 				$this->db->trans_commit();
+
+				$data_pembelian_det = $this->m_global->multi_row('*', ['id_pembelian' => $cek_header->id_pembelian], 't_pembelian_det');
+				$arr = [];
+
+				foreach ($data_pembelian_det as $key => $value) {
+					if ($value->qty == $value->qty_terima) {
+						$txt = 'ok';
+					} else {
+						$txt = 'belum';
+					}
+
+					$arr[] = $txt;
+				}
+
+				### jika tidak ada yg belum
+				### update t_pembelian set flag is_terima_all = 1 where is_terima di masing-masing det not null
+				if (!in_array('belum', $arr)) {
+					$data_where = ['id_pembelian' => $cek_header->id_pembelian];
+					$this->m_global->update('t_pembelian', ['is_terima_all' => 1], $data_where);
+				}
+
 				$retval['status'] = true;
 				$retval['pesan'] = 'Sukses menghapus Penerimaan';
 			}
