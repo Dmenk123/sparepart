@@ -63,7 +63,7 @@ class Master_barang extends CI_Controller {
 			$row[] = $barang->sku;
 			$row[] = ' <img src='.base_url().'files/img/barcode/'.$barang->sku.'.jpg style="width:100px;" height="auto" class="center">';
 			$row[] = $barang->nama;
-			$row[] = $barang->stok;
+			// $row[] = $barang->stok;
 			$row[] = $barang->nama_satuan;
 			$row[] = 'Rp '.number_format($barang->harga);
 			$row[] = $barang->nama_kategori;

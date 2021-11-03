@@ -41,7 +41,7 @@
               <th>Kode SKU</th>
               <th>Barcode</th>
               <th>Nama Barang</th>
-              <th>Stok (Qty)</th>
+              <!-- <th>Stok (Qty)</th> -->
               <th>Satuan</th>
               <th>Harga Jual</th>
               <th>Kategori</th>
