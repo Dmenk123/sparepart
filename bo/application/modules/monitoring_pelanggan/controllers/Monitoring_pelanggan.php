@@ -54,19 +54,22 @@ class Monitoring_pelanggan extends CI_Controller {
 		$data_table = $this->m_pelanggan->get_datatable_monitoring($id_pelanggan);
 		$data = array();
 		$data = [];
-        foreach ($data_table as $key => $value) {
+		if ($data_table) {
+			foreach ($data_table as $key => $value) {
 			
-			$data[$key][] = $key+1;
-			$data[$key][] = $value->nama_pelanggan;
-			$data[$key][] = $value->nama_barang;
-			// $data[$key][] = 'Rp '.number_format($value->harga_jual); 
-			$data[$key][] = $value->qty; 
-			$data[$key][] = date('d-m-Y', strtotime($value->tanggal_order));     
-			// $data[$key][] = $value->jenis_kelamin;
-			// $data[0][] = $value->created_at;
-			
-
-			
+				$data[$key][] = $key+1;
+				$data[$key][] = $value->nama_pelanggan;
+				$data[$key][] = $value->nama_barang;
+				// $data[$key][] = 'Rp '.number_format($value->harga_jual); 
+				$data[$key][] = $value->qty; 
+				$data[$key][] = date('d-m-Y', strtotime($value->tanggal_order));     
+				$data[$key][] = 'Rp '.number_format($value->sub_total); 
+				// $data[$key][] = $value->jenis_kelamin;
+				// $data[0][] = $value->created_at;
+				
+	
+				
+			}
 		}
 		
 		// $this->output->enable_profiler(TRUE);
