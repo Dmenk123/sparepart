@@ -39,7 +39,7 @@ class Penjualan extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => null,
+			'modal' => 'modal_detail_pengeluaran',
 			'js'	=> 'penjualan.js',
 			'view'	=> 'view_invoice_penjualan'
 		];
@@ -61,7 +61,8 @@ class Penjualan extends CI_Controller {
 			$row[] = $invoice->no_faktur;
 			$row[] = $invoice->nama_toko;
 			$row[] = $invoice->alamat;
-			$row[] = $invoice->username;
+			$row[] = $invoice->nama_sales;
+			$row[] = $invoice->metode;
 			
 			$str_aksi = '
 				<div class="btn-group">
@@ -70,11 +71,14 @@ class Penjualan extends CI_Controller {
 						<button class="dropdown-item" onclick="edit_penjualan(\''.$invoice->no_faktur.'\')">
 							<i class="la la-pencil"></i> Edit Invoice
 						</button>
-						<button class="dropdown-item" onclick="delete_penjualan(\''.$invoice->no_faktur.'\')">
+						<button class="dropdown-item" onclick="detail_penjualan(\''.$invoice->no_faktur.'\',\''.$invoice->id_penjualan.'\')">
+							<i class="la la-desktop"></i> Lihat Penjualan
+						</button>
+						<button class="dropdown-item" onclick="delete_penjualan(\''.$invoice->no_faktur.'\',\''.$invoice->id_penjualan.'\')">
 							<i class="la la-trash"></i> Hapus
 						</button>
 						<button class="dropdown-item" onclick="cetak_invoice(\''.$invoice->no_faktur.'\')">
-							<i class="la la-trash"></i> Cetak
+							<i class="la la-print"></i> Cetak
 						</button>
 			';
 
@@ -92,6 +96,90 @@ class Penjualan extends CI_Controller {
 		];
 		
 		echo json_encode($output);
+	}
+
+	public function get_detail_penjualan()
+	{
+		$id = $this->input->get('id');
+		$kode = $this->input->get('kode');
+		
+		$join = [ 
+			['table' => 'm_pelanggan', 'on' => 't_penjualan.id_pelanggan = m_pelanggan.id_pelanggan'],
+			['table' => 'm_user', 'on' => 't_penjualan.id_sales = m_user.id'],
+		];
+		$header = $this->m_global->single_row('t_penjualan.*, m_pelanggan.nama_toko, m_user.nama as nama_sales', [
+			't_penjualan.no_faktur' => $kode,
+			't_penjualan.id_penjualan' => $id, 
+			't_penjualan.deleted_at' => null,
+		], 't_penjualan', $join);
+
+		$detail = $this->m_penjualan->getPenjualanDet($id)->result();
+		
+		$html_det = '';
+		if($detail) {
+			$total_harga_sum = 0;
+			foreach ($detail as $key => $value) {
+				$total_harga_sum += $value->sub_total;
+				$html_det .= '<tr>
+					<td style="vertical-align: middle;">'.$value->qty.'</td>
+					<td style="vertical-align: middle;">'.$value->nama.'</td>
+					<td style="vertical-align: middle;" align="right">'.number_format($value->harga_diskon).'</td>
+					<td style="vertical-align: middle;" align="right">'.number_format($value->sub_total).'</td>
+				</tr>';
+			}
+			$html_det .= '<tr>
+				<td colspan="3" style="vertical-align: middle;font-weight:bold;" align="center">Grand Total</td>
+				<td style="vertical-align: middle;font-weight:bold;" align="right">'.number_format($total_harga_sum).'</td>
+			</tr>';
+		}else{
+			$html_det .= '<tr>
+				<td style="vertical-align: middle;" colspan="4" align="center">Belum ada data transaksi ...</td>
+			</tr>';
+		}
+	
+		
+		echo json_encode([
+			'header' => $header,
+			'html_det' => $html_det
+		]);
+		
+	}
+
+	public function delete_penjualan()
+	{
+		$this->db->trans_begin();
+		$id = $this->input->post('id');
+		$kode = $this->input->post('kode');
+
+		$cek = $this->m_global->single_row('*', ['id_penjualan' => $id], 't_penjualan');
+		$cek2 = $this->m_global->single_row('*', ['id_penjualan' => $id], 't_penjualan_det');
+
+		if($cek) {
+			$del = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan');
+		}
+
+		if($cek2) {
+			$del2 = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan_det');
+		}
+
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Hapus Data';
+		}else{
+			$roll = $this->lib_mutasi->rollBack($cek->no_faktur);
+			if($roll) {
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Hapus Data ';
+			}else{
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Hapus Data';
+			}
+		}
+		
+		echo json_encode($retval);
 	}
 
 	// ===============================================
@@ -167,6 +255,7 @@ class Penjualan extends CI_Controller {
 		/**
 		 * data passing ke halaman view content
 		 */
+		
 		$data = array(
 			'title' => 'Penjualan Baru',
 			'data_user' => $data_user,
@@ -177,14 +266,23 @@ class Penjualan extends CI_Controller {
 		);
 
 		$mode = $this->input->get('mode');
+
 		if ($mode == 'edit') {
-			$order_id = $this->input->get('order_id');
-			$invoice = $this->m_global->getSelectedData('t_penjualan', array('order_id'=>$order_id))->row();
+			$no_faktur = $this->input->get('no_faktur');
+			$invoice = $this->m_global->getSelectedData('t_penjualan', array('no_faktur'=>$no_faktur))->row();
+			
+			if(!$invoice) {
+				return redirect('penjualan');
+			}
+
 			$data['invoice'] = $invoice;
 			$data['mode'] = $mode;
 			$data['title'] = "Edit Penjualan";
 			$data['id_penjualan'] = $invoice->id_penjualan;
-			$data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
+			$data['no_faktur'] = $invoice->no_faktur;
+			// $data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
+		}else{
+			return redirect('penjualan');
 		}
 
 		/**
@@ -210,34 +308,53 @@ class Penjualan extends CI_Controller {
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$tgl = $obj_date->format('Y-m-d');
 		$arr_valid = $this->rule_validasi();
-		$counter_penjualan = $this->m_penjualan->get_max_penjualan();
-		
-		$id_pelanggan 		= $this->input->post('pelanggan');
-		$id_sales 			= $this->input->post('sales');
-		$tgl_jatuh_tempo	= $this->input->post('tgl_jatuh_tempo');
-		$is_kredit			= ($this->input->post('metode') == '1') ? 1 : null;
-		$date 				= str_replace('/', '-', $tgl_jatuh_tempo);
-		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date) );
-		$no_faktur          = no_faktur($tgl, $counter_penjualan);
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
 		}
 
-		$this->db->trans_begin();
+		$is_update = false;
+
+		if($this->input->post('id_penjualan') != '') {
+			$cek = $this->m_penjualan->get_by_id($this->input->post('id_penjualan'));
+			if($cek){
+				$is_update = true;
+				$no_faktur = $cek->no_faktur;
+				$id_penjualan_fix = $cek->id_penjualan;
+			}else{
+				$retval['status'] = false;
+				$retval['pesan'] = 'Data Tidak Ditemukan';
+				echo json_encode($retval);
+				return;
+			}
+		}
+
+		if(!$is_update) {
+			$counter_penjualan = $this->m_penjualan->get_max_penjualan();
+			$no_faktur = no_faktur($tgl, $counter_penjualan);
+			$data['no_faktur'] = $no_faktur;
+			$data['created_at']	= $timestamp;
+		}
 		
+		$id_pelanggan 		= $this->input->post('pelanggan');
+		$id_sales 			= $this->input->post('sales');
+		$is_kredit			= ($this->input->post('metode') == '1') ? 1 : null;
+
 		$data = [
-			'no_faktur'         => $no_faktur,
 			'id_pelanggan' 		=> $id_pelanggan,
 			'id_sales' 			=> $id_sales,
-			'tgl_jatuh_tempo'	=> $jatuh_tempo,
 			'is_kredit'			=> $is_kredit,
-			'created_at'		=> $timestamp
 		];
-		
-		$insert = $this->m_penjualan->save($data);
-		
+
+		$this->db->trans_begin();
+
+		if($is_update) {
+			$this->m_penjualan->update(['id_penjualan' => $id_penjualan_fix], $data);
+		}else{
+			$insert = $this->m_penjualan->save($data);
+		}
+
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
 			$retval['status'] = false;
@@ -247,53 +364,6 @@ class Penjualan extends CI_Controller {
 			$retval['status'] = true;
 			$retval['pesan'] = 'Sukses Menambahkan Data Invoice';
 			$retval['no_faktur'] = $no_faktur;
-		}
-
-		echo json_encode($retval);
-	}
-
-	public function update_new_invoice()
-	{
-		$this->load->library('Enkripsi');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$tgl = $obj_date->format('Y-m-d');
-		$arr_valid = $this->rule_validasi();
-		
-		$id_penjualan       = $this->input->post('id_penjualan');
-		$id_pelanggan 		= $this->input->post('pelanggan');
-		$id_sales 			= $this->input->post('sales');
-		$tgl_jatuh_tempo	= $this->input->post('tgl_jatuh_tempo');
-		$date = str_replace('/', '-', $tgl_jatuh_tempo);
-		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date) );
-
-		if ($arr_valid['status'] == FALSE) {
-			echo json_encode($arr_valid);
-			return;
-		}
-
-		$this->db->trans_begin();
-		
-		$data = [
-			'id_pelanggan' 		=> $id_pelanggan,
-			'id_sales' 			=> $id_sales,
-			'tgl_jatuh_tempo'	=> $jatuh_tempo,
-			'updated_at'		=> $timestamp
-		];
-
-		$data_where = array('id_Penjualan'=>$id_penjualan);
-		
-		$update = $this->m_penjualan->update($data_where, $data);
-		
-		if ($this->db->trans_status() === FALSE){
-			$this->db->trans_rollback();
-			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal Mengubah Data Invoice';
-		}else{
-			$this->db->trans_commit();
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Mengubah Data Invoice';
-			// $retval['order_id'] = $order_id;
 		}
 
 		echo json_encode($retval);
@@ -471,7 +541,8 @@ class Penjualan extends CI_Controller {
         foreach($data as $row){
             ?>
             <tr>
-                <td width="10%"><input type="number" class="form-control" width="5" id="qty_order_<?php echo $row->id_penjualan_det;?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id_penjualan_det ?>)"></td>
+                <!-- <td width="10%"><input type="number" class="form-control" width="5" id="qty_order_<?php echo $row->id_penjualan_det;?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id_penjualan_det ?>)"></td> -->
+				<td width="10%"><input type="hidden" class="form-control" width="5" id="qty_order_<?php echo $row->id_penjualan_det;?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id_penjualan_det ?>)"><?php echo $row->qty; ?></td>
                 <td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
                 <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->harga_diskon); ?></td>
                 <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($row->sub_total); ?></td>
@@ -547,7 +618,7 @@ class Penjualan extends CI_Controller {
 			$retval['status'] = false;
 			$retval['pesan'] = 'Gagal Hapus Data';
 		}else{
-			$cek = $this->lib_mutasi->rollBack($cek_trans->no_faktur);
+			$cek = $this->lib_mutasi->rollBack($cek_trans->no_faktur, $cek_trans->id_barang, $cek_trans->qty);
 			if($cek) {
 				$this->db->trans_commit();
 				$retval['status'] = true;

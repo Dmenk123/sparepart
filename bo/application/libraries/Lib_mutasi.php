@@ -6,11 +6,6 @@ class Lib_mutasi extends CI_Controller {
 		$this->_ci = &get_instance();
 		$this->_ci->load->model('m_global');  //<-------Load the Model first
     }
-
-	public function tes()
-	{
-		return 'asa';
-	}
 	
 	/**
 	 * $id_barang = adalah id dari m_barang
@@ -172,7 +167,7 @@ class Lib_mutasi extends CI_Controller {
 	 * tanggal = optional, jika null is date now
 	 * id_gudang = optional (jika terdapat multi gudang)
 	 */
-	function updateMutasi($id_barang, $totalPermintaan, $id_kategori_trans, $tanggal = null, $id_gudang = null)
+	function updateMutasi($id_barang, $totalPermintaan, $id_kategori_trans, $kode_reff,  $id_gudang = null, $tanggal = null)
    	{
 		try {
 			$this->_ci->db->trans_begin();
@@ -189,17 +184,18 @@ class Lib_mutasi extends CI_Controller {
 			### jika permintaan > 0, panggil fungsi insert mutasi stok 
 			if ($totalPermintaan > 0) {            
 				
-				$this->simpan_mutasi($id_barang, $totalPermintaan, $id_kategori_trans, $tanggal);
+				$this->simpan_mutasi($id_barang, $totalPermintaan, $id_kategori_trans, $kode_reff, $tanggal);
 
 			}else{
 				
 				### ambil data barang pada t_stok_mutasi  
-				$getBarang = $this->_ci->m_global->multi_row('*', ['qty <' => 0, 'id_barang' => $id_barang], 't_stok_mutasi', null, 'id_stok_mutasi_det desc'); 
+				$getBarang = $this->_ci->m_global->multi_row('*', ['qty <' => 0, 'id_barang' => $id_barang, 'id_gudang' => $id_gudang], 't_stok_mutasi', null, 'id_stok_mutasi_det desc'); 
 
 				$hapusMutasi = [];
 				$updateMutasi = [];
 				$sm_hpp = [];
 
+				// jadikan bilangan positif
 				$awaltotalPermintaan = abs($totalPermintaan);
 				$totalPermintaan = abs($awaltotalPermintaan);
 				
@@ -229,7 +225,7 @@ class Lib_mutasi extends CI_Controller {
 				}
 
 				
-				$getBarangx = $this->_ci->m_global->multi_row('*', ['qty_pakai >' => 0, 'id_barang' => $id_barang], 't_stok_mutasi', null, 'id_stok_mutasi_det desc'); 
+				$getBarangx = $this->_ci->m_global->multi_row('*', ['qty_pakai >' => 0, 'id_barang' => $id_barang, 'id_gudang' => $id_gudang], 't_stok_mutasi', null, 'id_stok_mutasi_det desc'); 
 
 				$totalPermintaan = abs($awaltotalPermintaan);
 				
@@ -310,12 +306,17 @@ class Lib_mutasi extends CI_Controller {
 	 * rollback digunakan ketika menghapus transaksi
 	 * $kode_reff = kode referensi transaksi
 	 */
-	public function rollBack($kode_reff)
+	public function rollBack($kode_reff, $id_barang = null, $qty = null)
 	{
 		try {
 			$this->_ci->db->trans_begin();
-			### ambil data pada t_stok_mutasi  
-			$getMutasi = $this->_ci->m_global->multi_row('*', ['kode_reff' => $kode_reff], 't_stok_mutasi', null, 'created_at asc'); 
+			### ambil data pada t_stok_mutasi
+			if($id_barang) {
+				$qty_minus = -$qty;
+				$getMutasi = $this->_ci->m_global->multi_row('*', ['kode_reff' => $kode_reff, 'id_barang' => $id_barang, 'qty' => $qty_minus], 't_stok_mutasi', null, 'created_at asc');
+			}else{
+				$getMutasi = $this->_ci->m_global->multi_row('*', ['kode_reff' => $kode_reff], 't_stok_mutasi', null, 'created_at asc');
+			} 
 			
 			if (count($getMutasi) < 1) {
 				return FALSE;
@@ -336,7 +337,11 @@ class Lib_mutasi extends CI_Controller {
 				}
 				
 				// update curent stock
-				$this->_ci->m_global->update('t_stok', ['qty' => $stok_qty], ['id_stok' => $value->id_stok]);					
+				$this->_ci->m_global->update('t_stok', ['qty' => $stok_qty], ['id_stok' => $value->id_stok]);
+				
+				// update peneriman yg dipakai
+
+				// delete t_log_laporan
 			}
 
 			if ($this->_ci->db->trans_status() === FALSE) {

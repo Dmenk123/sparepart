@@ -47,7 +47,7 @@
         <div class="kt-portlet__head-toolbar" >
           <div class="kt-portlet__head-wrapper">
             <div class="row" style="text-align:left!important;">
-              <h2><?php echo $title;?></h>
+              <h2><?php echo $title;?> <?php if(isset($no_faktur)) { echo '- Faktur : '.$no_faktur; } ?></h2>
             </div>
           </div>
         </div>
@@ -89,25 +89,12 @@
                         </select>
                     <span class="help-block"></span>
                 </div>
-                <!-- <div class="form-group col-sm-4">
-                    <label for="lbl_hargabarang" class="form-control-label">Tgl Jatuh Tempo :</label>
-                    <input type="text" class="form-control kt_datepicker" id="tgl_jatuh_tempo" name="tgl_jatuh_tempo" autocomplete="off" value="<?php $value = (isset($tgl_jatuh_tempo))?$tgl_jatuh_tempo:''; echo $value; ?>">
-                    <span class="help-block"></span>
-                </div> -->
             </div>
          
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            <?php 
-              if ($mode == 'edit') { ?>
-                <button type="button" class="btn btn-primary" id="btnSave" onclick="editDataPenjualan()">Simpan
-            <?php } else { ?>
-                <button type="button" class="btn btn-primary" id="btnSave" onclick="saveDataPenjualan()">Selanjutnya <i class="fa fa-angle-double-right"></i></button>
-            <?php   }
-              
-            ?>
-           
-        </div>
+            <button type="button" class="btn btn-primary" id="btnSave" onclick="saveDataPenjualan()">Selanjutnya <i class="fa fa-angle-double-right"></i></button>
+          </div>
          
         </form>
         <!--end: Form Invoice -->

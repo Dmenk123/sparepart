@@ -134,7 +134,7 @@
                     <span class="help-block"></span>
                 </div>
                 <div class="form-group col-sm-3" style="padding-top:25px;">
-                  <button type="submit" class="btn btn-primary">Simpan</button>
+                  <button id="btnSave" type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </div>
             </form>
@@ -177,7 +177,7 @@
             <!-- this row will not appear when printing -->
             <div class="row no-print">
                 <div class="form-group col-sm-6" style="padding-top:25px;">
-                  <a class="btn btn-default pull-left" href="<?=base_url($this->uri->segment(1)).'/new_penjualan?no_faktur='.$invoice->no_faktur;?>"><i class="fa fa-arrow-left"></i> Kembali</a>
+                  <a class="btn btn-default pull-left" href="<?=base_url($this->uri->segment(1));?>"><i class="fa fa-arrow-left"></i> Kembali</a>
                 </div>
                 <div class="form-group col-sm-6" style="padding-top:25px;">
                   <button class="btn btn-success pull-right" ><i class="fa fa-credit-card"></i> Submit Payment</button>

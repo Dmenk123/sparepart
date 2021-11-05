@@ -3,13 +3,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_penjualan extends CI_Model
 {
 	var $table = 't_penjualan';
-	var $column_search = ['pj.no_faktur'];
+	
+	var $column_search = [
+		'pj.no_faktur',
+		'pj.created_at',
+		'pl.nama_pembeli',
+		'pl.alamat',
+		'mu.nama',
+		'metode',
+	];
 	
 	var $column_order = [
 		null, 
 		'pj.no_faktur',
-		'pj.tgl_jatuh_tempo',
-		'pj.id_sales',
+		'pj.created_at',
+		'pl.nama_pembeli',
+		'pl.alamat',
+		'mu.nama',
+		'metode',
 		null
 	];
 
@@ -29,13 +40,14 @@ class M_penjualan extends CI_Model
 				pj.no_faktur,
 				pj.tgl_jatuh_tempo,
 				pj.created_at,
-				mu.username,
+				(CASE WHEN pj.is_kredit = 1 THEN \'Kredit\' ELSE \'Cash\' END) as metode,
+				mu.nama as nama_sales,
 				pl.nama_pembeli,
 				pl.alamat,
 				pl.no_telp,
 				pl.email,
 				pl.nama_toko
-				');
+		');
 		$this->db->from('t_penjualan pj');
 		$this->db->join('m_user mu', 'mu.id=pj.id_sales');
 		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=pj.id_pelanggan');
@@ -57,7 +69,15 @@ class M_penjualan extends CI_Model
 				}
 				else
 				{
-					$this->db->or_like($item, $_POST['search']['value']);
+					if($item == 'metode') {
+						/**
+						 * param both untuk wildcard pada awal dan akhir kata
+						 * param false untuk disable escaping (karena pake subquery)
+						 */
+						$this->db->or_like('(CASE WHEN pj.is_kredit = 1 THEN \'Kredit\' ELSE \'Cash\' END)', $_POST['search']['value'],'both',false);
+					}else{
+						$this->db->or_like($item, $_POST['search']['value']);
+					}
 				}
 				//last loop
 				if(count($this->column_search) - 1 == $i) 
@@ -104,7 +124,7 @@ class M_penjualan extends CI_Model
 	public function get_by_id($id)
 	{
 		$this->db->from($this->table);
-		$this->db->where('id_agen',$id);
+		$this->db->where('id_penjualan',$id);
 		$query = $this->db->get();
 
 		return $query->row();

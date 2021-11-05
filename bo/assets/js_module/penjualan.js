@@ -133,56 +133,91 @@ function add_menu()
 	$('#modal_title').text('Tambah Master Agen'); 
 }
 
-function edit_agen(id)
-{
-    reset_modal_form();
-    save_method = 'update';
-    //Ajax Load data from ajax
-    $.ajax({
-        url : base_url + 'master_agen/edit_agen',
-        type: "POST",
-        dataType: "JSON",
-        data : {id:id},
-        success: function(data)
-        {
-            // data.data_menu.forEach(function(dataLoop) {
-            //     $("#parent_menu").append('<option value = '+dataLoop.id+' class="append-opt">'+dataLoop.nama+'</option>');
-            // });
-            $('[name="id_agen"]').val(data.old_data.id_agen);
-            $('[name="nama_pers"]').val(data.old_data.nama_perusahaan);
-            $('[name="produk"]').val(data.old_data.produk);
-            $('[name="alamat"]').val(data.old_data.alamat);
-            $('[name="telp"]').val(data.old_data.telp);
+const detail_penjualan = (kode, id) => {  
+  // reset_modal_form();
+  $.ajax({
+    type: 'GET',
+    data: {kode:kode, id:id},
+    dataType: 'json',
+    url: base_url + 'penjualan/get_detail_penjualan',
+    success: function(data)
+    {
+        let header = data.header;
+        $('#span_faktur').text(header.no_faktur);
+        $('#span_tgl_jual').text(moment(header.created_at).format('LL'));
+        $('#span_pelanggan').text(header.nama_toko);
+        $('#span_sales').text(header.nama_sales);
+        // $('#span_petugas_det').text(header.nama_user);
+        $('#tbl_konten_detail tbody').html(data.html_det);
+        $('#modal_det_jual').modal('show');
+        $('#modal_title').text('Detail Penjualan'); 
+    },
+    error: function (jqXHR, textStatus, errorThrown)
+    {
+        Swal.fire('Terjadi Kesalahan ');
+    }
     
-            $('#modal_agen_form').modal('show');
-	        $('#modal_title').text('Edit Master Agen'); 
-            // console.log(data.foto_encoded);
-        },
-        error: function (jqXHR, textStatus, errorThrown)
-        {
-            alert('Error get data from ajax');
-        }
-    });
+  });
+	
 }
 
-function edit_penjualan(order_id)
-{
-  window.location.href = base_url +'penjualan/menu_edit?order_id='+order_id;
+const delete_penjualan = (kode, id) => {
+  swalConfirmDelete.fire({
+      title: 'Hapus Data ?',
+      text: "Data Akan dihapus permanen ?",
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus Data !',
+      cancelButtonText: 'Tidak, Batalkan!',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.value) {
+          $.ajax({
+              url : base_url + 'penjualan/delete_penjualan',
+              type: "POST",
+              dataType: "JSON",
+              data : {id:id, kode:kode},
+              success: function(data)
+              {
+                  swalConfirm.fire('Berhasil Hapus Data!', data.pesan, 'success');
+                  table.ajax.reload();
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                  Swal.fire('Terjadi Kesalahan');
+              }
+          });
+      } else if (
+        /* Read more about handling dismissals below */
+        result.dismiss === Swal.DismissReason.cancel
+      ) {
+        swalConfirm.fire(
+          'Dibatalkan',
+          'Aksi Dibatalakan',
+          'error'
+        )
+      }
+  });
 }
 
-function editorder(order_id)
+function edit_penjualan(no_faktur)
 {
-  window.location.href = base_url +'penjualan/add_order?order_id='+order_id+'&mode=edit';
+  window.location.href = base_url +'penjualan/new_penjualan?no_faktur='+no_faktur+'&mode=edit';
 }
 
-function editinvoice(order_id)
+function editorder(no_faktur)
 {
-  window.location.href = base_url +'penjualan/new_invoice?order_id='+order_id+'&mode=edit';
+  window.location.href = base_url +'penjualan/add_order?no_faktur='+no_faktur+'&mode=edit';
 }
 
-function cetak_invoice(order_id)
+function editinvoice(no_faktur)
 {
-  window.location.href = base_url +'penjualan/cetak_invoice?order_id='+order_id;
+  window.location.href = base_url +'penjualan/new_invoice?no_faktur='+no_faktur+'&mode=edit';
+}
+
+function cetak_invoice(no_faktur)
+{
+  window.location.href = base_url +'penjualan/cetak_invoice?no_faktur='+no_faktur;
 }
 
 function simpanedit()
@@ -361,7 +396,7 @@ function editDataPenjualan()
                 },
                 error: function (e) {
                     console.log("ERROR : ", e);
-                    toastr.danger("ERROR : " + e, "Gagal");
+                    toastr.error("ERROR : " + e, "Gagal");
                     $("#btnSave").prop("disabled", false);
                     $('#btnSave').text('Simpan');
 
@@ -379,45 +414,6 @@ function editDataPenjualan()
               'error'
             )
           }
-    });
-}
-
-function delete_agen(id){
-    swalConfirmDelete.fire({
-        title: 'Hapus Data ?',
-        text: "Data Akan dihapus permanen ?",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, Hapus Data !',
-        cancelButtonText: 'Tidak, Batalkan!',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.value) {
-            $.ajax({
-                url : base_url + 'master_agen/delete_agen',
-                type: "POST",
-                dataType: "JSON",
-                data : {id:id},
-                success: function(data)
-                {
-                    swalConfirm.fire('Berhasil Hapus Data Agen!', data.pesan, 'success');
-                    table.ajax.reload();
-                },
-                error: function (jqXHR, textStatus, errorThrown)
-                {
-                    Swal.fire('Terjadi Kesalahan');
-                }
-            });
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        ) {
-          swalConfirm.fire(
-            'Dibatalkan',
-            'Aksi Dibatalakan',
-            'error'
-          )
-        }
     });
 }
 
@@ -534,6 +530,14 @@ $(document).ready(function(){
             }
            
         });
+    });
+
+    $("input").focusin(function() {
+      $("#btnSave").prop("disabled", true);
+    });
+
+    $("input").focusout(function() {
+      $("#btnSave").prop("disabled", false);
     });
 
 

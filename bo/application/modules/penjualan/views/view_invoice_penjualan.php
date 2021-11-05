@@ -40,6 +40,7 @@
               <th>Nama Pelanggan</th>
               <th>Alamat Pelanggan</th>
               <th>Nama Sales</th>
+              <th>Metode</th>
               <th style="width: 5%;">Aksi</th>
             </tr>
           </thead>
