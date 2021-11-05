@@ -366,7 +366,7 @@ class Log_harga extends CI_Controller {
 			$data[$key][] = $key+1;
 			$data[$key][] = $value->nama_barang;
 			$data[$key][] = 'Rp '.number_format($value->harga_jual); 
-			$data[$key][] = $value->tanggal; 
+			$data[$key][] = date('d-m-Y', strtotime($value->tanggal)); 
 			$data[$key][] = $value->nama_user;     
 			// $data[$key][] = $value->jenis_kelamin;
 			// $data[0][] = $value->created_at;

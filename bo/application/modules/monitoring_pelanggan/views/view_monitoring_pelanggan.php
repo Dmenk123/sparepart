@@ -35,7 +35,7 @@
             <div class="form-group col-sm-4">
               <label for="lbl_username" class="form-control-label">Nama Pelanggan:</label>
               <!-- <div class="col-sm-3"> -->
-              <select name="id_pelanggan" id="id_pelanggan" class="form-control select2">
+              <select name="id_pelanggan" id="id_pelanggan" class="form-control select2" onchange="getBarang(this)">
                   <option value="">Pilih Pelanggan</option>
                   <?php foreach($pelanggan->result() as $row):?>
                       <option value="<?php echo $row->id_pelanggan;?>"><?php echo $row->nama_pembeli;?></option>
@@ -47,7 +47,7 @@
             <div class="form-group col-sm-4">
               <label for="lbl_username" class="form-control-label">Nama Barang :</label>
               <!-- <div class="col-sm-3"> -->
-              <select name="id_barang" id="id_barang" class="form-control select2">
+              <select name="id_barang" id="id_barang" class="form-control select2" >
                   <option value="">Pilih Barang</option>
               </select>
               <!-- </div> -->

@@ -51,7 +51,8 @@ class Monitoring_pelanggan extends CI_Controller {
 	public function datatable_monitoring()
 	{
 		$id_pelanggan = $this->input->post('id_pelanggan');
-		$data_table = $this->m_pelanggan->get_datatable_monitoring($id_pelanggan);
+		$id_barang = $this->input->post('id_barang');
+		$data_table = $this->m_pelanggan->get_datatable_monitoring($id_pelanggan, $id_barang);
 		$data = array();
 		$data = [];
 		if ($data_table) {
@@ -426,5 +427,12 @@ class Monitoring_pelanggan extends CI_Controller {
 		  $c .= sprintf("%02X", mt_rand(0, 255));
 		}
 		return $c;
+	}
+
+	public function get_barang()
+	{
+		$id = $this->input->post('id_pelanggan');
+		$barang = $this->m_pelanggan->get_barang($id);
+		echo json_encode($barang);
 	}
 }
