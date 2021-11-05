@@ -11,6 +11,7 @@ $(document).ready(function() {
 	//datatables
     $("#filters").click(function(){
         var id = $('#id_pelanggan').val();
+        var id_barang = $('#id_barang').val();
         monitoring(id)
         if (id != '') {
             table = $('#tabel_mon_pelanggan').DataTable({
@@ -18,10 +19,14 @@ $(document).ready(function() {
                 searchDelay: 500,
                 processing: true,
                 serverSide: false,
+                bDestroy: true,
                 ajax: {
                     url  : base_url + "monitoring_pelanggan/datatable_monitoring",
                     type : "POST",
-                    data : {id_pelanggan : id},
+                    data : {
+                        id_pelanggan : id, 
+                        id_barang: id_barang
+                    },
                 },
     
                 //set column definition initialisation properties
@@ -112,4 +117,35 @@ function monitoring(id)
           $(".modal").modal('hide');
       }
     });
+}
+
+function getBarang(param){
+    var value = $(param).val();
+
+    field = $("[name='id_barang']");
+    field.html("<option value=''>Loading</option>");
+    $.ajax({
+        url  : base_url + "monitoring_pelanggan/get_barang",
+        type: 'post',
+        data : {
+            id_pelanggan : value
+        },
+    type : 'POST', dataType : 'json'
+    }).done(function(response){
+        var tes = "<option value=''>Pilih Barang</option>";
+        console.log(response);
+        if(response){
+            for(i=0;i<response.length;i++){
+            //    console.log(response[i]['klh_id']);
+                var option = "<option value='"+response[i]['id_barang']+"' ";
+                option += " >"+response[i]['nama_barang']+"</option>";
+                tes += option;
+                // field.append(option);
+            }
+        
+        }
+        field.html(tes);
+        $('#jenis_event').data("selectBox-selectBoxIt").refresh();
+    });
+
 }

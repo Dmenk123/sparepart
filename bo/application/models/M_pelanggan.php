@@ -236,7 +236,7 @@ class M_pelanggan extends CI_Model
 		$this->db->query("truncate table m_user");
 	}
 
-	public function get_datatable_monitoring($id_pelanggan)
+	public function get_datatable_monitoring($id_pelanggan, $id_barang=null)
 	{
 		$this->db->select('det.*, b.nama as nama_barang, pl.nama_pembeli as nama_pelanggan, p.created_at as tanggal_order');
 		$this->db->from('t_penjualan_det det');
@@ -244,6 +244,9 @@ class M_pelanggan extends CI_Model
 		$this->db->join('m_barang b', 'b.id_barang=det.id_barang', 'left');
 		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=p.id_pelanggan');
 		$this->db->where('p.id_pelanggan', $id_pelanggan);
+		if ($id_barang != null && $id_barang != '') {
+			$this->db->where('det.id_barang', $id_barang);
+		}
 		$this->db->where('det.id_barang !=', 0);
 		$this->db->order_by('det.id_penjualan_det', 'desc');
 
@@ -277,5 +280,23 @@ class M_pelanggan extends CI_Model
         );
         return $query;
 
+	}
+
+	public function get_barang($id_pelanggan)
+	{
+		$this->db->distinct('b.id_barang');
+		$this->db->select('b.id_barang, b.nama as nama_barang');
+		$this->db->from('t_penjualan_det det');
+		$this->db->join('t_penjualan p', 'p.id_penjualan=det.id_penjualan', 'left');
+		$this->db->join('m_barang b', 'b.id_barang=det.id_barang', 'left');
+		$this->db->where('p.id_pelanggan', $id_pelanggan);
+		$this->db->where('det.id_barang !=', 0);
+		$this->db->order_by('det.id_penjualan_det', 'desc');
+
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        }
 	}
 }
