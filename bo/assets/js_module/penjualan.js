@@ -3,7 +3,7 @@ var table;
 var id_pen;
 
 $(document).ready(function() {
-
+  
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {
         return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
@@ -255,15 +255,12 @@ function saveDataPenjualan()
                 timeout: 600000,
                 success: function (data) {
                     if(data.status) {
-                        createAlert('','Berhasil!',''+data.pesan+'','success',true,true,'pageMessages');
-                        // swal.fire("Sukses!!", "Aksi "+txtAksi+" Berhasil", "success");
+                        toastr.success("Sukses Menambah Penjualan", "Sukses");
                         $("#btnSave").prop("disabled", false);
                         $('#btnSave').text('Simpan');
-                        loadingCircle.css("display", "block");
                         setTimeout(function(){
                           ajax_send(data.no_faktur);
-                          loadingCircle.css("display", "none");
-                        }, 3000);
+                        }, 1000);
                     }else {
                         for (var i = 0; i < data.inputerror.length; i++) 
                         {
@@ -281,8 +278,8 @@ function saveDataPenjualan()
                     }
                 },
                 error: function (e) {
-                    console.log("ERROR : ", e);
-                    createAlert('Opps!','Terjadi Kesalahan','Coba Lagi nanti','danger',true,false,'pageMessages');
+                    // console.log("ERROR : ", e);
+                    toastr.warning(e, "Peringatan");
                     $("#btnSave").prop("disabled", false);
                     $('#btnSave').text('Simpan');
 
@@ -341,11 +338,9 @@ function editDataPenjualan()
                 timeout: 600000,
                 success: function (data) {
                     if(data.status) {
-                        createAlert('','Berhasil!',''+data.pesan+'','success',true,true,'pageMessages');
-                        swal.fire("Sukses!!", "Aksi "+txtAksi+" Berhasil", "success");
+                        toastr.success(data.pesan, "Sukses");
                         $("#btnSave").prop("disabled", false);
                         $('#btnSave').text('Simpan');
-
                         window.location.href = base_url+'penjualan';
                         
                     }else {
@@ -366,7 +361,7 @@ function editDataPenjualan()
                 },
                 error: function (e) {
                     console.log("ERROR : ", e);
-                    createAlert('Opps!','Terjadi Kesalahan','Coba Lagi nanti','danger',true,false,'pageMessages');
+                    toastr.danger("ERROR : " + e, "Gagal");
                     $("#btnSave").prop("disabled", false);
                     $('#btnSave').text('Simpan');
 
@@ -502,85 +497,6 @@ function readURL(input) {
     } else {
         $('#div_preview_foto').css("display","none");
         $('#preview_img').attr('src', '');
-    }
-}
-
-function createAlert(title, summary, details, severity, dismissible, autoDismiss, appendToId) {
-    var iconMap = {
-      info: "fa fa-info-circle",
-      success: "fa fa-thumbs-up",
-      warning: "fa fa-exclamation-triangle",
-      danger: "fa ffa fa-exclamation-circle"
-    };
-  
-    var iconAdded = false;
-  
-    var alertClasses = ["alert", "animated", "flipInX"];
-    alertClasses.push("alert-" + severity.toLowerCase());
-  
-    if (dismissible) {
-      alertClasses.push("alert-dismissible");
-    }
-  
-    var msgIcon = $("<i />", {
-      "class": iconMap[severity] // you need to quote "class" since it's a reserved keyword
-    });
-  
-    var msg = $("<div />", {
-      "class": alertClasses.join(" ") // you need to quote "class" since it's a reserved keyword
-    });
-  
-    if (title) {
-      var msgTitle = $("<h4 />", {
-        html: title
-      }).appendTo(msg);
-      
-      if(!iconAdded){
-        msgTitle.prepend(msgIcon);
-        iconAdded = true;
-      }
-    }
-  
-    if (summary) {
-      var msgSummary = $("<strong />", {
-        html: summary
-      }).appendTo(msg);
-      
-      if(!iconAdded){
-        msgSummary.prepend(msgIcon);
-        iconAdded = true;
-      }
-    }
-  
-    if (details) {
-      var msgDetails = $("<p />", {
-        html: details
-      }).appendTo(msg);
-      
-      if(!iconAdded){
-        msgDetails.prepend(msgIcon);
-        iconAdded = true;
-      }
-    }
-    
-  
-    if (dismissible) {
-      var msgClose = $("<span />", {
-        "class": "close", // you need to quote "class" since it's a reserved keyword
-        "data-dismiss": "alert",
-        html: "<i class='fa fa-times-circle'></i>"
-      }).appendTo(msg);
-    }
-    
-    $('#' + appendToId).prepend(msg);
-    
-    if(autoDismiss){
-      setTimeout(function(){
-        msg.addClass("flipOutX");
-        setTimeout(function(){
-          msg.remove();
-        },1000);
-      }, 5000);
     }
 }
 

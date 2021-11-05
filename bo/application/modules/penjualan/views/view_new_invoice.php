@@ -58,7 +58,7 @@
     
         <form id="form-user" name="form-user">
             <div class="row">
-                <div class="form-group col-sm-6">
+                <div class="form-group col-sm-4">
                     <input type="hidden" class="form-control" id="id_agen" name="id_agen">
                     <input type="hidden" class="form-control" id="id_penjualan" name="id_penjualan"  value="<?php $value = (isset($id_penjualan))?$id_penjualan:''; echo $value; ?>">
                     <input type="hidden" class="form-control" id="mode" name="mode" value="<?php echo $mode;?>">
@@ -71,13 +71,21 @@
                         </select>
                     <span class="help-block"></span>
                 </div>
-                <div class="form-group col-sm-6">
+                <div class="form-group col-sm-4">
                     <label for="lbl_namabarang" class="form-control-label">Nama Sales :</label>
                         <select name="sales" id="sales" class="form-control select2">
                             <option value="0">-PILIH-</option>
                             <?php foreach($sales->result() as $row):?>
                                 <option value="<?php echo $row->id;?>" <?php echo ((isset($invoice)) && ($invoice->id_sales == $row->id)) ? 'selected' : ''?>><?php echo $row->username;?></option>
                             <?php endforeach;?>
+                        </select>
+                    <span class="help-block"></span>
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="lbl_namabarang" class="form-control-label">Metode Penjualan :</label>
+                        <select name="metode" id="metode" class="form-control select2">
+                            <option value="0">-Cash-</option>
+                            <option value="1">-Kredit-</option>
                         </select>
                     <span class="help-block"></span>
                 </div>

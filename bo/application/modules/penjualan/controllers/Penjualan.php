@@ -215,6 +215,7 @@ class Penjualan extends CI_Controller {
 		$id_pelanggan 		= $this->input->post('pelanggan');
 		$id_sales 			= $this->input->post('sales');
 		$tgl_jatuh_tempo	= $this->input->post('tgl_jatuh_tempo');
+		$is_kredit			= ($this->input->post('metode') == '1') ? 1 : null;
 		$date 				= str_replace('/', '-', $tgl_jatuh_tempo);
 		$jatuh_tempo 		= date("Y-m-d H:i:s", strtotime($date) );
 		$no_faktur          = no_faktur($tgl, $counter_penjualan);
@@ -231,6 +232,7 @@ class Penjualan extends CI_Controller {
 			'id_pelanggan' 		=> $id_pelanggan,
 			'id_sales' 			=> $id_sales,
 			'tgl_jatuh_tempo'	=> $jatuh_tempo,
+			'is_kredit'			=> $is_kredit,
 			'created_at'		=> $timestamp
 		];
 		
@@ -249,7 +251,6 @@ class Penjualan extends CI_Controller {
 
 		echo json_encode($retval);
 	}
-
 
 	public function update_new_invoice()
 	{
@@ -530,19 +531,35 @@ class Penjualan extends CI_Controller {
 
 	public function hapus_order()
 	{
+		$this->db->trans_begin();
 		$id = $this->input->post('id');
-		$data_where = array('id_penjualan_det' => $id);
+		$join = [ 
+			['table' => 't_penjualan', 'on' => 't_penjualan_det.id_penjualan = t_penjualan.id_penjualan'],
+		];
+		$data_where = ['id_penjualan_det' => $id];
+
+		$cek_trans = $this->m_global->single_row('t_penjualan_det.*, t_penjualan.no_faktur', $data_where, 't_penjualan_det', $join);
+		
 		$del = $this->m_global->force_delete($data_where, 't_penjualan_det');
-		if($del) {
-			$retval['status'] = TRUE;
-			$retval['pesan'] = 'Data Order berhasil dihapus';
+
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Hapus Data';
 		}else{
-			$retval['status'] = FALSE;
-			$retval['pesan'] = 'Data Order berhasil dihapus';
+			$cek = $this->lib_mutasi->rollBack($cek_trans->no_faktur);
+			if($cek) {
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Hapus Data ';
+			}else{
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Hapus Data';
+			}
 		}
-
+		
 		echo json_encode($retval);
-
 	}
 
 	public function menu_edit()
