@@ -12,7 +12,24 @@ $(document).ready(function() {
     $("#filters").click(function(){
         var id = $('#id_pelanggan').val();
         var id_barang = $('#id_barang').val();
-        monitoring(id)
+        var start = $('#start').val();
+        var end = $('#end').val();
+        if (start && end) {
+            var mulai = start.split("/")
+            var s = new Date(mulai[2], mulai[1] - 1, mulai[0])
+
+            var akhir = end.split("/")
+            var e = new Date(akhir[2], akhir[1] - 1, akhir[0])
+            if (s > e) {
+                Swal.fire('Tanggal Mulai dilarang melebihi tanggal akhir')
+                return;
+            }
+            
+        }else if (!id) {
+            Swal.fire('Silahkan memilih pelanggan terlebih dahulu')
+            return;
+        }
+        monitoring(id, id_barang, start, end)
         if (id != '') {
             table = $('#tabel_mon_pelanggan').DataTable({
                 responsive: true,
@@ -25,7 +42,9 @@ $(document).ready(function() {
                     type : "POST",
                     data : {
                         id_pelanggan : id, 
-                        id_barang: id_barang
+                        id_barang: id_barang,
+                        start : start,
+                        end : end
                     },
                 },
     
@@ -64,14 +83,19 @@ function reload_table()
 }
 
 
-function monitoring(id)
+function monitoring(id, id_barang, start, end)
 {
     url = base_url + 'monitoring_pelanggan/monitoring_cart';
     $.ajax({
       type: "POST",
       enctype: 'multipart/form-data',
       url: url,
-      data: {id_pelanggan:id},
+      data: {
+            id_pelanggan:id,
+            id_barang : id_barang,
+            start : start,
+            end : end
+        },
       dataType: "JSON",
       // processData: false, // false, it prevent jQuery form transforming the data into a query string
       // contentType: false, 

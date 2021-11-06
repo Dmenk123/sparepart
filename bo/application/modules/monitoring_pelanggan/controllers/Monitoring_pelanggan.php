@@ -52,7 +52,21 @@ class Monitoring_pelanggan extends CI_Controller {
 	{
 		$id_pelanggan = $this->input->post('id_pelanggan');
 		$id_barang = $this->input->post('id_barang');
-		$data_table = $this->m_pelanggan->get_datatable_monitoring($id_pelanggan, $id_barang);
+		$start     = $this->input->post('start');
+		$end 	   = $this->input->post('end'); 
+		
+		if ($start) {
+			$start = date('Y-d-m', strtotime($start));
+		}
+
+		if ($end) {
+			$exp_date = str_replace('/', '-', $end);
+			$end = date('Y-m-d', strtotime($exp_date));
+		}
+		// var_dump($end); die();
+		
+		$data_table = $this->m_pelanggan->get_datatable_monitoring($id_pelanggan, $id_barang, $start, $end);
+		// echo $this->db->last_query(); die();
 		$data = array();
 		$data = [];
 		if ($data_table) {
@@ -380,9 +394,22 @@ class Monitoring_pelanggan extends CI_Controller {
 	public function monitoring_cart()
 	{
 		$id_item = $this->input->post('id_pelanggan');
+		$id_barang = $this->input->post('id_barang');
+		$start = $this->input->post('start');
+		$end = $this->input->post('end');
+		if ($start) {
+			$start = date('Y-d-m', strtotime($start));
+		}
+
+		if ($end) {
+			$exp_date = str_replace('/', '-', $end);
+			$end = date('Y-m-d', strtotime($exp_date));
+		}
+
 		$data_where = array('id_pelanggan'=>$id_item);
 		$pelanggan = $this->m_global->getSelectedData('m_pelanggan', $data_where)->row();
-		$result     = $this->m_pelanggan->monitoring_cart($id_item)->result_array();
+		$result     = $this->m_pelanggan->monitoring_cart($id_item, $id_barang, $start, $end)->result_array();
+		// echo $this->db->last_query(); die();
 		// var_dump($result); die();
 		$data_mentah    = array();
 		$data_label = [];

@@ -31,6 +31,22 @@
 
         <!--begin: Datatable -->
         <form id="form-user" name="form-user">
+        <div class="row">
+            <div class="form-group col-sm-4">
+              <label for="lbl_username" class="form-control-label">Tgl Mulai :</label>
+              <!-- <div class="col-sm-3"> -->
+              <input type="text" class="form-control kt_datepicker" id="start" name="start" autocomplete="off">
+              <!-- </div> -->
+              <span class="help-block"></span>
+            </div>
+            <div class="form-group col-sm-4">
+              <label for="lbl_username" class="form-control-label">Tgl Akhir :</label>
+              <!-- <div class="col-sm-3"> -->
+              <input type="text" class="form-control kt_datepicker" id="end" name="end" autocomplete="off" >
+              <!-- </div> -->
+              <span class="help-block"></span>
+            </div>
+          </div>
           <div class="row">
             <div class="form-group col-sm-4">
               <label for="lbl_username" class="form-control-label">Nama Pelanggan:</label>
