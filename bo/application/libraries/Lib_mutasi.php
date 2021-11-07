@@ -24,7 +24,7 @@ class Lib_mutasi extends CI_Controller {
 	) {
 		try {
 			$this->_ci->db->trans_begin();
-
+			
 			$obj_date = new DateTime();
 			$timestamp = $obj_date->format('Y-m-d H:i:s');
 			
@@ -38,7 +38,7 @@ class Lib_mutasi extends CI_Controller {
 
 			#### ambil data dari t_stok
 			$data_stok = $this->_ci->m_global->single_row('*', ['id_barang' => $id_barang, 'id_gudang' => $id_gudang, 'deleted_at' => null], 't_stok');
-
+			
 			if(!$data_stok) {
 				$this->_ci->db->trans_rollback();
 				$retval = ['status' => false, 'pesan' => 'Data Stok Tidak Diketemukan'];		
@@ -57,10 +57,9 @@ class Lib_mutasi extends CI_Controller {
 				$this->_ci->db->trans_rollback();
 				return false;
 			}
-
+			
 			### ambil data barang pada t_stok_mutasi  
 			$getBarang = $this->_ci->m_global->multi_row('*', ['qty_sisa > ' => 0, 'id_barang' => $id_barang, 'id_gudang' => $id_gudang], 't_stok_mutasi', null, 'created_at asc'); 
-			// echo $this->_ci->db->last_query();exit;
 			
 			$newMutasi = [];
          	$updateMutasi = [];
@@ -141,6 +140,11 @@ class Lib_mutasi extends CI_Controller {
 					$totalPermintaan = $totalPermintaan - $totalQty;
 				}
          	}
+			 
+			//  echo "<pre>";
+			//  print_r ($newMutasi);
+			//  echo "</pre>";
+			//  exit;
 
 			### insert batch
 			$this->_ci->db->insert_batch('t_stok_mutasi', $newMutasi); 
@@ -204,11 +208,10 @@ class Lib_mutasi extends CI_Controller {
 					$totalQty = abs($getBarang[$k]->qty);                
 					if ($totalPermintaan <= $totalQty) 
 					{
-						$hapusMutasi[$k]['id_stok']    =$getBarang[$k]->id_stok;
+						$hapusMutasi[$k]['id_stok'] = $getBarang[$k]->id_stok;
 						$hapusMutasi[$k]['id_stok_mutasi_det'] = $getBarang[$k]->id_stok_mutasi_det;
 						$hapusMutasi[$k]['qty'] =-(abs($getBarang[$k]->qty)-$totalPermintaan);
-
-						// $sm_hpp[$k] = $getBarang[$k]->sm_hpp;
+						$hapusMutasi[$k]['hpp'] = $getBarang[$k]->hpp;
 						
 						$k = count($getBarang);
 					}
@@ -224,7 +227,6 @@ class Lib_mutasi extends CI_Controller {
 					}
 				}
 
-				
 				$getBarangx = $this->_ci->m_global->multi_row('*', ['qty_pakai >' => 0, 'id_barang' => $id_barang, 'id_gudang' => $id_gudang], 't_stok_mutasi', null, 'id_stok_mutasi_det desc'); 
 
 				$totalPermintaan = abs($awaltotalPermintaan);
@@ -328,20 +330,22 @@ class Lib_mutasi extends CI_Controller {
 				#### update t_stok
 				$data_stok = $this->_ci->m_global->single_row('*', ['id_stok' => $value->id_stok], 't_stok');
 				
-				if ($value->keterangan == 'PENGURANGAN') {
-					$stok_qty = ($data_stok->qty - $value->qty);
-				}elseif ($value->keterangan == 'PENAMBAHAN'){
-					$stok_qty = ($data_stok->qty + $value->qty);
-				}else{
-					$stok_qty = $data_stok->qty;
-				}
+				// if ($value->keterangan == 'PENGURANGAN') {
+				// 	$stok_qty = ($data_stok->qty - $value->qty);
+				// }elseif ($value->keterangan == 'PENAMBAHAN'){
+				// 	$stok_qty = ($data_stok->qty + $value->qty);
+				// }else{
+				// 	$stok_qty = $data_stok->qty;
+				// }
 				
 				// update curent stock
-				$this->_ci->m_global->update('t_stok', ['qty' => $stok_qty], ['id_stok' => $value->id_stok]);
+				// $this->_ci->m_global->update('t_stok', ['qty' => $stok_qty], ['id_stok' => $value->id_stok]);
 				
-				// update peneriman yg dipakai
+				// update t_log_laporan
 
-				// delete t_log_laporan
+
+				// update peneriman yg dipakai
+				$this->updateMutasi($value->id_barang, $value->qty, $value->id_kategori_trans, $value->kode_reff,  $value->id_gudang);
 			}
 
 			if ($this->_ci->db->trans_status() === FALSE) {
@@ -815,7 +819,6 @@ class Lib_mutasi extends CI_Controller {
 
 			$obj_date = new DateTime();
 			$timestamp = $obj_date->format('Y-m-d H:i:s');
-			
 			if($tanggal) {
 				$obj_tanggal = DateTime::createFromFormat('Y-m-d', $tanggal);
 				$tgl = $obj_tanggal->format('Y-m-d');
@@ -845,6 +848,23 @@ class Lib_mutasi extends CI_Controller {
 				$this->_ci->m_global->update('t_lap_keuangan', $arr_update, ['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff]);
 				
 			}
+			elseif($id_kategori_trans == 2) 
+			{
+				$header = $this->_ci->m_global->single_row('*', ['kode_reff' => $kode_reff, 'deleted_at' => null], 't_lap_keuangan');
+				
+				$arr_update['kode_reff'] = $kode_reff;
+				$arr_update['updated_at'] = $timestamp;
+
+				if ($is_kredit) {
+					$arr_update['piutang'] = $nilaiRupiah + $header->piutang;
+					$arr_update['penerimaan'] = 0;
+				} else {
+					$arr_update['piutang'] = 0;
+					$arr_update['penerimaan'] = $nilaiRupiah + $header->penerimaan;
+				}
+
+				$this->_ci->m_global->update('t_lap_keuangan', $arr_update, ['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff]);
+			}
 
 			/* #### jika penerimaan pembelian
 			#### search laporan by kode_reff, ambil last id_det
@@ -852,6 +872,49 @@ class Lib_mutasi extends CI_Controller {
 			else if($id_kategori_trans == 4) {
 
 			} */
+
+			if ($this->_ci->db->trans_status() === FALSE) {
+				$this->_ci->db->trans_rollback();
+				$retval = ['status' => false];		
+			} 
+			else {
+				$this->_ci->db->trans_commit();
+				$retval = ['status' => true];		
+			}
+
+			return $retval;
+
+		} catch (\Throwable $th) {
+			$this->_ci->db->trans_rollback();
+			$retval = ['status' => false, 'pesan' => $th];		
+			return $retval;
+		}
+	}
+
+	public function deleteDataLap(
+		$id_kategori_trans,
+		$kode_reff,
+		$tanggal=null
+	)
+	{
+		try {
+			$this->_ci->db->trans_begin();
+
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			
+			if($tanggal) {
+				$obj_tanggal = DateTime::createFromFormat('Y-m-d', $tanggal);
+				$tgl = $obj_tanggal->format('Y-m-d');
+				$bulan = $obj_tanggal->format('m');
+				$tahun = $obj_tanggal->format('Y');
+			}else{
+				$tgl = $obj_date->format('Y-m-d');
+				$bulan = $obj_date->format('m');
+				$tahun = $obj_date->format('Y');
+			}
+
+			$this->_ci->m_global->force_delete(['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff], 't_lap_keuangan');
 
 			if ($this->_ci->db->trans_status() === FALSE) {
 				$this->_ci->db->trans_rollback();

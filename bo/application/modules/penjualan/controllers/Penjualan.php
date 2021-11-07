@@ -152,13 +152,20 @@ class Penjualan extends CI_Controller {
 		$kode = $this->input->post('kode');
 
 		$cek = $this->m_global->single_row('*', ['id_penjualan' => $id], 't_penjualan');
-		$cek2 = $this->m_global->single_row('*', ['id_penjualan' => $id], 't_penjualan_det');
+		$cek2 = $this->m_penjualan->getPenjualanDet($id);
+
+		
+		echo "<pre>";
+		print_r ($cek2);
+		echo "</pre>";
+		exit;
 
 		if($cek) {
 			$del = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan');
 		}
 
 		if($cek2) {
+			$loop_data = $cek2;
 			$del2 = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan_det');
 		}
 
@@ -167,16 +174,17 @@ class Penjualan extends CI_Controller {
 			$retval['status'] = false;
 			$retval['pesan'] = 'Gagal Hapus Data';
 		}else{
-			$roll = $this->lib_mutasi->rollBack($cek->no_faktur);
-			if($roll) {
-				$this->db->trans_commit();
-				$retval['status'] = true;
-				$retval['pesan'] = 'Sukses Hapus Data ';
-			}else{
-				$this->db->trans_rollback();
-				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal Hapus Data';
-			}
+			// $roll = $this->lib_mutasi->rollBack($cek->no_faktur);
+			// $roll = $this->lib_mutasi->updateMutasi($id_barang, $totalPermintaan, $id_kategori_trans, $kode_reff,  $id_gudang = null, $tanggal = null);
+			// if($roll['status'] == true) {
+			// 	$this->db->trans_commit();
+			// 	$retval['status'] = true;
+			// 	$retval['pesan'] = 'Sukses Hapus Data ';
+			// }else{
+			// 	$this->db->trans_rollback();
+			// 	$retval['status'] = false;
+			// 	$retval['pesan'] = 'Gagal Hapus Data';
+			// }
 		}
 		
 		echo json_encode($retval);
@@ -281,9 +289,10 @@ class Penjualan extends CI_Controller {
 			$data['id_penjualan'] = $invoice->id_penjualan;
 			$data['no_faktur'] = $invoice->no_faktur;
 			// $data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
-		}else{
-			return redirect('penjualan');
 		}
+		// else{
+		// 	return redirect('penjualan');
+		// }
 
 		/**
 		 * content data untuk template
@@ -329,7 +338,7 @@ class Penjualan extends CI_Controller {
 				return;
 			}
 		}
-
+		
 		if(!$is_update) {
 			$counter_penjualan = $this->m_penjualan->get_max_penjualan();
 			$no_faktur = no_faktur($tgl, $counter_penjualan);
@@ -341,11 +350,9 @@ class Penjualan extends CI_Controller {
 		$id_sales 			= $this->input->post('sales');
 		$is_kredit			= ($this->input->post('metode') == '1') ? 1 : null;
 
-		$data = [
-			'id_pelanggan' 		=> $id_pelanggan,
-			'id_sales' 			=> $id_sales,
-			'is_kredit'			=> $is_kredit,
-		];
+		$data['id_pelanggan'] = $id_pelanggan;
+		$data['id_sales'] = $id_sales;
+		$data['is_kredit'] = $is_kredit;
 
 		$this->db->trans_begin();
 
@@ -428,7 +435,12 @@ class Penjualan extends CI_Controller {
 			'data_role'	=> $data_role,
 		);
 
-		$data['invoice'] = $this->m_penjualan->getPenjualan($no_faktur)->row();
+		$cek_header = $this->m_penjualan->getPenjualan($no_faktur)->row();
+		if(!$cek_header) {
+			return redirect('penjualan');
+		}
+
+		$data['invoice'] = $cek_header;
 		$data['gudang']  = $this->m_global->getSelectedData('m_gudang', array('deleted_at'=>NULL));
 		// $data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL));
 
@@ -492,6 +504,7 @@ class Penjualan extends CI_Controller {
 			'harga_diskon' 	=> $harga_diskon,
 			'besaran_diskon'=> $diskon,
 			'sub_total'     => $sub_total,
+			'id_gudang'		=> $id_gudang,
 			'qty'           => $qty
 		];
 		
@@ -607,9 +620,10 @@ class Penjualan extends CI_Controller {
 		$join = [ 
 			['table' => 't_penjualan', 'on' => 't_penjualan_det.id_penjualan = t_penjualan.id_penjualan'],
 		];
+
 		$data_where = ['id_penjualan_det' => $id];
 
-		$cek_trans = $this->m_global->single_row('t_penjualan_det.*, t_penjualan.no_faktur', $data_where, 't_penjualan_det', $join);
+		$cek_trans = $this->m_global->single_row('t_penjualan_det.*, t_penjualan.no_faktur, t_penjualan.is_kredit', $data_where, 't_penjualan_det', $join);
 		
 		$del = $this->m_global->force_delete($data_where, 't_penjualan_det');
 
@@ -618,11 +632,33 @@ class Penjualan extends CI_Controller {
 			$retval['status'] = false;
 			$retval['pesan'] = 'Gagal Hapus Data';
 		}else{
-			$cek = $this->lib_mutasi->rollBack($cek_trans->no_faktur, $cek_trans->id_barang, $cek_trans->qty);
+			// $cek = $this->lib_mutasi->rollBack($cek_trans->no_faktur, $cek_trans->id_barang, $cek_trans->qty);
+			$cek = $this->lib_mutasi->updateMutasi(
+				$cek_trans->id_barang, 
+				-abs($cek_trans->qty), 
+				2, 
+				$cek_trans->no_faktur, 
+				$cek_trans->id_gudang
+			);
+
 			if($cek) {
-				$this->db->trans_commit();
-				$retval['status'] = true;
-				$retval['pesan'] = 'Sukses Hapus Data ';
+				// update data lap keuangan
+				$keu = $this->lib_mutasi->updateDataLap(
+					-$cek_trans->sub_total,
+					2,
+					$cek_trans->no_faktur,
+					$cek_trans->is_kredit
+				);
+
+				if($keu['status'] == true) {
+					$this->db->trans_commit();
+					$retval['status'] = true;
+					$retval['pesan'] = 'Sukses Hapus Data ';
+				}else{
+					$this->db->trans_rollback();
+					$retval['status'] = false;
+					$retval['pesan'] = 'Gagal Hapus Data';
+				}
 			}else{
 				$this->db->trans_rollback();
 				$retval['status'] = false;
