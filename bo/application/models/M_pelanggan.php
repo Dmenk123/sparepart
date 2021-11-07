@@ -236,7 +236,7 @@ class M_pelanggan extends CI_Model
 		$this->db->query("truncate table m_user");
 	}
 
-	public function get_datatable_monitoring($id_pelanggan, $id_barang=null)
+	public function get_datatable_monitoring($id_pelanggan, $id_barang=null, $start=null, $end=null)
 	{
 		$this->db->select('det.*, b.nama as nama_barang, pl.nama_pembeli as nama_pelanggan, p.created_at as tanggal_order');
 		$this->db->from('t_penjualan_det det');
@@ -246,6 +246,13 @@ class M_pelanggan extends CI_Model
 		$this->db->where('p.id_pelanggan', $id_pelanggan);
 		if ($id_barang != null && $id_barang != '') {
 			$this->db->where('det.id_barang', $id_barang);
+		}
+		if ($start) {
+			$this->db->where('DATE(p.created_at) >=', $start);
+		}
+
+		if ($end) {
+			$this->db->where('DATE(p.created_at) <=', $end);
 		}
 		$this->db->where('det.id_barang !=', 0);
 		$this->db->order_by('det.id_penjualan_det', 'desc');
@@ -257,28 +264,40 @@ class M_pelanggan extends CI_Model
         }
 	}
 
-	public function monitoring_cart($id_pelanggan)
+	public function monitoring_cart($id_pelanggan, $id_barang, $start, $end)
 	{
-		$query = $this->db->query(
-            "
-			select
-				b.nama,
-				sum(det.qty) as total,
-				count(*) as jumlah
-			FROM
-				t_penjualan_det det
-			LEFT JOIN
-				t_penjualan p ON p.id_penjualan=det.id_penjualan
-			LEFT JOIN
-				m_barang b ON b.id_barang=det.id_barang
-			WHERE
-				p.id_pelanggan = $id_pelanggan
-				AND (det.id_barang IS NOT NULL AND det.id_barang <> 0)
-			group by
-				det.id_barang
-            "
-        );
-        return $query;
+		$query = "
+				select
+					b.nama,
+					sum(det.qty) as total,
+					count(*) as jumlah
+				FROM
+					t_penjualan_det det
+				LEFT JOIN
+					t_penjualan p ON p.id_penjualan=det.id_penjualan
+				LEFT JOIN
+					m_barang b ON b.id_barang=det.id_barang
+				WHERE
+					p.id_pelanggan = $id_pelanggan
+					AND (det.id_barang IS NOT NULL AND det.id_barang <> 0)
+			";
+		if ($id_barang) {
+			$query .= " and det.id_barang = $id_barang";
+		}
+
+		if ($start) {
+			$query .= " and DATE(p.created_at) >= '$start'";
+		}
+
+		if ($end) {
+			$query .= " and DATE(p.created_at) <= '$end'";
+		}
+
+		$query .= " group by
+							det.id_barang
+					";
+        
+        return $this->db->query($query);
 
 	}
 
