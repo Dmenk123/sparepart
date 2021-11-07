@@ -369,6 +369,7 @@ class Template_view extends CI_Controller {
 			}
 		}
 		
+		
 		//global modal for upload excel to master
 		$data['modal_excel_upload'] = $this->_ci->load->view('template/modal_upload_excel', $data, TRUE);
         

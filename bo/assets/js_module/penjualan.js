@@ -537,7 +537,16 @@ $(document).ready(function(){
     });
 
     $("input").focusout(function() {
-      $("#btnSave").prop("disabled", false);
+      $.ajax({
+        type: "post",
+        url: base_url+"penjualan/cek_qty_stok",
+        data: {qty:$('#qty').val(), id_barang:$('#id_barang').val(), id_gudang:$('#id_gudang').val()},
+        dataType: "json",
+        success: function (response) {
+          $('#qty').val(response);
+          $("#btnSave").prop("disabled", false);
+        }
+      });
     });
 
 

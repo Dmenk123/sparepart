@@ -96,8 +96,13 @@
                         <td><?= (isset($invoice->no_faktur)) ? $invoice->no_faktur : '-';?></span></td>
                       </tr>
                       <tr>
-                        <th rowspan="2">Sales Name</th>
+                        <th>Sales Name</th>
                         <td><?= (isset($invoice->username)) ? $invoice->username : "";?></span></td>
+                      </tr>
+                      <tr>
+                        <th colspan="2">Barang Tidak ada ? 
+                          <span><a data-target="#modal_frame" data-toggle="modal" href="#modal_frame">Klik disini untuk buka Form Master Barang</a></span>
+                        </th>
                       </tr>
                     </table>
                 </div><!-- /.col -->
@@ -117,7 +122,7 @@
                   <span class="help-block"></span>
                 </div>
                 <div class="form-group col-sm-4">
-                  <label for="lbl_namabarang" class="form-control-label">Nama Barang :</label>
+                  <label for="lbl_namabarang" class="form-control-label">Nama Barang : </label>
                   <select name="id_barang" id="id_barang" class="form-control ">
                       <option value="0">-PILIH-</option>
                   </select>

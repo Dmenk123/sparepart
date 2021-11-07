@@ -483,7 +483,7 @@ class Penjualan extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => null,
+			'modal' => 'modal_detail_pengeluaran',
 			'js'	=> 'penjualan.js',
 			'view'	=> 'view_add_order_penjualan'
 		];
@@ -520,6 +520,14 @@ class Penjualan extends CI_Controller {
 		if(!$data_header) {
 			$retval['status'] = false;
 			$retval['pesan'] = 'Data Penjualan Tidak Ditemukan';
+			echo json_encode($retval);
+			return;
+		}
+
+		$datadet = $this->m_global->getSelectedData('t_penjualan_det', ['id_penjualan' => $id_penjualan, 'id_barang' => $id_barang, 'id_gudang' => $id_gudang])->row();
+		if($datadet) {
+			$retval['status'] = false;
+			$retval['pesan'] = 'Barang yang dipilih sudah ada, mohon memilih barang yang lain';
 			echo json_encode($retval);
 			return;
 		}
@@ -732,6 +740,25 @@ class Penjualan extends CI_Controller {
 		];
 
 		$this->template_view->load_view($content, $data);
+	}
+
+	public function cek_qty_stok()
+	{
+		$qty = $this->input->post('qty');
+		$id_barang = $this->input->post('id_barang');
+		$id_gudang = $this->input->post('id_gudang');
+		$cek = $this->m_global->single_row('*', [
+			'id_barang' => $id_barang,
+			'id_gudang' => $id_gudang, 
+			'deleted_at' => null,
+		], 't_stok');
+
+		if($qty >= $cek->qty) {
+			echo json_encode($cek->qty);
+		}else{
+			echo json_encode($qty);
+		}
+		
 	}
 
 	public function cetak_invoice()
