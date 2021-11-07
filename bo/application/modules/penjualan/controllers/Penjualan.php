@@ -147,47 +147,78 @@ class Penjualan extends CI_Controller {
 
 	public function delete_penjualan()
 	{
-		$this->db->trans_begin();
-		$id = $this->input->post('id');
-		$kode = $this->input->post('kode');
+		try {
+			$this->db->trans_begin();
+			$id = $this->input->post('id');
+			$kode = $this->input->post('kode');
 
-		$cek = $this->m_global->single_row('*', ['id_penjualan' => $id], 't_penjualan');
-		$cek2 = $this->m_penjualan->getPenjualanDet($id);
+			$cek = $this->m_global->single_row('*', ['id_penjualan' => $id], 't_penjualan');
+			$cek2 = $this->m_penjualan->getPenjualanDet($id);
+			$cek2 = $cek2->result();
+			
+			if($cek2) {
+				$del = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan');
+			}
 
+			if($cek2) {
+				$loop_data = $cek2;
+				foreach ($loop_data as $key => $value) {
+					$mutasi = $this->lib_mutasi->updateMutasi(
+						$value->id_barang, 
+						-abs($value->qty), 
+						2, 
+						$cek->no_faktur, 
+						$value->id_gudang
+					);
 		
-		echo "<pre>";
-		print_r ($cek2);
-		echo "</pre>";
-		exit;
+					if($mutasi) {
+						// update data lap keuangan
+						$keu = $this->lib_mutasi->updateDataLap(
+							-$value->sub_total,
+							2,
+							$cek->no_faktur,
+							$cek->is_kredit
+						);
+		
+						if($keu['status'] == true) {
+							$this->db->trans_commit();
+						}else{
+							$this->db->trans_rollback();
+							$retval['status'] = false;
+							$retval['pesan'] = 'Gagal Hapus Data';
+							echo json_encode($retval);
+						return;
+						}
+					}else{
+						$this->db->trans_rollback();
+						$retval['status'] = false;
+						$retval['pesan'] = 'Gagal Hapus Data';
+						echo json_encode($retval);
+						return;
+					}
+				}
 
-		if($cek) {
-			$del = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan');
-		}
+				$del2 = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan_det');
+			}
 
-		if($cek2) {
-			$loop_data = $cek2;
-			$del2 = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan_det');
-		}
-
-		if ($this->db->trans_status() === FALSE){
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Hapus Data';
+			}else{
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Hapus Data ';
+			}
+			
+			echo json_encode($retval);
+		} catch (\Throwable $th) {
 			$this->db->trans_rollback();
 			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal Hapus Data';
-		}else{
-			// $roll = $this->lib_mutasi->rollBack($cek->no_faktur);
-			// $roll = $this->lib_mutasi->updateMutasi($id_barang, $totalPermintaan, $id_kategori_trans, $kode_reff,  $id_gudang = null, $tanggal = null);
-			// if($roll['status'] == true) {
-			// 	$this->db->trans_commit();
-			// 	$retval['status'] = true;
-			// 	$retval['pesan'] = 'Sukses Hapus Data ';
-			// }else{
-			// 	$this->db->trans_rollback();
-			// 	$retval['status'] = false;
-			// 	$retval['pesan'] = 'Gagal Hapus Data';
-			// }
+			$retval['pesan'] = $th;
+			echo json_encode($retval);
 		}
 		
-		echo json_encode($retval);
 	}
 
 	// ===============================================
@@ -341,7 +372,7 @@ class Penjualan extends CI_Controller {
 		
 		if(!$is_update) {
 			$counter_penjualan = $this->m_penjualan->get_max_penjualan();
-			$no_faktur = no_faktur($tgl, $counter_penjualan);
+			$no_faktur = generate_kode_transaksi($tgl, $counter_penjualan, 'INV');
 			$data['no_faktur'] = $no_faktur;
 			$data['created_at']	= $timestamp;
 		}
@@ -632,7 +663,7 @@ class Penjualan extends CI_Controller {
 			$retval['status'] = false;
 			$retval['pesan'] = 'Gagal Hapus Data';
 		}else{
-			// $cek = $this->lib_mutasi->rollBack($cek_trans->no_faktur, $cek_trans->id_barang, $cek_trans->qty);
+			
 			$cek = $this->lib_mutasi->updateMutasi(
 				$cek_trans->id_barang, 
 				-abs($cek_trans->qty), 

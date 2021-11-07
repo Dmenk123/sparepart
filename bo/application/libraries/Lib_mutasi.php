@@ -304,67 +304,6 @@ class Lib_mutasi extends CI_Controller {
 		}
    	}
 
-	/**
-	 * rollback digunakan ketika menghapus transaksi
-	 * $kode_reff = kode referensi transaksi
-	 */
-	public function rollBack($kode_reff, $id_barang = null, $qty = null)
-	{
-		try {
-			$this->_ci->db->trans_begin();
-			### ambil data pada t_stok_mutasi
-			if($id_barang) {
-				$qty_minus = -$qty;
-				$getMutasi = $this->_ci->m_global->multi_row('*', ['kode_reff' => $kode_reff, 'id_barang' => $id_barang, 'qty' => $qty_minus], 't_stok_mutasi', null, 'created_at asc');
-			}else{
-				$getMutasi = $this->_ci->m_global->multi_row('*', ['kode_reff' => $kode_reff], 't_stok_mutasi', null, 'created_at asc');
-			} 
-			
-			if (count($getMutasi) < 1) {
-				return FALSE;
-			}
-
-			foreach ($getMutasi as $value) {
-				// delete stok mutation
-				$this->_ci->m_global->force_delete(['id_stok' => $value->id_stok, 'id_stok_mutasi_det' => $value->id_stok_mutasi_det, 'deleted_at' => null], 't_stok_mutasi');
-				#### update t_stok
-				$data_stok = $this->_ci->m_global->single_row('*', ['id_stok' => $value->id_stok], 't_stok');
-				
-				// if ($value->keterangan == 'PENGURANGAN') {
-				// 	$stok_qty = ($data_stok->qty - $value->qty);
-				// }elseif ($value->keterangan == 'PENAMBAHAN'){
-				// 	$stok_qty = ($data_stok->qty + $value->qty);
-				// }else{
-				// 	$stok_qty = $data_stok->qty;
-				// }
-				
-				// update curent stock
-				// $this->_ci->m_global->update('t_stok', ['qty' => $stok_qty], ['id_stok' => $value->id_stok]);
-				
-				// update t_log_laporan
-
-
-				// update peneriman yg dipakai
-				$this->updateMutasi($value->id_barang, $value->qty, $value->id_kategori_trans, $value->kode_reff,  $value->id_gudang);
-			}
-
-			if ($this->_ci->db->trans_status() === FALSE) {
-				$this->_ci->db->trans_rollback();
-				$retval = ['status' => false];		
-			} 
-			else {
-				$this->_ci->db->trans_commit();
-				$retval = ['status' => true];		
-			}
-
-			return $retval;
-		} catch (\Throwable $th) {
-			$this->_ci->db->trans_rollback();
-			$retval = ['status' => false, 'pesan' => $th];		
-			return $retval;
-		}
-	}
-
 	public function insert_data_det($datanya)
 	{
 		return;
