@@ -1,9 +1,16 @@
-var save_method;
-var table;
-var id_pen;
+let save_method;
+let table;
+let id_pen;
+let bulanUri;
+let tahunUri;
+let kategoriUri;
 
 $(document).ready(function() {
-  
+    let uri = new URL(window.location.href);
+    bulanUri = uri.searchParams.get("bulan");
+    tahunUri = uri.searchParams.get("tahun");
+    kategoriUri = uri.searchParams.get("kategori");
+    
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {
         return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
@@ -17,10 +24,11 @@ $(document).ready(function() {
         ajax: {
             url  : base_url + "pengeluaran_lain/list_data_pengeluaran",
             type : "POST", 
-            // data: {
-            //     tanggal: tanggal,
-            //     jenis: jenis,
-            // },
+            data: {
+                tahun: tahunUri,
+                bulan: bulanUri,
+                kategori: kategoriUri,
+            },
         },
         language: {
             decimal: ",",
@@ -33,11 +41,52 @@ $(document).ready(function() {
         //     { visible: false, searchable: false, targets: 11 },
         // ]
     });
-    
-    $("#foto").change(function() {
-        readURL(this);
-    });
 
+  //   const load_detail_apbd_surabaya = (jenis) => {
+  //     if ( $.fn.DataTable.isDataTable('#datatable_apbd_pemkot') ) {
+  //         $('#datatable_apbd_pemkot').DataTable().clear().destroy();
+  //     }
+  
+  //     $('#datatable_apbd_pemkot').DataTable({
+  //         dom: 'Bfrtip',
+  //         buttons: [
+  //             'copy',
+  //             {
+  //                 extend: 'excel',
+  //                 messageTop: 'Data APBD bidang '+jenis+' sampai dengan tanggal '+tanggal
+  //             },
+  //             {
+  //                 extend: 'print',
+  //                 exportOptions: {
+  //                     columns: [ 0, ':visible' ] //only show visible column
+  //                 },
+  //                 messageTop: 'Data APBD bidang '+jenis+' sampai dengan tanggal '+tanggal
+  //             },
+  //         ],
+  //         processing: true,
+  //         serverside: true,
+  //         ajax: {
+  //             url: '{{route('app.datatable_apbd_sby')}}',
+  //             method: 'POST',
+  //             data: {
+  //                 tanggal: tanggal,
+  //                 jenis: jenis,
+  //             },
+  //         },
+  //         language: {
+  //             decimal: ",",
+  //             thousands: "."
+  //         },
+  //         columnDefs: [
+  //             { targets: 8, className: 'text-right' },
+  //             { targets: 9, className: 'text-right' },
+  //             { visible: false, searchable: false, targets: 10 },
+  //             { visible: false, searchable: false, targets: 11 },
+  //         ]
+  //     });
+  
+  // }
+    
     //change menu status
     $(document).on('click', '.btn_edit_status', function(){
         var id = $(this).attr('id');
@@ -487,19 +536,7 @@ function import_data_excel(){
     });
 }
 
-function readURL(input) {
-    if (input.files && input.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        $('#div_preview_foto').css("display","block");
-        $('#preview_img').attr('src', e.target.result);
-      }
-      reader.readAsDataURL(input.files[0]);
-    } else {
-        $('#div_preview_foto').css("display","none");
-        $('#preview_img').attr('src', '');
-    }
-}
+
 
 function ajax_send(no_faktur)
 {

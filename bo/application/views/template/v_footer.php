@@ -148,8 +148,10 @@
                 $('.percent').mask('##0,00%', {reverse: true});
 
                 $('.select2').select2({
-                    allowClear: true,
-                    placeholder: "Mohon Pilih Salah Satu"
+                    // allowClear: true,
+                    width: 'resolve'
+                    // placeholder: "Mohon Pilih Salah Satu",
+                   
                 });
 
                 $('.kt_datepicker').datepicker({

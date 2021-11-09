@@ -18,42 +18,63 @@
 
     <div class="kt-portlet kt-portlet--mobile">
       <div class="kt-portlet__head kt-portlet__head--lg">
-        <div class="kt-portlet__head-label">
-        </div>
+        
         <div class="kt-portlet__head-toolbar">
           <div class="kt-portlet__head-wrapper">
-            <!-- <div class="kt-portlet__head-actions row"> -->
-              <div class="input-group col-8">
-                <div class="input-group-prepend">
-                  <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Action
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                    <div role="separator" class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Separated link</a>
+            <div class="kt-portlet__head-actions row">
+              <form method="get" id="formFilter">
+                <div class="form-row">
+                  <div class="col">
+                    <select name="bulan" id="bulan" class="form-control select2" style="width:100%;">
+                      <option value="">Bulan Laporan</option>
+                      <?php 
+                      for ($i=1; $i <= 12; $i++) { 
+                        if((int)$this->input->get('bulan') == $i) {
+                          echo "<option value='$i' selected>".bulan_indo($i)."</option>";
+                        }else{
+                          echo "<option value='$i'>".bulan_indo($i)."</option>";
+                        }
+                      }
+                      ?>
+                    </select>
                   </div>
-                </div>
-                 <div class="input-group-append">
-                  <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Action
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                    <div role="separator" class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Separated link</a>
+                  <div class="col">
+                    <select name="tahun" id="tahun" class="form-control select2">
+                      <option value="">Tahun Laporan</option>
+                      <?php 
+                      for ($i=(int)date('Y')+20; $i >= (int)date('Y')-20; $i--) { 
+                        if ((int)$this->input->get('tahun') == $i) {
+                          echo "<option value='$i' selected>$i</option>";
+                        }else{
+                          echo "<option value='$i'>$i</option>";
+                        }
+                      }
+                      ?>
+                    </select>
                   </div>
+                  <div class="col">
+                    <select name="kategori" id="kategori" class="form-control select2">
+                      <option value="">Semua Kategori</option>
+                      <?php 
+                        foreach ($kategori as $key => $value) {
+                          if ((int)$this->input->get('kategori') == $value->id_kategori_trans) {
+                            echo "<option value='$value->id_kategori_trans' selected>$value->nama_kategori_trans</option>";
+                          }else{
+                            echo "<option value='$value->id_kategori_trans'>$value->nama_kategori_trans</option>";
+                          }
+                        
+                        }
+                      ?>
+                    </select>
+                  </div>
+                  <button type="submit" form="formFilter" class="btn btn-success btn-bold btn-sm"><i class="la la-filter"></i>Filter</button>
                 </div>
-                <input type="text" class="form-control" aria-label="Text input with dropdown button">
-              </div>
-              <div class="col-4"><?= $this->template_view->getAddButton(false, 'add_menu', 'new_penjualan', 'Tambah Penjualan'); ?></div>
-            <!-- </div> -->
+              </form>
+            </div>
           </div>
         </div>
+
+        <div class="kt-portlet__head-toolbar" style="float-right;"><?= $this->template_view->getAddButton(false, 'add_menu', 'new_pengeluaran', 'Tambah Pengeluaran'); ?></div>
       </div>
       <div class="kt-portlet__body">
 

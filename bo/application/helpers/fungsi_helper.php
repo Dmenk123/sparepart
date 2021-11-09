@@ -181,4 +181,21 @@ if (!function_exists('tanggal_indo')) {
         return $retval;
     }
 }
+
+if (!function_exists('bulan_indo')) {
+    /**
+     * fungsi merubah YYYY-MM-DD ke DD String Bulan Indo YYYY
+     *
+     * @param [type] $string
+     * @return void
+     */
+    function bulan_indo($int)
+    {
+        $arr_bulan = [
+            1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        
+        return $arr_bulan[$int];
+    }
+}
 ?>

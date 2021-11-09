@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 08/11/2021 00:36:41
+ Date: 10/11/2021 03:07:50
 */
 
 SET NAMES utf8mb4;
@@ -157,20 +157,25 @@ CREATE TABLE `m_kategori_transaksi`  (
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   `kode_akun` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `is_lain` int(1) NULL DEFAULT NULL,
   PRIMARY KEY (`id_kategori_trans`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of m_kategori_transaksi
 -- ----------------------------
-INSERT INTO `m_kategori_transaksi` VALUES (1, 'Pembelian', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL);
-INSERT INTO `m_kategori_transaksi` VALUES (2, 'Penjualan', 1, '2021-10-12 00:58:51', NULL, NULL, NULL);
-INSERT INTO `m_kategori_transaksi` VALUES (3, 'Stok Awal', 1, '2021-10-12 00:58:51', NULL, NULL, NULL);
-INSERT INTO `m_kategori_transaksi` VALUES (4, 'Penerimaan Pembelian', 1, '2021-10-12 00:58:51', NULL, NULL, NULL);
-INSERT INTO `m_kategori_transaksi` VALUES (5, 'Penerimaan Retur', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL);
-INSERT INTO `m_kategori_transaksi` VALUES (6, 'Retur', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL);
-INSERT INTO `m_kategori_transaksi` VALUES (7, 'Penyesuaian Stok', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL);
-INSERT INTO `m_kategori_transaksi` VALUES (8, 'Penerimaan Lain-Lain', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (1, 'Pembelian', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (2, 'Penjualan', 1, '2021-10-12 00:58:51', NULL, NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (3, 'Stok Awal', 1, '2021-10-12 00:58:51', NULL, NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (4, 'Penerimaan Pembelian', 1, '2021-10-12 00:58:51', NULL, NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (5, 'Penerimaan Retur', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (6, 'Retur', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (7, 'Penyesuaian Stok', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (8, 'Penerimaan Lain-Lain', NULL, '2021-10-12 00:58:51', NULL, NULL, NULL, NULL);
+INSERT INTO `m_kategori_transaksi` VALUES (9, 'Biaya Karyawan', NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `m_kategori_transaksi` VALUES (10, 'Biaya Listrik', NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `m_kategori_transaksi` VALUES (11, 'Biaya Air', NULL, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `m_kategori_transaksi` VALUES (12, 'Santunan Yatim Piatu', NULL, NULL, NULL, NULL, NULL, 1);
 
 -- ----------------------------
 -- Table structure for m_menu
@@ -216,6 +221,7 @@ INSERT INTO `m_menu` VALUES (19, 6, 'Data Profil', 'Data Profil', 'master_profil
 INSERT INTO `m_menu` VALUES (20, 15, 'Setting Harga Jual', 'Setting Harga Jual', 'log_harga', 'flaticon-cart', 1, 2, 3, 1, 1, 1);
 INSERT INTO `m_menu` VALUES (21, 0, 'Monitoring', 'Monitoring', '', 'flaticon-book', 1, 1, 4, 0, 0, 0);
 INSERT INTO `m_menu` VALUES (22, 21, 'Pelanggan', 'Pelanggan', 'monitoring_pelanggan', 'flaticon-user', 1, 2, 1, 0, 0, 0);
+INSERT INTO `m_menu` VALUES (23, 15, 'Pengeluaran Lain-Lain', 'Pengeluaran Lain-Lain', 'pengeluaran_lain', 'flaticon-clipboard', 1, 2, 4, 1, 1, 1);
 
 -- ----------------------------
 -- Table structure for m_pelanggan
@@ -332,7 +338,7 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-11-07 22:38:13', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
+INSERT INTO `m_user` VALUES (1, 1, 'admin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-11-10 02:09:35', 'USR-00001', 'admin-1610858192.jpg', NULL, '2021-01-17 11:36:32', NULL, 'admin');
 INSERT INTO `m_user` VALUES (2, 1, 'coba', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50', 'coba saja');
 INSERT INTO `m_user` VALUES (3, 6, 'alsyafin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00003', 'user_default.png', '2021-01-15 09:07:51', NULL, NULL, 'Alsuafinollah');
 INSERT INTO `m_user` VALUES (4, 6, 'zamroni', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, NULL, 'USR-00004', 'user_default.png', '2021-01-15 09:08:19', NULL, NULL, 'Moch Zamroni');
@@ -1021,6 +1027,48 @@ CREATE TABLE `t_penerimaan_det`  (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for t_pengeluaran_lain
+-- ----------------------------
+DROP TABLE IF EXISTS `t_pengeluaran_lain`;
+CREATE TABLE `t_pengeluaran_lain`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `kode` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+  `id_kategori_trans` int(11) NULL DEFAULT NULL,
+  `id_user` int(11) NULL DEFAULT NULL,
+  `tanggal` date NULL DEFAULT NULL,
+  `nilai_total` float(20, 2) NULL DEFAULT NULL,
+  `created_at` datetime(0) NULL DEFAULT NULL,
+  `updated_at` datetime(0) NULL DEFAULT NULL,
+  `deleted_at` datetime(0) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of t_pengeluaran_lain
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for t_pengeluaran_lain_det
+-- ----------------------------
+DROP TABLE IF EXISTS `t_pengeluaran_lain_det`;
+CREATE TABLE `t_pengeluaran_lain_det`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_pengeluaran_lain` int(11) NULL DEFAULT NULL,
+  `id_barang` int(11) NULL DEFAULT NULL,
+  `qty` int(11) NULL DEFAULT NULL,
+  `nilai` float(20, 2) NULL DEFAULT NULL,
+  `sub_total` float(20, 2) NULL DEFAULT NULL,
+  `created_at` datetime(0) NULL DEFAULT NULL,
+  `updated_at` datetime(0) NULL DEFAULT NULL,
+  `deleted_at` datetime(0) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = FIXED;
+
+-- ----------------------------
+-- Records of t_pengeluaran_lain_det
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for t_penjualan
 -- ----------------------------
 DROP TABLE IF EXISTS `t_penjualan`;
@@ -1148,6 +1196,7 @@ INSERT INTO `t_role_menu` VALUES (15, 1, 0, 0, 0);
 INSERT INTO `t_role_menu` VALUES (16, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (17, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (20, 1, 1, 0, 0);
+INSERT INTO `t_role_menu` VALUES (23, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (2, 1, 0, 0, 0);
 INSERT INTO `t_role_menu` VALUES (4, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (3, 1, 1, 1, 1);

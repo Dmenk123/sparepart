@@ -28,7 +28,8 @@ class Pengeluaran_lain extends CI_Controller {
 		$data = array(
 			'title' => 'Pengelolaan Pengeluaran Lain-Lain',
 			'data_user' => $data_user,
-			'data_role'	=> $data_role
+			'data_role'	=> $data_role,
+			'kategori' => $this->m_global->multi_row('*', ['is_lain' => 1, 'deleted_at' => null], 'm_kategori_transaksi', null, 'nama_kategori_trans')
 		);
 
 		/**
