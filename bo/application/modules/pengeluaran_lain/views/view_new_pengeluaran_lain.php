@@ -58,42 +58,28 @@
     
         <form id="form-user" name="form-user">
             <div class="row">
-                <div class="form-group col-sm-4">
-                    <input type="hidden" class="form-control" id="id_agen" name="id_agen">
-                    <input type="hidden" class="form-control" id="id_penjualan" name="id_penjualan"  value="<?php $value = (isset($id_penjualan))?$id_penjualan:''; echo $value; ?>">
+                <div class="form-group col-sm-6">
+                    <input type="hidden" class="form-control" id="id_pengeluaran" name="id_pengeluaran"  value="<?php $value = (isset($id_pengeluaran))?$id_pengeluaran:''; echo $value; ?>">
                     <input type="hidden" class="form-control" id="mode" name="mode" value="<?php echo $mode;?>">
-                    <label for="lbl_username" class="form-control-label">Nama Pelanggan:</label>
-                        <select name="pelanggan" id="pelanggan" class="form-control select2">
+                    <label for="lbl_username" class="form-control-label">Kategori:</label>
+                        <select name="kategori" id="kategori" class="form-control select2">
                             <option value="0">-PILIH-</option>
-                            <?php foreach($pelanggan->result() as $row):?>
-                                <option value="<?php echo $row->id_pelanggan;?>" <?php echo ((isset($invoice)) && ($invoice->id_pelanggan == $row->id_pelanggan)) ? 'selected' : ''?>><?php echo $row->nama_toko;?></option>
+                            <?php foreach($kategori as $row):?>
+                                <option value="<?php echo $row->id_kategori_trans;?>" <?php echo ((isset($old_data)) && ($old_data->id_kategori_trans == $row->id_kategori_trans)) ? 'selected' : ''?>><?php echo $row->nama_kategori_trans;?></option>
                             <?php endforeach;?>
                         </select>
                     <span class="help-block"></span>
                 </div>
-                <div class="form-group col-sm-4">
-                    <label for="lbl_namabarang" class="form-control-label">Nama Sales :</label>
-                        <select name="sales" id="sales" class="form-control select2">
-                            <option value="0">-PILIH-</option>
-                            <?php foreach($sales->result() as $row):?>
-                                <option value="<?php echo $row->id;?>" <?php echo ((isset($invoice)) && ($invoice->id_sales == $row->id)) ? 'selected' : ''?>><?php echo $row->username;?></option>
-                            <?php endforeach;?>
-                        </select>
-                    <span class="help-block"></span>
-                </div>
-                <div class="form-group col-sm-4">
-                    <label for="lbl_namabarang" class="form-control-label">Metode Penjualan :</label>
-                        <select name="metode" id="metode" class="form-control select2">
-                            <option value="0">-Cash-</option>
-                            <option value="1">-Kredit-</option>
-                        </select>
+                <div class="form-group col-sm-6">
+                    <label for="lbl_namabarang" class="form-control-label">Tanggal :</label>
+                      <input type="text" class="form-control kt_datepicker" id="tanggal" readonly="" name="tanggal">
                     <span class="help-block"></span>
                 </div>
             </div>
          
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            <button type="button" class="btn btn-primary" id="btnSave" onclick="saveDataPenjualan()">Selanjutnya <i class="fa fa-angle-double-right"></i></button>
+            <button type="button" class="btn btn-primary" id="btnSave" onclick="saveNewPengeluaran()">Selanjutnya <i class="fa fa-angle-double-right"></i></button>
           </div>
          
         </form>

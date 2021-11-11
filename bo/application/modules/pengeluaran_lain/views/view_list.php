@@ -34,7 +34,7 @@
             <div class="col-lg-4 kt-margin-b-10-tablet-and-mobile">
               <label>Bulan :</label>
               <select name="bulan" id="bulan" class="form-control select2">
-                <option value="">Bulan Laporan</option>
+                <option value="all">Bulan Laporan</option>
                 <?php 
                 for ($i=1; $i <= 12; $i++) { 
                   if((int)$this->input->get('bulan') == $i) {
@@ -49,7 +49,7 @@
             <div class="col-lg-4 kt-margin-b-10-tablet-and-mobile">
               <label>Tahun :</label>
               <select name="tahun" id="tahun" class="form-control select2">
-                <option value="">Tahun Laporan</option>
+                <option value="all">Tahun Laporan</option>
                 <?php 
                 for ($i=(int)date('Y')+20; $i >= (int)date('Y')-20; $i--) { 
                   if ((int)$this->input->get('tahun') == $i) {
@@ -64,7 +64,7 @@
             <div class="col-lg-4 kt-margin-b-10-tablet-and-mobile">
               <label>Kategori :</label>
               <select name="kategori" id="kategori" class="form-control select2">
-                <option value="">Semua Kategori</option>
+                <option value="all">Semua Kategori</option>
                 <?php 
                   foreach ($kategori as $key => $value) {
                     if ((int)$this->input->get('kategori') == $value->id_kategori_trans) {
@@ -110,7 +110,6 @@
               <th>Kategori</th>
               <th>User</th>
               <th>Total Rupiah</th>
-              <th>Metode</th>
               <th style="width: 5%;">Aksi</th>
             </tr>
           </thead>

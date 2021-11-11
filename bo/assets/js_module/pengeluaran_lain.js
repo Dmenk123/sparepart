@@ -42,6 +42,34 @@ $(document).ready(function() {
         // ]
     });
 
+
+      // getTable();
+      // getTotal();
+
+      // $('#regForm').submit(function(e){
+      //     e.preventDefault();
+      //     // var url = '<?php echo base_url(); ?>';
+      //     var reg = $('#regForm').serialize();
+      //     $.ajax({
+      //         type: 'POST',
+      //         data: reg,
+      //         dataType: 'json',
+      //         url: base_url + 'penjualan/save_order',
+      //         success: function(data)
+      //         {
+      //             swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
+      //             $('#regForm')[0].reset();
+      //             getTable();
+      //             getTotal();
+      //         },
+      //         error: function (jqXHR, textStatus, errorThrown)
+      //         {
+      //             Swal.fire('Terjadi Kesalahan');
+      //         }
+            
+      //     });
+      // });
+
   //   const load_detail_apbd_surabaya = (jenis) => {
   //     if ( $.fn.DataTable.isDataTable('#datatable_apbd_pemkot') ) {
   //         $('#datatable_apbd_pemkot').DataTable().clear().destroy();
@@ -88,78 +116,78 @@ $(document).ready(function() {
   // }
     
     //change menu status
-    $(document).on('click', '.btn_edit_status', function(){
-        var id = $(this).attr('id');
-        var status = $(this).val();
-        swalConfirm.fire({
-            title: 'Ubah Status Data User ?',
-            text: "Apakah Anda Yakin ?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Ubah Status!',
-            cancelButtonText: 'Tidak, Batalkan!',
-            reverseButtons: true
-          }).then((result) => {
-            if (result.value) {
-                $.ajax({
-                    url : base_url + 'master_user/edit_status_user/'+ id,
-                    type: "POST",
-                    dataType: "JSON",
-                    data : {status : status},
-                    success: function(data)
-                    {
-                        swalConfirm.fire('Berhasil Ubah Status User!', data.pesan, 'success');
-                        table.ajax.reload();
-                    },
-                    error: function (jqXHR, textStatus, errorThrown)
-                    {
-                        Swal.fire('Terjadi Kesalahan');
-                    }
-                });
-            } else if (
-              /* Read more about handling dismissals below */
-              result.dismiss === Swal.DismissReason.cancel
-            ) {
-              swalConfirm.fire(
-                'Dibatalkan',
-                'Aksi Dibatalakan',
-                'error'
-              )
-            }
-        });
-    });
+    // $(document).on('click', '.btn_edit_status', function(){
+    //     var id = $(this).attr('id');
+    //     var status = $(this).val();
+    //     swalConfirm.fire({
+    //         title: 'Ubah Status Data User ?',
+    //         text: "Apakah Anda Yakin ?",
+    //         icon: 'warning',
+    //         showCancelButton: true,
+    //         confirmButtonText: 'Ya, Ubah Status!',
+    //         cancelButtonText: 'Tidak, Batalkan!',
+    //         reverseButtons: true
+    //       }).then((result) => {
+    //         if (result.value) {
+    //             $.ajax({
+    //                 url : base_url + 'master_user/edit_status_user/'+ id,
+    //                 type: "POST",
+    //                 dataType: "JSON",
+    //                 data : {status : status},
+    //                 success: function(data)
+    //                 {
+    //                     swalConfirm.fire('Berhasil Ubah Status User!', data.pesan, 'success');
+    //                     table.ajax.reload();
+    //                 },
+    //                 error: function (jqXHR, textStatus, errorThrown)
+    //                 {
+    //                     Swal.fire('Terjadi Kesalahan');
+    //                 }
+    //             });
+    //         } else if (
+    //           /* Read more about handling dismissals below */
+    //           result.dismiss === Swal.DismissReason.cancel
+    //         ) {
+    //           swalConfirm.fire(
+    //             'Dibatalkan',
+    //             'Aksi Dibatalakan',
+    //             'error'
+    //           )
+    //         }
+    //     });
+    // });
 
-    $(".modal").on("hidden.bs.modal", function(){
-        reset_modal_form();
-        reset_modal_form_import();
-    });
+    // $(".modal").on("hidden.bs.modal", function(){
+    //     reset_modal_form();
+    //     reset_modal_form_import();
+    // });
 
-    $('#id_barang').change(function(){
-      let res = $(this).val();
-      let id_gudang = $('#id_gudang').val();
+    // $('#id_barang').change(function(){
+    //   let res = $(this).val();
+    //   let id_gudang = $('#id_gudang').val();
       
-      if(res == 0) {
+    //   if(res == 0) {
         
-        $('#qty').val('0').attr({
-          "max" : 0,
-          "min" : 0
-        });
+    //     $('#qty').val('0').attr({
+    //       "max" : 0,
+    //       "min" : 0
+    //     });
 
-      }else{
-        $.ajax({
-          type: "get",
-          url: base_url+"penjualan/select_qty_barang",
-          data: {id_barang:res, id_gudang:id_gudang},
-          dataType: "json",
-          success: function (response) {
-            $('#qty').val(response).attr({
-              "max" : response,
-              "min" : 0
-           });
-          }
-        });
-      }
-    });
+    //   }else{
+    //     $.ajax({
+    //       type: "get",
+    //       url: base_url+"penjualan/select_qty_barang",
+    //       data: {id_barang:res, id_gudang:id_gudang},
+    //       dataType: "json",
+    //       success: function (response) {
+    //         $('#qty').val(response).attr({
+    //           "max" : response,
+    //           "min" : 0
+    //        });
+    //       }
+    //     });
+    //   }
+    // });
 });	
 
 const getSelectBarang = (obj) => {
@@ -254,10 +282,11 @@ const delete_penjualan = (kode, id) => {
   });
 }
 
-function edit_penjualan(no_faktur)
+function edit_pengeluaran(kode, id)
 {
-  window.location.href = base_url +'penjualan/new_penjualan?no_faktur='+no_faktur+'&mode=edit';
+  window.location.href = base_url +'pengeluaran_lain/add_pengeluaran_det?index='+id+'&kode='+kode+'&mode=edit';
 }
+
 
 function editorder(no_faktur)
 {
@@ -306,13 +335,13 @@ function reload_table()
     table.ajax.reload(null,false); //reload datatable ajax 
 }
 
-function saveDataPenjualan()
+function saveNewPengeluaran()
 {
     var url;
     var txtAksi;
     const loadingCircle = $("#loading-circle");
  
-    url = base_url + 'penjualan/add_new_penjualan';
+    url = base_url + 'pengeluaran_lain/add_new_pengeluaran';
     txtAksi = 'Tambah Invoice';
     var alert = "Menambah";
     
@@ -348,7 +377,7 @@ function saveDataPenjualan()
                         $("#btnSave").prop("disabled", false);
                         $('#btnSave').text('Simpan');
                         setTimeout(function(){
-                          ajax_send(data.no_faktur);
+                          ajax_send(data.kode);
                         }, 1000);
                     }else {
                         for (var i = 0; i < data.inputerror.length; i++) 
@@ -387,6 +416,11 @@ function saveDataPenjualan()
             )
           }
     });
+}
+
+function ajax_send(kode)
+{
+  window.location.href = base_url+'pengeluaran_lain/add_pengeluaran_det?kode='+kode;
 }
 
 function editDataPenjualan()
@@ -491,8 +525,8 @@ function reset_modal_form_import()
 }
 
 function import_excel(){
-    $('#modal_import_excel').modal('show');
-	$('#modal_import_title').text('Import data user'); 
+  $('#modal_import_excel').modal('show');
+  $('#modal_import_title').text('Import data user'); 
 }
 
 function import_data_excel(){
@@ -537,66 +571,7 @@ function import_data_excel(){
 }
 
 
-
-function ajax_send(no_faktur)
-{
-    window.location.href = base_url+'penjualan/add_order?no_faktur='+no_faktur;
-}
  
-  
-$(document).ready(function(){
-  
-  // console.log(id);
-    getTable();
-    getTotal();
-
-    $('#regForm').submit(function(e){
-        e.preventDefault();
-        // var url = '<?php echo base_url(); ?>';
-        var reg = $('#regForm').serialize();
-        $.ajax({
-            type: 'POST',
-            data: reg,
-            dataType: 'json',
-            url: base_url + 'penjualan/save_order',
-            success: function(data)
-            {
-                swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
-                $('#regForm')[0].reset();
-                getTable();
-                getTotal();
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                Swal.fire('Terjadi Kesalahan');
-            }
-           
-        });
-    });
-
-    $("input").focusin(function() {
-      $("#btnSave").prop("disabled", true);
-    });
-
-    $("input").focusout(function() {
-      $.ajax({
-        type: "post",
-        url: base_url+"penjualan/cek_qty_stok",
-        data: {qty:$('#qty').val(), id_barang:$('#id_barang').val(), id_gudang:$('#id_gudang').val()},
-        dataType: "json",
-        success: function (response) {
-          $('#qty').val(response);
-          $("#btnSave").prop("disabled", false);
-        }
-      });
-    });
-
-
-    // $(document).on('click', '#clearMsg', function(){
-    //     $('#responseDiv').hide();
-    // });
-
-});
 function getTable(){
     var id = $('#id_penjualan').val();
     console.log(id);
@@ -666,7 +641,6 @@ function hapus_order(id)
     }
   });
 }
-
 
 function tes(id)
 {

@@ -40,7 +40,7 @@ class Pengeluaran_lain extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => 'modal_detail_pengeluaran',
+			'modal' => 'modal_detail_pengeluaran_lain',
 			'js'	=> 'pengeluaran_lain.js',
 			'view'	=> 'view_list'
 		];
@@ -50,7 +50,17 @@ class Pengeluaran_lain extends CI_Controller {
 
 	public function list_data_pengeluaran()
 	{
-		$listData = $this->t_out->get_datatable_pengeluaran();
+		$bulan = $this->input->post('bulan');
+		$tahun = $this->input->post('tahun');
+		$kategori = $this->input->post('kategori');
+		
+		$paramdata = [
+			'bulan' => $bulan,
+			'tahun' => $tahun,
+			'kategori' => $kategori
+		];
+		
+		$listData = $this->t_out->get_datatable_pengeluaran($paramdata);
 		$datas = [];
 		$i = 1;
 		foreach ($listData as $key => $value) {
@@ -65,10 +75,10 @@ class Pengeluaran_lain extends CI_Controller {
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
 						<button class="dropdown-item" onclick="edit_pengeluaran(\''.$value->kode.'\',\''.$value->id.'\')">
-							<i class="la la-pencil"></i> Edit Invoice
+							<i class="la la-pencil"></i> Edit Transaksi
 						</button>
 						<button class="dropdown-item" onclick="detail_pengeluaran(\''.$value->kode.'\',\''.$value->id.'\')">
-							<i class="la la-desktop"></i> Lihat Penjualan
+							<i class="la la-desktop"></i> Lihat Detail
 						</button>
 						<button class="dropdown-item" onclick="delete_pengeluaran(\''.$value->kode.'\',\''.$value->id.'\')">
 							<i class="la la-trash"></i> Hapus
@@ -112,16 +122,17 @@ class Pengeluaran_lain extends CI_Controller {
 		if ($mode == 'edit') {
 			$kode = $this->input->get('kode');
 			$data_header = $this->m_global->getSelectedData('t_pengeluaran_lain', array('kode'=>$kode))->row();
-			
+		
 			if(!$data_header) {
-				return redirect('penjualan');
+				return redirect('pengeluaran_lain');
 			}
 
-			$data['invoice'] = $data_header;
+			$data['old_data'] = $data_header;
 			$data['mode'] = $mode;
 			$data['title'] = "Edit Pengeluaran";
 			$data['id_pengeluaran'] = $data_header->id;
 			$data['kode'] = $data_header->kode;
+			$data['kategori'] = $this->m_global->multi_row('*', ['deleted_at'=>NULL, 'is_lain' => 1], 'm_kategori_transaksi', NULL, 'nama_kategori_trans asc');
 			// $data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
 		}
 		// else{
@@ -149,7 +160,10 @@ class Pengeluaran_lain extends CI_Controller {
 		$this->load->library('Enkripsi');
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$tgl = $obj_date->format('Y-m-d');
+		// $tgl = $obj_date->format('Y-m-d');
+		$tgl = $this->input->post('tanggal');
+		$tgl_fix = DateTime::createFromFormat('d/m/Y', $tgl)->format('Y-m-d');
+		
 		$arr_valid = $this->rule_validasi();
 
 		if ($arr_valid['status'] == FALSE) {
@@ -159,12 +173,12 @@ class Pengeluaran_lain extends CI_Controller {
 
 		$is_update = false;
 
-		if($this->input->post('id_penjualan') != '') {
-			$cek = $this->m_penjualan->get_by_id($this->input->post('id_penjualan'));
+		if($this->input->post('id_pengeluaran') != '') {
+			$cek = $this->t_out->get_by_id($this->input->post('id_pengeluaran'));
 			if($cek){
 				$is_update = true;
-				$no_faktur = $cek->no_faktur;
-				$id_penjualan_fix = $cek->id_penjualan;
+				$kode = $cek->kode;
+				$id_pengeluaran_fix = $cek->id;
 			}else{
 				$retval['status'] = false;
 				$retval['pesan'] = 'Data Tidak Ditemukan';
@@ -174,41 +188,100 @@ class Pengeluaran_lain extends CI_Controller {
 		}
 		
 		if(!$is_update) {
-			$counter_penjualan = $this->m_penjualan->get_max_penjualan();
-			$no_faktur = generate_kode_transaksi($tgl, $counter_penjualan, 'INV');
-			$data['no_faktur'] = $no_faktur;
+			$cek_kategori = $this->m_global->single_row('*', [
+				'id_kategori_trans' => $this->input->post('kategori'),
+				'deleted_at' => null,
+			],'m_kategori_transaksi');
+
+			$counter_pengeluaran = $this->t_out->get_max_transaksi();
+			$kode = generate_kode_transaksi($tgl_fix, $counter_pengeluaran, strtoupper(strtolower($cek_kategori->singkatan)));
+			
+			$data['kode'] = $kode;
+			$data['id_kategori_trans'] = $cek_kategori->id_kategori_trans;
+			$data['id_user'] = $this->session->userdata('id_user');
+			$data['tanggal'] = $tgl_fix;
 			$data['created_at']	= $timestamp;
+		}else{
+			$data['id_user'] = $this->session->userdata('id_user');
+			$data['tanggal'] = $tgl_fix;
+			$data['updated_at']	= $timestamp;
 		}
 		
-		$id_pelanggan 		= $this->input->post('pelanggan');
-		$id_sales 			= $this->input->post('sales');
-		$is_kredit			= ($this->input->post('metode') == '1') ? 1 : null;
-
-		$data['id_pelanggan'] = $id_pelanggan;
-		$data['id_sales'] = $id_sales;
-		$data['is_kredit'] = $is_kredit;
-
 		$this->db->trans_begin();
 
 		if($is_update) {
-			$this->m_penjualan->update(['id_penjualan' => $id_penjualan_fix], $data);
+			$this->t_out->update(['id' => $id_pengeluaran_fix], $data);
 		}else{
-			$insert = $this->m_penjualan->save($data);
+			$insert = $this->t_out->save($data);
 		}
 
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
 			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan Data Invoice';
+			$retval['pesan'] = 'Gagal menambahkan Data Pengeluaran';
 		}else{
 			$this->db->trans_commit();
 			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Menambahkan Data Invoice';
-			$retval['no_faktur'] = $no_faktur;
+			$retval['pesan'] = 'Sukses Menambahkan Data Pengeluaran';
+			$retval['kode'] = $kode;
 		}
 
 		echo json_encode($retval);
 	}
+
+	public function add_pengeluaran_det()
+	{
+		$kode = $this->input->get('kode');
+		$id = $this->input->get('index');
+		$id_user = $this->session->userdata('id_user');
+		$data_user = $this->m_user->get_detail_user($id_user);
+		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
+		$profil = $this->m_global->single_row('*', ['deleted_at' => null], 'm_profil');
+		// var_dump($diskon); die();
+
+		/**
+		 * data passing ke halaman view content
+		 */
+		$data = array(
+			'title' => 'Tambah Pengeluaran Lain-Lain',
+			'data_user' => $data_user,
+			'data_role'	=> $data_role,
+			'profil' => $profil
+		);
+
+		$cek_header = $this->t_out->getPengeluaran($kode)->row();
+
+		if (!$cek_header) {
+			return redirect('pengeluaran_lain');
+		}
+
+		$data['header'] = $cek_header;
+		// $data['gudang']  = $this->m_global->getSelectedData('m_gudang', array('deleted_at' => NULL));
+		
+		echo "<pre>";
+		print_r ($data);
+		echo "</pre>";
+		exit;
+		/**
+		 * content data untuk template
+		 * param (css : link css pada direktori assets/css_module)
+		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
+		 * param (js : link js pada direktori assets/js_module)
+		 */
+		$content = [
+			'css' 	=> null,
+			'modal' => 'modal_detail_pengeluaran_lain',
+			'js'	=> 'pengeluaran_lain.js',
+			'view'	=> 'view_add_order_pengeluaran_lain'
+		];
+
+		$this->template_view->load_view($content, $data);
+	}
+
+
+
+
+
 
 	public function get_detail_penjualan()
 	{
@@ -341,23 +414,15 @@ class Pengeluaran_lain extends CI_Controller {
 		$data['inputerror'] = array();
 		$data['status'] = TRUE;
 
-		
-		
-		// if ($this->input->post('icon_menu') == '') {
-		// 	$data['inputerror'][] = 'icon_menu';
-        //     $data['error_string'][] = 'Wajib mengisi icon menu';
-        //     $data['status'] = FALSE;
-		// }
-
-		if ($this->input->post('pelanggan') == '') {
-			$data['inputerror'][] = 'pelanggan';
-            $data['error_string'][] = 'Wajib Memilih Nama Toko Pelanggan';
+		if ($this->input->post('kategori') == '') {
+			$data['inputerror'][] = 'kategori';
+            $data['error_string'][] = 'Wajib Memilih kategori';
             $data['status'] = FALSE;
 		}
 
-		if ($this->input->post('sales') == '') {
-			$data['inputerror'][] = 'sales';
-            $data['error_string'][] = 'Wajib Memilih Nama Sales';
+		if ($this->input->post('tanggal') == '') {
+			$data['inputerror'][] = 'tanggal';
+            $data['error_string'][] = 'Wajib Memilih tanggal';
             $data['status'] = FALSE;
 		}
 
@@ -440,48 +505,7 @@ class Pengeluaran_lain extends CI_Controller {
 		echo json_encode($qty);		
 	}
 
-	public function add_order()
-	{
-		$no_faktur = $this->input->get('no_faktur');
-		$id_user = $this->session->userdata('id_user'); 
-		$data_user = $this->m_user->get_detail_user($id_user);
-		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
-		
-		// var_dump($diskon); die();
-			
-		/**
-		 * data passing ke halaman view content
-		 */
-		$data = array(
-			'title' => 'NEW INVOICE',
-			'data_user' => $data_user,
-			'data_role'	=> $data_role,
-		);
-
-		$cek_header = $this->m_penjualan->getPenjualan($no_faktur)->row();
-		if(!$cek_header) {
-			return redirect('penjualan');
-		}
-
-		$data['invoice'] = $cek_header;
-		$data['gudang']  = $this->m_global->getSelectedData('m_gudang', array('deleted_at'=>NULL));
-		// $data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL));
-
-		/**
-		 * content data untuk template
-		 * param (css : link css pada direktori assets/css_module)
-		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
-		 * param (js : link js pada direktori assets/js_module)
-		 */
-		$content = [
-			'css' 	=> null,
-			'modal' => 'modal_detail_pengeluaran',
-			'js'	=> 'penjualan.js',
-			'view'	=> 'view_add_order_penjualan'
-		];
-
-		$this->template_view->load_view($content, $data);
-	}
+	
 
 	public function save_order()
 	{

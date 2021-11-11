@@ -60,8 +60,8 @@
             <div class="row">
                 <div class="col-xs-12">
                     <h2 class="page-header">
-                        <i class="fa fa-globe"></i> JMP Motor.
-                        <!-- <small class="pull-right">Date: 2017/01/09</small> -->
+                        <i class="fa fa-globe"></i> <?= $profil->nama_usaha;?>.
+                        <!-- <small class="pull-right">Alamat : <?= $profil->alamat;?></small> -->
                     </h2>
                 </div><!-- /.col -->
             </div>
@@ -72,7 +72,7 @@
                         <table class="table table-borderless">
                           <tr>
                             <th>Address</th>
-                            <td><?= (isset($invoice->alamat)) ? $invoice->alamat : '-';?></span></td>
+                            <td><?= (isset($header->alamat)) ? $header->alamat : '-';?></span></td>
                           </tr>
                           <!-- <tr>
                             <th>Tanggal Pembelian</th>
@@ -80,24 +80,28 @@
                           </tr> -->
                           <tr>
                             <th rowspan="2">Phone</th>
-                            <td><?= (isset($invoice->no_telp)) ? $invoice->no_telp : "";?></span></td>
+                            <td><?= (isset($header->no_telp)) ? $header->no_telp : "";?></span></td>
                           </tr>
                           <tr>
-                            <td><?= (isset($invoice->email)) ? $invoice->email : "";?></span></td>
+                            <td><?= (isset($header->email)) ? $header->email : "";?></span></td>
                           </tr>
                         </table>
                     </address>
-                </div><!-- /.col -->
+                </div>
 
                 <div class="col-sm-6 invoice-col">
                    <table class="table table-borderless">
+                        <tr>
+                          <th>Tanggal</th>
+                          <td><?= (isset($header->tanggal)) ? tanggal_indo($header->tanggal) : '-';?></td>
+                        </tr>
                       <tr>
-                        <th>No. Faktur</th>
-                        <td><?= (isset($invoice->no_faktur)) ? $invoice->no_faktur : '-';?></span></td>
+                        <th>Kode</th>
+                        <td><?= (isset($header->kode)) ? $header->kode : '-';?></span></td>
                       </tr>
                       <tr>
-                        <th>Sales Name</th>
-                        <td><?= (isset($invoice->username)) ? $invoice->username : "";?></span></td>
+                        <th>Petugas</th>
+                        <td><?= (isset($header->nama_user)) ? $header->nama_user : "";?></span></td>
                       </tr>
                       <tr>
                         <th colspan="2">Barang Tidak ada ? 
@@ -109,39 +113,39 @@
             </div><!-- /.row -->
 
             <form id="regForm">
-            <div class="row">
-                <div class="form-group col-sm-4">
-                  <label for="lbl_gudang" class="form-control-label">Gudang :</label>
-                  <input type="hidden" value="<?= (isset($invoice->id_penjualan))?$invoice->id_penjualan:"";?>" name="id_penjualan" id="id_penjualan">
-                  <select name="id_gudang" id="id_gudang" class="form-control select2" onchange="getSelectBarang(this)">
-                      <option value="0">-PILIH-</option>
-                      <?php foreach($gudang->result() as $row):?>
-                          <option value="<?php echo $row->id_gudang;?>"><?php echo $row->nama_gudang;?></option>
-                      <?php endforeach;?>
-                  </select>
-                  <span class="help-block"></span>
-                </div>
-                <div class="form-group col-sm-4">
-                  <label for="lbl_namabarang" class="form-control-label">Nama Barang : </label>
-                  <select name="id_barang" id="id_barang" class="form-control select2">
-                      <option value="0">-PILIH-</option>
-                  </select>
-                  <span class="help-block"></span>
-                </div>
-                <div class="form-group col-sm-1">
-                    <label for="lbl_hargabarang" class="form-control-label">Qty :</label>
-                    <input type="number" class="form-control" id="qty" name="qty" autocomplete="off">
+              <div class="row">
+                  <div class="form-group col-sm-4">
+                    <label for="lbl_gudang" class="form-control-label">Gudang :</label>
+                    <input type="hidden" value="<?= (isset($invoice->id_penjualan))?$invoice->id_penjualan:"";?>" name="id_penjualan" id="id_penjualan">
+                    <select name="id_gudang" id="id_gudang" class="form-control select2" onchange="getSelectBarang(this)">
+                        <option value="0">-PILIH-</option>
+                        <?php foreach($gudang->result() as $row):?>
+                            <option value="<?php echo $row->id_gudang;?>"><?php echo $row->nama_gudang;?></option>
+                        <?php endforeach;?>
+                    </select>
                     <span class="help-block"></span>
-                </div>
-                <div class="form-group col-sm-2">
-                    <label for="lbl_hargabarang" class="form-control-label">Diskon :</label>
-                    <input type="text" class="form-control percent" id="dis" name="diskon" value="0" autocomplete="off">
+                  </div>
+                  <div class="form-group col-sm-4">
+                    <label for="lbl_namabarang" class="form-control-label">Nama Barang : </label>
+                    <select name="id_barang" id="id_barang" class="form-control select2">
+                        <option value="0">-PILIH-</option>
+                    </select>
                     <span class="help-block"></span>
-                </div>
-                <div class="form-group col-sm-3" style="padding-top:25px;">
-                  <button id="btnSave" type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </div>
+                  </div>
+                  <div class="form-group col-sm-1">
+                      <label for="lbl_hargabarang" class="form-control-label">Qty :</label>
+                      <input type="number" class="form-control" id="qty" name="qty" autocomplete="off">
+                      <span class="help-block"></span>
+                  </div>
+                  <div class="form-group col-sm-2">
+                      <label for="lbl_hargabarang" class="form-control-label">Diskon :</label>
+                      <input type="text" class="form-control percent" id="dis" name="diskon" value="0" autocomplete="off">
+                      <span class="help-block"></span>
+                  </div>
+                  <div class="form-group col-sm-3" style="padding-top:25px;">
+                    <button id="btnSave" type="submit" class="btn btn-primary">Simpan</button>
+                  </div>
+              </div>
             </form>
             <br />
             <!-- Table row -->

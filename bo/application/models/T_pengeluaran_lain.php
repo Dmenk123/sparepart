@@ -12,7 +12,7 @@ class T_pengeluaran_lain extends CI_Model
 	}
 
 
-	function get_datatable_pengeluaran()
+	function get_datatable_pengeluaran($param)
 	{
 		$this->db->select('tp.*, kat.nama_kategori_trans, user.nama as nama_user');
 		$this->db->from('t_pengeluaran_lain tp');
@@ -77,6 +77,22 @@ class T_pengeluaran_lain extends CI_Model
 		}
 	}
 
+	public function getPengeluaran($kode)
+	{
+		$this->db->select('
+			pl.*,
+			mu.username,
+			mu.nama as nama_user,
+		');
+		$this->db->from('t_pengeluaran_lain pl');
+		// $this->db->join('t_pengeluaran_lain_det pld', 'pl.id = pld.id_pengeluaran_lain');
+		$this->db->join('m_user mu', 'mu.id = pl.id_user');
+		$this->db->join('m_kategori_transaksi mk', 'pl.id_kategori_trans = mk.id_kategori_trans');
+		$this->db->where('pl.kode', $kode);
+		$q = $this->db->get();
+		return $q;
+	}
+
 	############################################################################################
 
 	/* public function updatePembelianDet($where, $data)
@@ -84,27 +100,7 @@ class T_pengeluaran_lain extends CI_Model
 		return $this->db->update('t_pembelian_det', $data, $where);
 	} */
 
-	public function getPembelian($no_faktur)
-	{
-		$this->db->select('
-						pj.id_penjualan,
-						pj.no_faktur,
-						pj.tgl_jatuh_tempo,
-						pj.created_at,
-						mu.username,
-						pl.nama_pembeli,
-						pl.alamat,
-						pl.no_telp,
-						pl.email,
-						pl.nama_toko
-						');
-		$this->db->from('t_penjualan pj');
-		$this->db->join('m_user mu', 'mu.id=pj.id_sales');
-		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=pj.id_pelanggan');
-		$this->db->where('pj.no_faktur', $no_faktur);
-		$q = $this->db->get();
-		return $q;
-	}
+	
 
 	function getTotalPembelian($id)
 	{
