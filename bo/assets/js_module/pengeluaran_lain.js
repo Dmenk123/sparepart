@@ -43,32 +43,34 @@ $(document).ready(function() {
     });
 
 
+    $('#regForm').submit(function(e){
+      e.preventDefault();
+      // var url = '<?php echo base_url(); ?>';
+      var reg = $('#regForm').serialize();
+      $.ajax({
+          type: 'POST',
+          data: reg,
+          dataType: 'json',
+          url: base_url + 'pengeluaran_lain/save_trans_detail',
+          success: function(data)
+          {
+              swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
+              $('#regForm')[0].reset();
+              getTable();
+              getTotal();
+          },
+          error: function (jqXHR, textStatus, errorThrown)
+          {
+              Swal.fire('Terjadi Kesalahan');
+          }
+        
+      });
+    });
+
       // getTable();
       // getTotal();
 
-      // $('#regForm').submit(function(e){
-      //     e.preventDefault();
-      //     // var url = '<?php echo base_url(); ?>';
-      //     var reg = $('#regForm').serialize();
-      //     $.ajax({
-      //         type: 'POST',
-      //         data: reg,
-      //         dataType: 'json',
-      //         url: base_url + 'penjualan/save_order',
-      //         success: function(data)
-      //         {
-      //             swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
-      //             $('#regForm')[0].reset();
-      //             getTable();
-      //             getTotal();
-      //         },
-      //         error: function (jqXHR, textStatus, errorThrown)
-      //         {
-      //             Swal.fire('Terjadi Kesalahan');
-      //         }
-            
-      //     });
-      // });
+      
 
   //   const load_detail_apbd_surabaya = (jenis) => {
   //     if ( $.fn.DataTable.isDataTable('#datatable_apbd_pemkot') ) {

@@ -76,6 +76,7 @@ class T_pengeluaran_lain extends CI_Model
 			return '1';
 		}
 	}
+	
 
 	public function getPengeluaran($kode)
 	{

@@ -248,12 +248,16 @@ class Pengeluaran_lain extends CI_Controller {
 			return redirect('pengeluaran_lain');
 		}
 
+		$barang = $this->m_global->multi_row('*', ['deleted_at' => null, 'sku' => null, 'id_kategori' => $cek_header->id_kategori_trans], 'm_barang', null, 'nama asc');
+
+
 		$data = array(
 			'title' => 'Tambah Pengeluaran Lain-Lain',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
 			'profil' => $profil,
-			'data_header' => $cek_header
+			'data_header' => $cek_header,
+			'barang' => $barang
 		);
 		// $data['gudang']  = $this->m_global->getSelectedData('m_gudang', array('deleted_at' => NULL));
 		
@@ -277,6 +281,98 @@ class Pengeluaran_lain extends CI_Controller {
 		$this->template_view->load_view($content, $data);
 	}
 
+	
+	public function save_trans_detail()
+	{
+		$this->load->library('Enkripsi');
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$arr_valid = $this->rule_validasi_order();
+		
+		$id_penjualan 	= $this->input->post('id_penjualan');
+		$id_barang      = $this->input->post('id_barang');
+		$id_gudang      = $this->input->post('id_gudang');
+
+		$data_where     = array('id_barang'=> $id_barang);
+		$barang         = $this->m_global->getSelectedData('m_barang', $data_where)->row();
+		$qty            = $this->input->post('qty');
+		$diskon    		= str_replace('%', '', $this->input->post('diskon'));
+		$diskon    		= str_replace(',','.',$diskon);
+		$nilai     		= ($diskon/100)*$barang->harga;
+		$harga_diskon 	= $barang->harga - $nilai;
+		
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		$data_header = $this->m_global->getSelectedData('t_penjualan', ['id_penjualan' => $id_penjualan])->row();
+
+		if(!$data_header) {
+			$retval['status'] = false;
+			$retval['pesan'] = 'Data Penjualan Tidak Ditemukan';
+			echo json_encode($retval);
+			return;
+		}
+
+		$datadet = $this->m_global->getSelectedData('t_penjualan_det', ['id_penjualan' => $id_penjualan, 'id_barang' => $id_barang, 'id_gudang' => $id_gudang])->row();
+		if($datadet) {
+			$retval['status'] = false;
+			$retval['pesan'] = 'Barang yang dipilih sudah ada, mohon memilih barang yang lain';
+			echo json_encode($retval);
+			return;
+		}
+
+		$faktur = $data_header->no_faktur;
+		$sub_total = $harga_diskon * $qty;
+		$this->db->trans_begin();
+		
+		$data_order = [
+			'id_penjualan'  => $id_penjualan,
+			'id_barang' 	=> $id_barang,
+			'harga_awal' 	=> $barang->harga,
+			'harga_diskon' 	=> $harga_diskon,
+			'besaran_diskon'=> $diskon,
+			'sub_total'     => $sub_total,
+			'id_gudang'		=> $id_gudang,
+			'qty'           => $qty
+		];
+		
+		$insert = $this->m_global->save($data_order, 't_penjualan_det');
+
+		if($insert) {
+			$mutasi = $this->lib_mutasi->simpan_mutasi($id_barang, $qty, 2, $faktur, $id_gudang);
+			
+			if($mutasi === FALSE) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menambahkan Order';
+				return;
+			}
+
+			$laporan = $this->lib_mutasi->insertDataLap($sub_total, 2, $faktur, $data_header->is_kredit);
+
+			if($laporan['status'] === FALSE) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menambahkan Order';
+				return;
+			}
+
+		}
+		
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal menambahkan Order';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses menambahkan Order';
+		}
+
+		echo json_encode($retval);
+	}
 
 
 
@@ -506,97 +602,6 @@ class Pengeluaran_lain extends CI_Controller {
 
 	
 
-	public function save_order()
-	{
-		$this->load->library('Enkripsi');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$arr_valid = $this->rule_validasi_order();
-		
-		$id_penjualan 	= $this->input->post('id_penjualan');
-		$id_barang      = $this->input->post('id_barang');
-		$id_gudang      = $this->input->post('id_gudang');
-
-		$data_where     = array('id_barang'=> $id_barang);
-		$barang         = $this->m_global->getSelectedData('m_barang', $data_where)->row();
-		$qty            = $this->input->post('qty');
-		$diskon    		= str_replace('%', '', $this->input->post('diskon'));
-		$diskon    		= str_replace(',','.',$diskon);
-		$nilai     		= ($diskon/100)*$barang->harga;
-		$harga_diskon 	= $barang->harga - $nilai;
-		
-		if ($arr_valid['status'] == FALSE) {
-			echo json_encode($arr_valid);
-			return;
-		}
-
-		$data_header = $this->m_global->getSelectedData('t_penjualan', ['id_penjualan' => $id_penjualan])->row();
-
-		if(!$data_header) {
-			$retval['status'] = false;
-			$retval['pesan'] = 'Data Penjualan Tidak Ditemukan';
-			echo json_encode($retval);
-			return;
-		}
-
-		$datadet = $this->m_global->getSelectedData('t_penjualan_det', ['id_penjualan' => $id_penjualan, 'id_barang' => $id_barang, 'id_gudang' => $id_gudang])->row();
-		if($datadet) {
-			$retval['status'] = false;
-			$retval['pesan'] = 'Barang yang dipilih sudah ada, mohon memilih barang yang lain';
-			echo json_encode($retval);
-			return;
-		}
-
-		$faktur = $data_header->no_faktur;
-		$sub_total = $harga_diskon * $qty;
-		$this->db->trans_begin();
-		
-		$data_order = [
-			'id_penjualan'  => $id_penjualan,
-			'id_barang' 	=> $id_barang,
-			'harga_awal' 	=> $barang->harga,
-			'harga_diskon' 	=> $harga_diskon,
-			'besaran_diskon'=> $diskon,
-			'sub_total'     => $sub_total,
-			'id_gudang'		=> $id_gudang,
-			'qty'           => $qty
-		];
-		
-		$insert = $this->m_global->save($data_order, 't_penjualan_det');
-
-		if($insert) {
-			$mutasi = $this->lib_mutasi->simpan_mutasi($id_barang, $qty, 2, $faktur, $id_gudang);
-			
-			if($mutasi === FALSE) {
-				$this->db->trans_rollback();
-				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal menambahkan Order';
-				return;
-			}
-
-			$laporan = $this->lib_mutasi->insertDataLap($sub_total, 2, $faktur, $data_header->is_kredit);
-
-			if($laporan['status'] === FALSE) {
-				$this->db->trans_rollback();
-				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal menambahkan Order';
-				return;
-			}
-
-		}
-		
-		if ($this->db->trans_status() === FALSE){
-			$this->db->trans_rollback();
-			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan Order';
-		}else{
-			$this->db->trans_commit();
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses menambahkan Order';
-		}
-
-		echo json_encode($retval);
-	}
 
 	public function fetch()
 	{

@@ -104,6 +104,11 @@
                     <input type="hidden" value="<?= (isset($data_header->id))?$data_header->id:"";?>" name="id_pengeluaran_lain" id="id_pengeluaran_lain">
                     <select name="id_barang" id="id_barang" class="form-control select2">
                       <option value="0">-PILIH-</option>
+                      <?php 
+                        foreach ($barang as $key => $value) {
+                          echo "<option value='$value->id_barang'>$value->nama</option>";
+                        }
+                      ?>
                     </select>
                     <span class="help-block"></span>
                   </div>
