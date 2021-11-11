@@ -89,6 +89,127 @@ class Pengeluaran_lain extends CI_Controller {
 		echo json_encode($data);
 	}
 
+	public function new_pengeluaran()
+	{
+		$id_user = $this->session->userdata('id_user'); 
+		$data_user = $this->m_user->get_detail_user($id_user);
+		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
+			
+		/**
+		 * data passing ke halaman view content
+		 */
+		
+		$data = array(
+			'title' => 'Pengeluaran Baru',
+			'data_user' => $data_user,
+			'data_role'	=> $data_role,
+			'kategori' => $this->m_global->multi_row('*', ['deleted_at'=>NULL, 'is_lain' => 1], 'm_kategori_transaksi', NULL, 'nama_kategori_trans asc'),
+			'mode'		=> 'add',
+		);
+
+		$mode = $this->input->get('mode');
+
+		if ($mode == 'edit') {
+			$kode = $this->input->get('kode');
+			$data_header = $this->m_global->getSelectedData('t_pengeluaran_lain', array('kode'=>$kode))->row();
+			
+			if(!$data_header) {
+				return redirect('penjualan');
+			}
+
+			$data['invoice'] = $data_header;
+			$data['mode'] = $mode;
+			$data['title'] = "Edit Pengeluaran";
+			$data['id_pengeluaran'] = $data_header->id;
+			$data['kode'] = $data_header->kode;
+			// $data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
+		}
+		// else{
+		// 	return redirect('penjualan');
+		// }
+
+		/**
+		 * content data untuk template
+		 * param (css : link css pada direktori assets/css_module)
+		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
+		 * param (js : link js pada direktori assets/js_module)
+		 */
+		$content = [
+			'css' 	=> null,
+			'modal' => null,
+			'js'	=> 'pengeluaran_lain.js',
+			'view'	=> 'view_new_pengeluaran_lain'
+		];
+
+		$this->template_view->load_view($content, $data);
+	}
+
+	public function add_new_pengeluaran()
+	{
+		$this->load->library('Enkripsi');
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tgl = $obj_date->format('Y-m-d');
+		$arr_valid = $this->rule_validasi();
+
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		$is_update = false;
+
+		if($this->input->post('id_penjualan') != '') {
+			$cek = $this->m_penjualan->get_by_id($this->input->post('id_penjualan'));
+			if($cek){
+				$is_update = true;
+				$no_faktur = $cek->no_faktur;
+				$id_penjualan_fix = $cek->id_penjualan;
+			}else{
+				$retval['status'] = false;
+				$retval['pesan'] = 'Data Tidak Ditemukan';
+				echo json_encode($retval);
+				return;
+			}
+		}
+		
+		if(!$is_update) {
+			$counter_penjualan = $this->m_penjualan->get_max_penjualan();
+			$no_faktur = generate_kode_transaksi($tgl, $counter_penjualan, 'INV');
+			$data['no_faktur'] = $no_faktur;
+			$data['created_at']	= $timestamp;
+		}
+		
+		$id_pelanggan 		= $this->input->post('pelanggan');
+		$id_sales 			= $this->input->post('sales');
+		$is_kredit			= ($this->input->post('metode') == '1') ? 1 : null;
+
+		$data['id_pelanggan'] = $id_pelanggan;
+		$data['id_sales'] = $id_sales;
+		$data['is_kredit'] = $is_kredit;
+
+		$this->db->trans_begin();
+
+		if($is_update) {
+			$this->m_penjualan->update(['id_penjualan' => $id_penjualan_fix], $data);
+		}else{
+			$insert = $this->m_penjualan->save($data);
+		}
+
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal menambahkan Data Invoice';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses Menambahkan Data Invoice';
+			$retval['no_faktur'] = $no_faktur;
+		}
+
+		echo json_encode($retval);
+	}
+
 	public function get_detail_penjualan()
 	{
 		$id = $this->input->get('id');
@@ -276,127 +397,7 @@ class Pengeluaran_lain extends CI_Controller {
 		return $data;
 	}
 
-	public function new_penjualan()
-	{
-		$id_user = $this->session->userdata('id_user'); 
-		$data_user = $this->m_user->get_detail_user($id_user);
-		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
-			
-		/**
-		 * data passing ke halaman view content
-		 */
-		
-		$data = array(
-			'title' => 'Penjualan Baru',
-			'data_user' => $data_user,
-			'data_role'	=> $data_role,
-			'pelanggan' => $this->m_global->getSelectedData('m_pelanggan', array('deleted_at'=>NULL)),
-			'sales'     => $this->m_global->getSelectedData('m_user', array('id_role'=>6)),
-			'mode'		=> 'add',
-		);
-
-		$mode = $this->input->get('mode');
-
-		if ($mode == 'edit') {
-			$no_faktur = $this->input->get('no_faktur');
-			$invoice = $this->m_global->getSelectedData('t_penjualan', array('no_faktur'=>$no_faktur))->row();
-			
-			if(!$invoice) {
-				return redirect('penjualan');
-			}
-
-			$data['invoice'] = $invoice;
-			$data['mode'] = $mode;
-			$data['title'] = "Edit Penjualan";
-			$data['id_penjualan'] = $invoice->id_penjualan;
-			$data['no_faktur'] = $invoice->no_faktur;
-			// $data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
-		}
-		// else{
-		// 	return redirect('penjualan');
-		// }
-
-		/**
-		 * content data untuk template
-		 * param (css : link css pada direktori assets/css_module)
-		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
-		 * param (js : link js pada direktori assets/js_module)
-		 */
-		$content = [
-			'css' 	=> null,
-			'modal' => null,
-			'js'	=> 'penjualan.js',
-			'view'	=> 'view_new_invoice'
-		];
-
-		$this->template_view->load_view($content, $data);
-	}
-
-	public function add_new_penjualan()
-	{
-		$this->load->library('Enkripsi');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$tgl = $obj_date->format('Y-m-d');
-		$arr_valid = $this->rule_validasi();
-
-		if ($arr_valid['status'] == FALSE) {
-			echo json_encode($arr_valid);
-			return;
-		}
-
-		$is_update = false;
-
-		if($this->input->post('id_penjualan') != '') {
-			$cek = $this->m_penjualan->get_by_id($this->input->post('id_penjualan'));
-			if($cek){
-				$is_update = true;
-				$no_faktur = $cek->no_faktur;
-				$id_penjualan_fix = $cek->id_penjualan;
-			}else{
-				$retval['status'] = false;
-				$retval['pesan'] = 'Data Tidak Ditemukan';
-				echo json_encode($retval);
-				return;
-			}
-		}
-		
-		if(!$is_update) {
-			$counter_penjualan = $this->m_penjualan->get_max_penjualan();
-			$no_faktur = generate_kode_transaksi($tgl, $counter_penjualan, 'INV');
-			$data['no_faktur'] = $no_faktur;
-			$data['created_at']	= $timestamp;
-		}
-		
-		$id_pelanggan 		= $this->input->post('pelanggan');
-		$id_sales 			= $this->input->post('sales');
-		$is_kredit			= ($this->input->post('metode') == '1') ? 1 : null;
-
-		$data['id_pelanggan'] = $id_pelanggan;
-		$data['id_sales'] = $id_sales;
-		$data['is_kredit'] = $is_kredit;
-
-		$this->db->trans_begin();
-
-		if($is_update) {
-			$this->m_penjualan->update(['id_penjualan' => $id_penjualan_fix], $data);
-		}else{
-			$insert = $this->m_penjualan->save($data);
-		}
-
-		if ($this->db->trans_status() === FALSE){
-			$this->db->trans_rollback();
-			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan Data Invoice';
-		}else{
-			$this->db->trans_commit();
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Menambahkan Data Invoice';
-			$retval['no_faktur'] = $no_faktur;
-		}
-
-		echo json_encode($retval);
-	}
+	
 
 	public function get_option_barang()
 	{
