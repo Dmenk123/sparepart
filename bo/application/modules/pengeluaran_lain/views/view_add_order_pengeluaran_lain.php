@@ -71,19 +71,12 @@
                     <address>
                         <table class="table table-borderless">
                           <tr>
-                            <th>Address</th>
-                            <td><?= (isset($header->alamat)) ? $header->alamat : '-';?></span></td>
-                          </tr>
-                          <!-- <tr>
-                            <th>Tanggal Pembelian</th>
-                            <td><?= (isset($data->tanggal_beli)) ? DateTime::createFromFormat('Y-m-d',$data->tanggal_beli)->format('d/m/Y') : '-';?></td>
-                          </tr> -->
-                          <tr>
-                            <th rowspan="2">Phone</th>
-                            <td><?= (isset($header->no_telp)) ? $header->no_telp : "";?></span></td>
+                            <th>Tanggal</th>
+                            <td><?= (isset($data_header->tanggal)) ? tanggal_indo($data_header->tanggal) : '-';?></td>
                           </tr>
                           <tr>
-                            <td><?= (isset($header->email)) ? $header->email : "";?></span></td>
+                            <th>Kode</th>
+                            <td><?= (isset($data_header->kode)) ? $data_header->kode : '-';?></span></td>
                           </tr>
                         </table>
                     </address>
@@ -91,17 +84,9 @@
 
                 <div class="col-sm-6 invoice-col">
                    <table class="table table-borderless">
-                        <tr>
-                          <th>Tanggal</th>
-                          <td><?= (isset($header->tanggal)) ? tanggal_indo($header->tanggal) : '-';?></td>
-                        </tr>
-                      <tr>
-                        <th>Kode</th>
-                        <td><?= (isset($header->kode)) ? $header->kode : '-';?></span></td>
-                      </tr>
                       <tr>
                         <th>Petugas</th>
-                        <td><?= (isset($header->nama_user)) ? $header->nama_user : "";?></span></td>
+                        <td><?= (isset($data_header->nama_user)) ? $data_header->nama_user : "";?></span></td>
                       </tr>
                       <tr>
                         <th colspan="2">Barang Tidak ada ? 
@@ -114,34 +99,25 @@
 
             <form id="regForm">
               <div class="row">
-                  <div class="form-group col-sm-4">
-                    <label for="lbl_gudang" class="form-control-label">Gudang :</label>
-                    <input type="hidden" value="<?= (isset($invoice->id_penjualan))?$invoice->id_penjualan:"";?>" name="id_penjualan" id="id_penjualan">
-                    <select name="id_gudang" id="id_gudang" class="form-control select2" onchange="getSelectBarang(this)">
-                        <option value="0">-PILIH-</option>
-                        <?php foreach($gudang->result() as $row):?>
-                            <option value="<?php echo $row->id_gudang;?>"><?php echo $row->nama_gudang;?></option>
-                        <?php endforeach;?>
-                    </select>
-                    <span class="help-block"></span>
-                  </div>
-                  <div class="form-group col-sm-4">
-                    <label for="lbl_namabarang" class="form-control-label">Nama Barang : </label>
+                  <div class="form-group col-sm-5">
+                    <label for="lbl_namabarang" class="form-control-label">Nama Barang/Jasa : </label>
+                    <input type="hidden" value="<?= (isset($data_header->id))?$data_header->id:"";?>" name="id_pengeluaran_lain" id="id_pengeluaran_lain">
                     <select name="id_barang" id="id_barang" class="form-control select2">
-                        <option value="0">-PILIH-</option>
+                      <option value="0">-PILIH-</option>
                     </select>
                     <span class="help-block"></span>
                   </div>
-                  <div class="form-group col-sm-1">
+                   <div class="form-group col-sm-1">
                       <label for="lbl_hargabarang" class="form-control-label">Qty :</label>
                       <input type="number" class="form-control" id="qty" name="qty" autocomplete="off">
                       <span class="help-block"></span>
                   </div>
-                  <div class="form-group col-sm-2">
-                      <label for="lbl_hargabarang" class="form-control-label">Diskon :</label>
-                      <input type="text" class="form-control percent" id="dis" name="diskon" value="0" autocomplete="off">
-                      <span class="help-block"></span>
+                  <div class="form-group col-sm-3">
+                    <label for="lbl_hargabarang" class="form-control-label">Nilai Rupiah :</label>
+                    <input type="text" class="form-control uang" id="nilai" name="nilai" autocomplete="off" align="right">
+                    <span class="help-block"></span>
                   </div>
+
                   <div class="form-group col-sm-3" style="padding-top:25px;">
                     <button id="btnSave" type="submit" class="btn btn-primary">Simpan</button>
                   </div>
@@ -156,7 +132,7 @@
                             <tr>
                                 <th>Qty</th>
                                 <th>Product</th>
-                                  <th>Price</th>
+                                <th>Price</th>
                                 <th>Sub Total</th>
                                 <th>&nbsp;</th>
                             </tr>

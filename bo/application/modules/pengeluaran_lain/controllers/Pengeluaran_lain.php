@@ -242,26 +242,25 @@ class Pengeluaran_lain extends CI_Controller {
 		/**
 		 * data passing ke halaman view content
 		 */
-		$data = array(
-			'title' => 'Tambah Pengeluaran Lain-Lain',
-			'data_user' => $data_user,
-			'data_role'	=> $data_role,
-			'profil' => $profil
-		);
-
 		$cek_header = $this->t_out->getPengeluaran($kode)->row();
-
+		
 		if (!$cek_header) {
 			return redirect('pengeluaran_lain');
 		}
 
-		$data['header'] = $cek_header;
+		$data = array(
+			'title' => 'Tambah Pengeluaran Lain-Lain',
+			'data_user' => $data_user,
+			'data_role'	=> $data_role,
+			'profil' => $profil,
+			'data_header' => $cek_header
+		);
 		// $data['gudang']  = $this->m_global->getSelectedData('m_gudang', array('deleted_at' => NULL));
 		
-		echo "<pre>";
-		print_r ($data);
-		echo "</pre>";
-		exit;
+		// echo "<pre>";
+		// print_r ($data);
+		// echo "</pre>";
+		// exit;
 		/**
 		 * content data untuk template
 		 * param (css : link css pada direktori assets/css_module)
