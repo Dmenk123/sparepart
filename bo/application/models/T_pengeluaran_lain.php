@@ -94,6 +94,32 @@ class T_pengeluaran_lain extends CI_Model
 		return $q;
 	}
 
+	function getPengeluaranDet($id)
+	{
+		$this->db->select('
+			pd.*,
+			mb.nama,
+			mb.sku
+		');
+		$this->db->from('t_pengeluaran_lain_det pd');
+		$this->db->join('t_pengeluaran_lain p', 'pd.id_pengeluaran_lain=p.id');
+		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
+		$this->db->where('pd.id_pengeluaran_lain', $id);
+		$this->db->order_by('pd.created_at', 'ASC');
+		$q = $this->db->get();
+		return $q;
+	}
+
+	function getTotalTransaksiDet($id)
+	{
+		$query = "
+			SELECT SUM(sub_total) as total
+			FROM t_pengeluaran_lain_det
+			WHERE id_pengeluaran_lain = $id
+		";
+		return $this->db->query($query);
+	}
+
 	############################################################################################
 
 	/* public function updatePembelianDet($where, $data)
@@ -103,15 +129,7 @@ class T_pengeluaran_lain extends CI_Model
 
 	
 
-	function getTotalPembelian($id)
-	{
-		$query = "
-			SELECT SUM(harga_total_fix) as total
-			FROM t_pembelian_det
-			WHERE id_pembelian = $id
-		";
-		return $this->db->query($query);
-	}
+	
 	
 
 	function getTotalDiskon($id)
@@ -125,22 +143,7 @@ class T_pengeluaran_lain extends CI_Model
 	}
 
 
-	function getPenerimaanDet($id)
-	{
-		$this->db->select('
-			pd.*,
-			p.id_pembelian,
-			mb.nama,
-			mb.sku
-		');
-		$this->db->from('t_penerimaan_det pd');
-		$this->db->join('t_penerimaan p', 'pd.id_penerimaan=p.id_penerimaan');
-		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
-		$this->db->where('pd.id_penerimaan', $id);
-		$this->db->order_by('pd.id_penerimaan_det', 'ASC');
-		$q = $this->db->get();
-		return $q;
-	}
+	
 
 	function getPembelianDet($id)
 	{

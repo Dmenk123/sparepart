@@ -720,6 +720,56 @@ class Lib_mutasi extends CI_Controller {
 					}
 
 					$this->_ci->m_global->save($arr_ins_laporan, 't_lap_keuangan');
+				}else{
+					$cek_data_kategori = $this->_ci->m_global->single_row('*', ['id_kategori_trans' => $id_kategori_trans, 'deleted_at' => null], 'm_kategori_transaksi');
+					
+					if(!$cek_data_kategori) {
+						$this->_ci->db->trans_rollback();
+						$retval = ['status' => false];
+					}
+
+					if ($cek_data_kategori->is_penerimaan == null) {
+						$this->_ci->db->trans_rollback();
+						$retval = ['status' => false];
+					}
+					
+
+					$max_mutasi = $this->_ci->m_global->max('id_laporan', 't_lap_keuangan');
+					$max_mutasi_det = $this->_ci->m_global->max('id_laporan_det', 't_lap_keuangan', ['kode_reff' => $kode_reff]);
+
+					$id_laporan = $max_mutasi->id_laporan + 1;
+					$id_laporan_det = $max_mutasi_det->id_laporan_det + 1;
+
+					
+					// echo "<pre>";
+					// print_r ($id_laporan);
+					// echo "</pre>";
+
+					// echo "<pre>";
+					// print_r($id_laporan_det);
+					// echo "</pre>";
+					// exit;
+
+					$arr_ins_laporan['id_laporan'] = $id_laporan;
+					$arr_ins_laporan['id_laporan_det'] = $id_laporan_det;
+					$arr_ins_laporan['tgl_laporan'] = $tgl;
+					$arr_ins_laporan['bulan_laporan'] = $bulan;
+					$arr_ins_laporan['tahun_laporan'] = $tahun;
+
+					$arr_ins_laporan['kode_reff'] = $kode_reff;
+					$arr_ins_laporan['id_kategori_trans'] = $id_kategori_trans;
+					$arr_ins_laporan['created_at'] = $timestamp;
+
+					$arr_ins_laporan['piutang'] = 0;
+					$arr_ins_laporan['hutang'] = 0;
+
+					if ($cek_data_kategori->is_penerimaan) {
+						$arr_ins_laporan['penerimaan'] = $nilaiRupiah;
+					} else {
+						$arr_ins_laporan['pengeluaran'] = $nilaiRupiah;
+					}
+
+					$this->_ci->m_global->save($arr_ins_laporan, 't_lap_keuangan');
 				}
 
 				/* 
@@ -800,6 +850,30 @@ class Lib_mutasi extends CI_Controller {
 				} else {
 					$arr_update['piutang'] = 0;
 					$arr_update['penerimaan'] = $nilaiRupiah + $header->penerimaan;
+				}
+
+				$this->_ci->m_global->update('t_lap_keuangan', $arr_update, ['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff]);
+			}else{
+				$cek_data_kategori = $this->_ci->m_global->single_row('*', ['id_kategori_trans' => $id_kategori_trans, 'deleted_at' => null], 'm_kategori_transaksi');
+				$header = $this->_ci->m_global->single_row('*', ['kode_reff' => $kode_reff, 'deleted_at' => null], 't_lap_keuangan');
+
+				if (!$cek_data_kategori) {
+					$this->_ci->db->trans_rollback();
+					$retval = ['status' => false];
+				}
+
+				if ($cek_data_kategori->is_penerimaan == null) {
+					$this->_ci->db->trans_rollback();
+					$retval = ['status' => false];
+				}
+
+				$arr_update['kode_reff'] = $kode_reff;
+				$arr_update['updated_at'] = $timestamp;
+
+				if ($cek_data_kategori->is_penerimaan) {
+					$arr_update['penerimaan'] = $nilaiRupiah + $header->penerimaan;
+				} else {
+					$arr_update['pengeluaran'] = $nilaiRupiah + $header->pengeluaran;
 				}
 
 				$this->_ci->m_global->update('t_lap_keuangan', $arr_update, ['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff]);

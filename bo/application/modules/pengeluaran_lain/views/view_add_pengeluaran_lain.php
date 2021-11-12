@@ -47,7 +47,7 @@
         <div class="kt-portlet__head-toolbar" >
           <div class="kt-portlet__head-wrapper">
             <div class="row" style="text-align:left!important;">
-              <h2>ADD ORDER</h>
+              <h2>Form Pengeluaran Lain-Lain</h>
             </div>
           </div>
         </div>

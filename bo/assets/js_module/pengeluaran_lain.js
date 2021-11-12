@@ -10,6 +10,12 @@ $(document).ready(function() {
     bulanUri = uri.searchParams.get("bulan");
     tahunUri = uri.searchParams.get("tahun");
     kategoriUri = uri.searchParams.get("kategori");
+
+    let arrSegment = window.location.pathname.split('/');
+    if(arrSegment[4] == 'add_pengeluaran_det') {
+      getTable();
+      getTotal();
+    }
     
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {
@@ -66,9 +72,6 @@ $(document).ready(function() {
         
       });
     });
-
-      // getTable();
-      // getTotal();
 
       
 
@@ -207,6 +210,33 @@ const getSelectBarang = (obj) => {
       }
     });
   }
+}
+
+const getTable = () => {
+    var id = $('#id_pengeluaran_lain').val();
+    console.log(id);
+    $.ajax({
+        type: 'POST',
+        url: base_url + 'pengeluaran_lain/fetch',
+        data: {id:id},
+        success:function(response){
+            $('#tbody').html(response);
+        }
+    });
+}
+
+const getTotal = () => {
+  var id = $('#id_pengeluaran_lain').val();
+  console.log(id);
+  $.ajax({
+      type: 'POST',
+      url: base_url + 'pengeluaran_lain/total_tabel_trans',
+      data: {id:id},
+      dataType: "json",
+      success:function(data){
+        $('#total').html(data.total);
+      }
+  });
 }
 
 function add_menu()
@@ -574,32 +604,7 @@ function import_data_excel(){
 
 
  
-function getTable(){
-    var id = $('#id_penjualan').val();
-    console.log(id);
-    $.ajax({
-        type: 'POST',
-        url: base_url + 'penjualan/fetch',
-        data: {id:id},
-        success:function(response){
-            $('#tbody').html(response);
-        }
-    });
-}
 
-function getTotal(){
-  var id = $('#id_penjualan').val();
-  console.log(id);
-  $.ajax({
-      type: 'POST',
-      url: base_url + 'penjualan/total_order',
-      data: {id:id},
-      dataType: "json",
-      success:function(data){
-        $('#total').html(data.total);
-      }
-  });
-}
 
 function hapus_order(id)
 {
