@@ -1,5 +1,5 @@
 
-<div class="modal fade modal_add_form" tabindex="-1" role="dialog" aria-labelledby="add_menu" aria-hidden="true" id="modal_det_jual">
+<div class="modal fade modal_add_form" tabindex="-1" role="dialog" aria-labelledby="add_menu" aria-hidden="true" id="modal_det_trans">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -12,24 +12,20 @@
             <div class="col-sm-6 invoice-col">
               <table class="table table-borderless">
                 <tr>
-                  <th>Faktur</th>
-                  <td><span id="span_faktur"></span></td>
+                  <th>Tanggal</th>
+                  <td><span id="span_tgl_det"></span></td>
                 </tr>
                 <tr>
-                  <th>Tanggal Penjualan</th>
-                  <td><span id="span_tgl_jual"></span></td>
-                </tr>
-                <tr>
-                  <th>Pelanggan</th>
-                  <td><span id="span_pelanggan"></span></td>
+                  <th>Kode</th>
+                  <td><span id="span_kode_det"></span></td>
                 </tr>
               </table>
             </div><!-- /.col -->
             <div class="col-sm-6 invoice-col">
               <table class="table table-borderless">
                 <tr>
-                  <th>Sales</th>
-                  <td><span id="span_sales"></span></td>
+                  <th>Petugas</th>
+                  <td><span id="span_petugas_det"></span></td>
                 </tr>
                 <!-- <tr>
                   <th>Petugas</th>

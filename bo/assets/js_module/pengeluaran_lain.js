@@ -62,6 +62,7 @@ $(document).ready(function() {
           {
               swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
               $('#regForm')[0].reset();
+              $("#id_barang").val(null).trigger('change');
               getTable();
               getTotal();
           },
@@ -239,32 +240,22 @@ const getTotal = () => {
   });
 }
 
-function add_menu()
-{
-  reset_modal_form();
-  save_method = 'add';
-	$('#modal_agen_form').modal('show');
-	$('#modal_title').text('Tambah Master Agen'); 
-}
-
-const detail_penjualan = (kode, id) => {  
+const detail_transaksi = (kode, id) => {  
   // reset_modal_form();
   $.ajax({
     type: 'GET',
     data: {kode:kode, id:id},
     dataType: 'json',
-    url: base_url + 'penjualan/get_detail_penjualan',
+    url: base_url + 'pengeluaran_lain/get_detail_transaksi',
     success: function(data)
     {
         let header = data.header;
-        $('#span_faktur').text(header.no_faktur);
-        $('#span_tgl_jual').text(moment(header.created_at).format('LL'));
-        $('#span_pelanggan').text(header.nama_toko);
-        $('#span_sales').text(header.nama_sales);
-        // $('#span_petugas_det').text(header.nama_user);
+        $('#span_kode_det').text(header.kode);
+        $('#span_tgl_det').text(moment(header.tanggal).format('LL'));
+        $('#span_petugas_det').text(header.nama_user);
         $('#tbl_konten_detail tbody').html(data.html_det);
-        $('#modal_det_jual').modal('show');
-        $('#modal_title').text('Detail Penjualan'); 
+        $('#modal_det_trans').modal('show');
+        $('#modal_title').text('Detail Pengeluaran Lain-Lain'); 
     },
     error: function (jqXHR, textStatus, errorThrown)
     {
@@ -275,7 +266,7 @@ const detail_penjualan = (kode, id) => {
 	
 }
 
-const delete_penjualan = (kode, id) => {
+const delete_transaksi = (kode, id) => {
   swalConfirmDelete.fire({
       title: 'Hapus Data ?',
       text: "Data Akan dihapus permanen ?",
@@ -287,7 +278,7 @@ const delete_penjualan = (kode, id) => {
     }).then((result) => {
       if (result.value) {
           $.ajax({
-              url : base_url + 'penjualan/delete_penjualan',
+              url : base_url + 'pengeluaran_lain/delete_transaksi',
               type: "POST",
               dataType: "JSON",
               data : {id:id, kode:kode},
@@ -314,7 +305,19 @@ const delete_penjualan = (kode, id) => {
   });
 }
 
-function edit_pengeluaran(kode, id)
+
+function add_menu()
+{
+  reset_modal_form();
+  save_method = 'add';
+	$('#modal_agen_form').modal('show');
+	$('#modal_title').text('Tambah Master Agen'); 
+}
+
+
+
+
+function edit_transaksi(kode, id)
 {
   window.location.href = base_url +'pengeluaran_lain/add_pengeluaran_det?index='+id+'&kode='+kode+'&mode=edit';
 }

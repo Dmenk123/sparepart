@@ -75,13 +75,13 @@ class Pengeluaran_lain extends CI_Controller
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_pengeluaran(\'' . $value->kode . '\',\'' . $value->id . '\')">
+						<button class="dropdown-item" onclick="edit_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
 							<i class="la la-pencil"></i> Edit Transaksi
 						</button>
-						<button class="dropdown-item" onclick="detail_pengeluaran(\'' . $value->kode . '\',\'' . $value->id . '\')">
+						<button class="dropdown-item" onclick="detail_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
 							<i class="la la-desktop"></i> Lihat Detail
 						</button>
-						<button class="dropdown-item" onclick="delete_pengeluaran(\'' . $value->kode . '\',\'' . $value->id . '\')">
+						<button class="dropdown-item" onclick="delete_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
 							<i class="la la-trash"></i> Hapus
 						</button>
 						<button class="dropdown-item" onclick="cetak_invoice(\'' . $value->kode . '\',\'' . $value->id . '\')">
@@ -112,6 +112,7 @@ class Pengeluaran_lain extends CI_Controller
 			<tr>
 				<td width="10%"><input type="hidden" class="form-control" width="5" id="qty_order_<?php echo $row->id; ?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id ?>)"><?php echo $row->qty; ?></td>
 				<td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
+				<td style="vertical-align: middle;"><?php echo 'Rp ' . number_format($row->nilai); ?></td>
 				<td style="vertical-align: middle;"><?php echo 'Rp ' . number_format($row->sub_total); ?></td>
 				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_trans_det(<?php echo $row->id; ?>)"><i class="fa fa-times"></i></button></td>
 			</tr>
@@ -296,11 +297,6 @@ class Pengeluaran_lain extends CI_Controller
 			'barang' => $barang
 		);
 		// $data['gudang']  = $this->m_global->getSelectedData('m_gudang', array('deleted_at' => NULL));
-
-		// echo "<pre>";
-		// print_r ($data);
-		// echo "</pre>";
-		// exit;
 		/**
 		 * content data untuk template
 		 * param (css : link css pada direktori assets/css_module)
@@ -450,30 +446,13 @@ class Pengeluaran_lain extends CI_Controller
 		echo json_encode($retval);
 	}
 
-
-
-
-
-
-
-
-
-	public function get_detail_penjualan()
+	public function get_detail_transaksi()
 	{
 		$id = $this->input->get('id');
 		$kode = $this->input->get('kode');
 
-		$join = [
-			['table' => 'm_pelanggan', 'on' => 't_penjualan.id_pelanggan = m_pelanggan.id_pelanggan'],
-			['table' => 'm_user', 'on' => 't_penjualan.id_sales = m_user.id'],
-		];
-		$header = $this->m_global->single_row('t_penjualan.*, m_pelanggan.nama_toko, m_user.nama as nama_sales', [
-			't_penjualan.no_faktur' => $kode,
-			't_penjualan.id_penjualan' => $id,
-			't_penjualan.deleted_at' => null,
-		], 't_penjualan', $join);
-
-		$detail = $this->m_penjualan->getPenjualanDet($id)->result();
+		$header = $this->t_out->getPengeluaran($kode)->row();
+		$detail = $this->t_out->getPengeluaranDet($id)->result();
 
 		$html_det = '';
 		if ($detail) {
@@ -483,7 +462,7 @@ class Pengeluaran_lain extends CI_Controller
 				$html_det .= '<tr>
 					<td style="vertical-align: middle;">' . $value->qty . '</td>
 					<td style="vertical-align: middle;">' . $value->nama . '</td>
-					<td style="vertical-align: middle;" align="right">' . number_format($value->harga_diskon) . '</td>
+					<td style="vertical-align: middle;" align="right">' . number_format($value->nilai) . '</td>
 					<td style="vertical-align: middle;" align="right">' . number_format($value->sub_total) . '</td>
 				</tr>';
 			}
@@ -504,50 +483,35 @@ class Pengeluaran_lain extends CI_Controller
 		]);
 	}
 
-	public function delete_penjualan()
+	public function delete_transaksi()
 	{
 		try {
 			$this->db->trans_begin();
 			$id = $this->input->post('id');
 			$kode = $this->input->post('kode');
 
-			$cek = $this->m_global->single_row('*', ['id_penjualan' => $id], 't_penjualan');
-			$cek2 = $this->m_penjualan->getPenjualanDet($id);
+			$cek = $this->m_global->single_row('*', ['id' => $id], 't_pengeluaran_lain');
+			$cek2 = $this->t_out->getPengeluaranDet($id);
 			$cek2 = $cek2->result();
 
 			if ($cek2) {
-				$del = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan');
+				$del = $this->m_global->force_delete(['id' => $id], 't_pengeluaran_lain');
 			}
 
 			if ($cek2) {
 				$loop_data = $cek2;
 				foreach ($loop_data as $key => $value) {
-					$mutasi = $this->lib_mutasi->updateMutasi(
-						$value->id_barang,
-						-abs($value->qty),
-						2,
-						$cek->no_faktur,
-						$value->id_gudang
+					// update data lap keuangan
+					$keu = $this->lib_mutasi->updateDataLap(
+						-$value->sub_total,
+						$cek->id_kategori_trans,
+						$cek->kode,
+						null,
+						$cek->tanggal
 					);
 
-					if ($mutasi) {
-						// update data lap keuangan
-						$keu = $this->lib_mutasi->updateDataLap(
-							-$value->sub_total,
-							2,
-							$cek->no_faktur,
-							$cek->is_kredit
-						);
-
-						if ($keu['status'] == true) {
-							$this->db->trans_commit();
-						} else {
-							$this->db->trans_rollback();
-							$retval['status'] = false;
-							$retval['pesan'] = 'Gagal Hapus Data';
-							echo json_encode($retval);
-							return;
-						}
+					if ($keu['status'] == true) {
+						$this->db->trans_commit();
 					} else {
 						$this->db->trans_rollback();
 						$retval['status'] = false;
@@ -557,7 +521,7 @@ class Pengeluaran_lain extends CI_Controller
 					}
 				}
 
-				$del2 = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan_det');
+				$del2 = $this->m_global->force_delete(['id_pengeluaran_lain' => $id], 't_pengeluaran_lain_det');
 			}
 
 			if ($this->db->trans_status() === FALSE) {
@@ -578,6 +542,17 @@ class Pengeluaran_lain extends CI_Controller
 			echo json_encode($retval);
 		}
 	}
+
+
+
+
+
+
+
+
+	
+
+	
 
 	// ===============================================
 	private function rule_validasi($is_update = false, $skip_pass = false)
