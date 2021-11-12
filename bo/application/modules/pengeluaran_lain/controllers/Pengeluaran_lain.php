@@ -113,7 +113,7 @@ class Pengeluaran_lain extends CI_Controller
 				<td width="10%"><input type="hidden" class="form-control" width="5" id="qty_order_<?php echo $row->id; ?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id ?>)"><?php echo $row->qty; ?></td>
 				<td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
 				<td style="vertical-align: middle;"><?php echo 'Rp ' . number_format($row->sub_total); ?></td>
-				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_order(<?php echo $row->id; ?>)"><i class="fa fa-times"></i></button></td>
+				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_trans_det(<?php echo $row->id; ?>)"><i class="fa fa-times"></i></button></td>
 			</tr>
 			<?php
 		}
@@ -407,6 +407,49 @@ class Pengeluaran_lain extends CI_Controller
 		echo json_encode($retval);
 	}
 
+	public function hapus_trans_detail()
+	{
+		$this->db->trans_begin();
+		$id = $this->input->post('id');
+		$join = [
+			['table' => 't_pengeluaran_lain', 'on' => 't_pengeluaran_lain_det.id_pengeluaran_lain = t_pengeluaran_lain.id'],
+		];
+
+		$data_where = ['t_pengeluaran_lain_det.id' => $id];
+
+		$cek_trans = $this->m_global->single_row('t_pengeluaran_lain_det.*, t_pengeluaran_lain.kode, t_pengeluaran_lain.id_kategori_trans, t_pengeluaran_lain.tanggal', $data_where, 't_pengeluaran_lain_det', $join);
+
+		$del = $this->m_global->force_delete($data_where, 't_pengeluaran_lain_det');
+
+		if ($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Hapus Data';
+		} else {
+			// update data lap keuangan
+			$keu = $this->lib_mutasi->updateDataLap(
+				-$cek_trans->sub_total,
+				$cek_trans->id_kategori_trans,
+				$cek_trans->kode,
+				null,
+				$cek_trans->tanggal
+			);
+
+			if ($keu['status'] == true) {
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Hapus Data ';
+			} else {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Hapus Data';
+			}
+			
+		}
+
+		echo json_encode($retval);
+	}
+
 
 
 
@@ -672,61 +715,7 @@ class Pengeluaran_lain extends CI_Controller
 		return $no_faktur;
 	}
 
-	public function hapus_order()
-	{
-		$this->db->trans_begin();
-		$id = $this->input->post('id');
-		$join = [
-			['table' => 't_penjualan', 'on' => 't_penjualan_det.id_penjualan = t_penjualan.id_penjualan'],
-		];
-
-		$data_where = ['id_penjualan_det' => $id];
-
-		$cek_trans = $this->m_global->single_row('t_penjualan_det.*, t_penjualan.no_faktur, t_penjualan.is_kredit', $data_where, 't_penjualan_det', $join);
-
-		$del = $this->m_global->force_delete($data_where, 't_penjualan_det');
-
-		if ($this->db->trans_status() === FALSE) {
-			$this->db->trans_rollback();
-			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal Hapus Data';
-		} else {
-
-			$cek = $this->lib_mutasi->updateMutasi(
-				$cek_trans->id_barang,
-				-abs($cek_trans->qty),
-				2,
-				$cek_trans->no_faktur,
-				$cek_trans->id_gudang
-			);
-
-			if ($cek) {
-				// update data lap keuangan
-				$keu = $this->lib_mutasi->updateDataLap(
-					-$cek_trans->sub_total,
-					2,
-					$cek_trans->no_faktur,
-					$cek_trans->is_kredit
-				);
-
-				if ($keu['status'] == true) {
-					$this->db->trans_commit();
-					$retval['status'] = true;
-					$retval['pesan'] = 'Sukses Hapus Data ';
-				} else {
-					$this->db->trans_rollback();
-					$retval['status'] = false;
-					$retval['pesan'] = 'Gagal Hapus Data';
-				}
-			} else {
-				$this->db->trans_rollback();
-				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal Hapus Data';
-			}
-		}
-
-		echo json_encode($retval);
-	}
+	
 
 	public function menu_edit()
 	{

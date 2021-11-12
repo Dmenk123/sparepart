@@ -606,7 +606,7 @@ function import_data_excel(){
  
 
 
-function hapus_order(id)
+function hapus_trans_det(id)
 {
   // alert('kesini'); exit;
   swalConfirm.fire({
@@ -620,7 +620,7 @@ function hapus_order(id)
   }).then((result) => {
     if (result.value) {
         $.ajax({
-            url : base_url + 'penjualan/hapus_order',
+            url : base_url + 'pengeluaran_lain/hapus_trans_detail',
             type: "POST",
             dataType: "JSON",
             data : {id : id},
