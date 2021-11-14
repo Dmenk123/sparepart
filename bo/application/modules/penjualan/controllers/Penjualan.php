@@ -152,12 +152,12 @@ class Penjualan extends CI_Controller {
 			$id = $this->input->post('id');
 			$kode = $this->input->post('kode');
 
-			$cek = $this->m_global->single_row('*', ['id_penjualan' => $id], 't_penjualan');
+			$cek = $this->m_global->single_row('*', ['id_penjualan' => $id, 'deleted_at' => null], 't_penjualan');
 			$cek2 = $this->m_penjualan->getPenjualanDet($id);
 			$cek2 = $cek2->result();
 			
 			if($cek2) {
-				$del = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan');
+				$del = $this->m_global->soft_delete(['id_penjualan' => $id], 't_penjualan');
 			}
 
 			if($cek2) {
@@ -198,7 +198,7 @@ class Penjualan extends CI_Controller {
 					}
 				}
 
-				$del2 = $this->m_global->force_delete(['id_penjualan' => $id], 't_penjualan_det');
+				$del2 = $this->m_global->soft_delete(['id_penjualan' => $id], 't_penjualan_det');
 			}
 
 			if ($this->db->trans_status() === FALSE){
@@ -664,7 +664,7 @@ class Penjualan extends CI_Controller {
 
 		$cek_trans = $this->m_global->single_row('t_penjualan_det.*, t_penjualan.no_faktur, t_penjualan.is_kredit', $data_where, 't_penjualan_det', $join);
 		
-		$del = $this->m_global->force_delete($data_where, 't_penjualan_det');
+		$del = $this->m_global->soft_delete($data_where, 't_penjualan_det');
 
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();

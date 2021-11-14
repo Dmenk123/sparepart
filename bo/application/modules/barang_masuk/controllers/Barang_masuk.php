@@ -362,53 +362,7 @@ class Barang_masuk extends CI_Controller {
 		]);
 		
 	}
-	// public function hapus_trans_detail() {
-		// 	try {
-		// 		$this->db->trans_begin();
-
-		// 		$id = $this->input->post('id');
-		// 		$pembelian_det = $this->m_global->getSelectedData('t_pembelian_det', array('id_pembelian_det' => $id))->row();
-
-		// 		$id_pembelian = $pembelian_det->id_pembelian;
-
-		// 		$pembelian     = $this->m_global->getSelectedData('t_pembelian', array('id_pembelian' => $id_pembelian))->row();
-
-		// 		$kode_pembelian = $pembelian->kode_pembelian;
-
-		// 		$del = $this->m_global->force_delete(['id_pembelian_det' => $id], 't_pembelian_det');
-
-		// 		$hasil_total = $this->t_pembelian->getTotalPembelian($id_pembelian)->row();
-		// 		$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $hasil_total->total], ['id_pembelian' => $id_pembelian]);
-			
-		// 		$upd_laporan = $this->lib_mutasi->updateDataLap($hasil_total->total ,1, $kode_pembelian);
-					
-		// 		if($upd_laporan['status'] == false) {
-		// 			$this->db->trans_rollback();
-		// 			$retval['status'] = false;
-		// 			$retval['pesan'] = 'Gagal menghapus detail Pembelian';
-		// 			return;
-		// 		}
-
-		// 		if ($this->db->trans_status() === FALSE) {
-		// 			$this->db->trans_rollback();
-		// 			$retval['status'] = false;
-		// 			$retval['pesan'] = 'Gagal menghapus detail Pembelian';
-		// 		} else {
-		// 			$this->db->trans_commit();
-		// 			$retval['status'] = true;
-		// 			$retval['pesan'] = 'Sukses menghapus detail Pembelian';
-		// 		}
-		// 	} catch (\Throwable $th) {
-		// 		$this->db->trans_rollback();
-		// 		$retval['status'] = false;
-		// 		$retval['pesan'] = $th;
-		// 	}
-			
-
-		// 	echo json_encode($retval);
-
-	// }
-
+	
 	public function simpan_penerimaan_barang()
 	{
 		try {
@@ -638,7 +592,7 @@ class Barang_masuk extends CI_Controller {
 
 			$cek_lap_keu = $this->m_global->single_row("*", ['id_kategori_trans' => 4, 'kode_reff' => $cek_header->kode_penerimaan], 't_lap_keuangan');
 			if($cek_lap_keu) {
-				$del_lap = $this->m_global->force_delete(['id_kategori_trans' => 4, 'kode_reff' => $cek_header->kode_penerimaan], 't_lap_keuangan');
+				$del_lap = $this->m_global->soft_delete(['id_kategori_trans' => 4, 'kode_reff' => $cek_header->kode_penerimaan], 't_lap_keuangan');
 			}
 
 			$data_detail = $this->t_penerimaan->getPenerimaanDet($cek_header->id_penerimaan)->result();
@@ -684,8 +638,8 @@ class Barang_masuk extends CI_Controller {
 			}
 
 			### harddeletes
-			$del = $this->m_global->force_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan');
-			$del_det = $this->m_global->force_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan_det');
+			$del = $this->m_global->soft_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan');
+			$del_det = $this->m_global->soft_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan_det');
 			
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();

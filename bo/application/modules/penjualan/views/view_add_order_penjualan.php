@@ -152,7 +152,7 @@
                             <tr>
                                 <th>Qty</th>
                                 <th>Product</th>
-                                  <th>Price</th>
+                                <th>Price</th>
                                 <th>Sub Total</th>
                                 <th>&nbsp;</th>
                             </tr>

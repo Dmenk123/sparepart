@@ -26,8 +26,17 @@ class T_pembelian extends CI_Model
 		$this->load->database();
 	}
 
-	private function _get_datatables_query($term='')
+	private function _get_datatables_query($term='', $param)
 	{
+		$is_filter_tgl = false;
+
+		if($param['bulan'] != 'all' && $param['tahun'] != 'all') {
+			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
+			$tgl_awal = $param['tahun'].'-'.$bulan.'-01';
+			$tgl_akhir = DateTime::createFromFormat('Y-m-d', $tgl_awal)->modify('last day of this month')->format('Y-m-d');
+			$is_filter_tgl = true;
+		}
+
 		$this->db->select("
 			pb.*,
 			m_agen.nama_perusahaan,
@@ -47,6 +56,12 @@ class T_pembelian extends CI_Model
 		//  join untuk mengetahui apakah ada transaksi di penerimaan
 		$this->db->join('t_penerimaan pn', 'pb.id_pembelian=pn.id_pembelian', 'left');
 		$this->db->join('t_penerimaan_det pnd', 'pn.id_penerimaan=pnd.id_penerimaan and pnd.deleted_at is null', 'left');
+	
+		if($is_filter_tgl) {
+			$this->db->where('pb.tanggal >=', $tgl_awal);
+			$this->db->where('pb.tanggal <=', $tgl_akhir);
+		}
+
 		$this->db->where('pb.deleted_at is null');
 		$this->db->group_by('pb.id_pembelian');
 		
@@ -98,10 +113,10 @@ class T_pembelian extends CI_Model
 		}
 	}
 
-	function get_datatable_pembelian()
+	function get_datatable_pembelian($param)
 	{
 		$term = $_REQUEST['search']['value'];
-		$this->_get_datatables_query($term);
+		$this->_get_datatables_query($term, $param);
 		if($_REQUEST['length'] != -1)
 		$this->db->limit($_REQUEST['length'], $_REQUEST['start']);
 
@@ -109,16 +124,17 @@ class T_pembelian extends CI_Model
 		return $query->result();
 	}
 
-	function count_filtered()
+	function count_filtered($param)
 	{
-		$this->_get_datatables_query();
+		$this->_get_datatables_query(null, $param);
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all()
+	public function count_all($param)
 	{
-		$this->db->from($this->table);
+		$this->_get_datatables_query(null, $param);
+		$query = $this->db->get();
 		return $this->db->count_all_results();
 	}
 	
@@ -215,21 +231,22 @@ class T_pembelian extends CI_Model
 	public function getPembelian($no_faktur)
 	{
 		$this->db->select('
-						pj.id_penjualan,
-						pj.no_faktur,
-						pj.tgl_jatuh_tempo,
-						pj.created_at,
-						mu.username,
-						pl.nama_pembeli,
-						pl.alamat,
-						pl.no_telp,
-						pl.email,
-						pl.nama_toko
-						');
+			pj.id_penjualan,
+			pj.no_faktur,
+			pj.tgl_jatuh_tempo,
+			pj.created_at,
+			mu.username,
+			pl.nama_pembeli,
+			pl.alamat,
+			pl.no_telp,
+			pl.email,
+			pl.nama_toko
+		');
 		$this->db->from('t_penjualan pj');
 		$this->db->join('m_user mu', 'mu.id=pj.id_sales');
 		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=pj.id_pelanggan');
 		$this->db->where('pj.no_faktur', $no_faktur);
+		$this->db->where('pj.deleted_at', null);
 		$q = $this->db->get();
 		return $q;
 	}
@@ -239,7 +256,7 @@ class T_pembelian extends CI_Model
 		$query = "
 			SELECT SUM(harga_total_fix) as total
 			FROM t_pembelian_det
-			WHERE id_pembelian = $id
+			WHERE id_pembelian = $id and deleted_at is null
 		";
 		return $this->db->query($query);
 	}
@@ -249,7 +266,7 @@ class T_pembelian extends CI_Model
 		$query = "
 			SELECT SUM(disc) as disc_total
 			FROM t_pembelian_det
-			WHERE id_pembelian = $id
+			WHERE id_pembelian = $id and deleted_at is null
 		";
 		return $this->db->query($query);
 	}
@@ -265,6 +282,7 @@ class T_pembelian extends CI_Model
 		$this->db->from('t_pembelian_det pd');
 		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
 		$this->db->where('pd.id_pembelian', $id);
+		$this->db->where('pd.deleted_at', null);
 		$this->db->order_by('pd.id_pembelian_det', 'ASC');
 		$q = $this->db->get();
 		return $q;

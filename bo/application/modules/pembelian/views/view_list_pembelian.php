@@ -29,7 +29,74 @@
         </div>
       </div>
       <div class="kt-portlet__body">
+      <form method="get" class="kt-form kt-form--fit kt-margin-b-20" id="formFilter">
+          <div class="row kt-margin-b-20">
+            <div class="col-lg-4 kt-margin-b-10-tablet-and-mobile">
+              <label>Bulan :</label>
+              <select name="bulan" id="bulan" class="form-control select2">
+                <?php 
+                $is_all_bln = true;
+                if($this->input->get('bulan') == 'all') {
+                  echo '<option value="all" selected>Bulan Laporan</option>';
+                }else{
+                  echo '<option value="all">Bulan Laporan</option>';
+                  $is_all_bln = false;
+                }
+                
+                for ($i=1; $i <= 12; $i++) { 
+                  if((int)$this->input->get('bulan') == $i) {
+                    echo "<option value='$i' selected>".bulan_indo($i)."</option>";
+                  }else{
+                    if((int)date('m') == $i && $is_all_bln == false) {
+                      echo "<option value='$i' selected>".bulan_indo($i)."</option>";
+                    }else{
+                      echo "<option value='$i'>".bulan_indo($i)."</option>";
+                    }
+                  }
+                }
+                ?>
+              </select>
+            </div>
 
+            <div class="col-lg-4 kt-margin-b-10-tablet-and-mobile">
+              <label>Tahun :</label>
+              <select name="tahun" id="tahun" class="form-control select2">
+                <?php 
+                $is_all_thn = true;
+                if($this->input->get('tahun') == 'all') {
+                  echo '<option value="all" selected>Tahun Laporan</option>';
+                }else{
+                  echo '<option value="all">Tahun Laporan</option>';
+                  $is_all_thn = false;
+                }
+
+                for ($i=(int)date('Y')+20; $i >= (int)date('Y')-20; $i--) { 
+                  if ((int)$this->input->get('tahun') == $i) {
+                    echo "<option value='$i' selected>$i</option>";
+                  }else{
+                    if ((int)date('Y') == $i && $is_all_thn == false) {
+                      echo "<option value='$i' selected>$i</option>";
+                    }else{
+                      echo "<option value='$i'>$i</option>"; 
+                    }
+                  }
+                }
+                ?>
+              </select>
+            </div>
+            <div class="col-lg-4 kt-margin-b-10-tablet-and-mobile" style="margin-top: auto;margin-bottom: 0px;">
+              <button type="submit" class="btn btn-primary btn-brand--icon" id="formFilter">
+                <span>
+                  <i class="la la-search"></i>
+                  <span>Filter</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        
+
+          <div class="kt-separator kt-separator--md kt-separator--dashed"></div>
+        </form>
         <!--begin: Datatable -->
         <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_pembelian">
           <thead>

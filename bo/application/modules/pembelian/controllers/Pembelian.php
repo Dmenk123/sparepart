@@ -49,8 +49,18 @@ class Pembelian extends CI_Controller {
 
 	public function list_pembelian()
 	{
-		$list = $this->t_pembelian->get_datatable_pembelian();
-				
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$bulan = ($this->input->post('bulan') == '') ? (int)$obj_date->format('m') : $this->input->post('bulan');
+		$tahun = ($this->input->post('tahun') == '') ? (int)$obj_date->format('Y') : $this->input->post('tahun');
+
+		$paramdata = [
+			'bulan' => $bulan,
+			'tahun' => $tahun
+		];
+
+		$list = $this->t_pembelian->get_datatable_pembelian($paramdata);
+		
 		$data = array();
 		$no =$_POST['start'];
 		foreach ($list as $value) {
@@ -106,8 +116,8 @@ class Pembelian extends CI_Controller {
 
 		$output = [
 			"draw" => $_POST['draw'],
-			"recordsTotal" => $this->t_pembelian->count_all(),
-			"recordsFiltered" => $this->t_pembelian->count_filtered(),
+			"recordsTotal" => $this->t_pembelian->count_all($paramdata),
+			"recordsFiltered" => $this->t_pembelian->count_filtered($paramdata),
 			"data" => $data
 		];
 		
@@ -203,7 +213,7 @@ class Pembelian extends CI_Controller {
 		$data['kode_trans']  = $kode;
 		$data['id_pembelian']  = $cek_kode->id_pembelian;
 		$data['id_agen']  = $cek_kode->id_agen;
-		$data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL));
+		$data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL, 'sku !=' => null));
 		$data['agen']  = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'deleted_at' => null], 'm_agen');
 		
 
@@ -215,7 +225,7 @@ class Pembelian extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => null,
+			'modal' => 'modal_detail_pembelian',
 			'js'	=> 'pembelian.js',
 			'view'	=> 'view_add_pembelian'
 		];
@@ -412,37 +422,46 @@ class Pembelian extends CI_Controller {
 
 	public function change_qty()
 	{
-		$this->db->trans_begin();
-		$id_pembelian_det = $this->input->post('id');
-		$qty              = $this->input->post('qty');
-		$pembelian_det     = $this->m_global->getSelectedData('t_pembelian_det', array('id_pembelian_det' => $id_pembelian_det))->row();
+		try {
+			$this->db->trans_begin();
+			$id_pembelian_det = $this->input->post('id');
+			$qty              = $this->input->post('qty');
+			$pembelian_det     = $this->m_global->getSelectedData('t_pembelian_det', array('id_pembelian_det' => $id_pembelian_det))->row();
 
-		
-		$subtotal = $pembelian_det->harga_fix * $qty; 
-		
-		$data = array(
-			'qty' => $qty,
-			'harga_total_fix' => $subtotal
-		);
+			
+			$subtotal = $pembelian_det->harga_fix * $qty; 
+			
+			$data = array(
+				'qty' => $qty,
+				'harga_total_fix' => $subtotal
+			);
+					
+			$data_where = array('id_pembelian_det' => $id_pembelian_det);
+			$update = $this->t_pembelian->updatePembelianDet($data_where, $data);
+			
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Mengubah Data';
+			}else{
+				$this->db->trans_commit();
+
+				$hasil_total = $this->t_pembelian->getTotalPembelian($pembelian_det->id_pembelian)->row();
+				$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $hasil_total->total], ['id_pembelian' => $pembelian_det->id_pembelian]);
 				
-		$data_where = array('id_pembelian_det' => $id_pembelian_det);
-		$update = $this->t_pembelian->updatePembelianDet($data_where, $data);
-		
-		if ($this->db->trans_status() === FALSE){
+				$cek_header = $this->m_global->single_row("*", ['id_pembelian' => $pembelian_det->id_pembelian, 'deleted_at' => null], 't_pembelian');
+				$ins_laporan = $this->lib_mutasi->insertDataLap($hasil_total->total ,1, $cek_header->kode_pembelian, $cek_header->is_kredit);
+
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Mengubah Data ';
+				// $retval['order_id'] = $order_id;
+			}
+		} catch (\Throwable $th) {
 			$this->db->trans_rollback();
 			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal Mengubah Data';
-		}else{
-			$this->db->trans_commit();
-
-			$hasil_total = $this->t_pembelian->getTotalPembelian($pembelian_det->id_pembelian)->row();
-			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $hasil_total->total], ['id_pembelian' => $pembelian_det->id_pembelian]);
-
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Mengubah Data ';
-			// $retval['order_id'] = $order_id;
+			$retval['pesan'] = $th;
 		}
-
+		
 		echo json_encode($retval);
 	}
 
@@ -467,12 +486,12 @@ class Pembelian extends CI_Controller {
 			}
 
 			### harddeletes
-			$del = $this->m_global->force_delete(['id_pembelian' => $cek_header->id_pembelian], 't_pembelian');
-			$del_det = $this->m_global->force_delete(['id_pembelian' => $cek_header->id_pembelian], 't_pembelian_det');
+			$del = $this->m_global->soft_delete(['id_pembelian' => $cek_header->id_pembelian], 't_pembelian');
+			$del_det = $this->m_global->soft_delete(['id_pembelian' => $cek_header->id_pembelian], 't_pembelian_det');
 
 			$cek_lap_keu = $this->m_global->single_row("*", ['id_kategori_trans' => 1, 'kode_reff' => $cek_header->kode_pembelian], 't_lap_keuangan');
 			if($cek_lap_keu) {
-				$del_lap = $this->m_global->force_delete(['id_kategori_trans' => 1, 'kode_reff' => $cek_header->kode_pembelian], 't_lap_keuangan');
+				$del_lap = $this->m_global->soft_delete(['id_kategori_trans' => 1, 'kode_reff' => $cek_header->kode_pembelian], 't_lap_keuangan');
 			}
 			
 
@@ -509,7 +528,7 @@ class Pembelian extends CI_Controller {
 
 			$kode_pembelian = $pembelian->kode_pembelian;
 
-			$del = $this->m_global->force_delete(['id_pembelian_det' => $id], 't_pembelian_det');
+			$del = $this->m_global->soft_delete(['id_pembelian_det' => $id], 't_pembelian_det');
 
 			$hasil_total = $this->t_pembelian->getTotalPembelian($id_pembelian)->row();
 			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $hasil_total->total], ['id_pembelian' => $id_pembelian]);

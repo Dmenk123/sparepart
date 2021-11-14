@@ -4,20 +4,61 @@ var id_pen;
 
 $(document).ready(function() {
 
-    //force integer input in textfield
-    $('input.numberinput').bind('keypress', function (e) {
-        return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
+  let uri = new URL(window.location.href);
+  bulanUri = uri.searchParams.get("bulan");
+  tahunUri = uri.searchParams.get("tahun");
+  kategoriUri = uri.searchParams.get("kategori");
+
+  let arrSegment = window.location.pathname.split('/');
+  if(arrSegment[4] == 'add_pembelian') {
+    getTable();
+    getTotal();
+  }
+ 
+  $('#regForm').submit(function(e){
+    e.preventDefault();
+    // var url = '<?php echo base_url(); ?>';
+    var reg = $('#regForm').serialize();
+    $.ajax({
+        type: 'POST',
+        data: reg,
+        dataType: 'json',
+        url: base_url + 'pembelian/save_pembelian',
+        success: function(data)
+        {
+            swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
+            $('#regForm')[0].reset();
+            $("#id_barang").val(null).trigger('change');
+            getTable();
+            getTotal();
+        },
+        error: function (jqXHR, textStatus, errorThrown)
+        {
+            Swal.fire('Terjadi Kesalahan ');
+        }
+        
     });
+  });
+
+  //force integer input in textfield
+  $('input.numberinput').bind('keypress', function (e) {
+      return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
+  });
 
 	//datatables
 	table = $('#tabel_pembelian').DataTable({
     responsive: true,
-        searchDelay: 500,
-        processing: true,
-        serverSide: true,
+    searchDelay: 500,
+    processing: true,
+    serverSide: true,
     ajax: {
       url  : base_url + "pembelian/list_pembelian",
-      type : "POST" 
+      type : "POST",
+      data: {
+        tahun: tahunUri,
+        bulan: bulanUri,
+        kategori: kategoriUri,
+      },
     },
 
     //set column definition initialisation properties
@@ -35,26 +76,26 @@ $(document).ready(function() {
     }
   });
     
-    $('#id_barang').on('select2:select', function (e) {
-        var data = e.params.data;
-        // console.log(data);
-        $.ajax({
-          type: "get",
-          url: base_url+ "pembelian/get_harga_barang",
-          data: {id_barang:data.id},
-          dataType: "json",
-          success: function (response) {
-            // $('#hsat').val(response.hpp);
-            $('#hsat').mask('000.000.000.000', {reverse: true}).val(response.hpp).trigger('input');
-          }
-        });
-    });
+  $('#id_barang').on('select2:select', function (e) {
+      var data = e.params.data;
+      // console.log(data);
+      $.ajax({
+        type: "get",
+        url: base_url+ "pembelian/get_harga_barang",
+        data: {id_barang:data.id},
+        dataType: "json",
+        success: function (response) {
+          // $('#hsat').val(response.hpp);
+          $('#hsat').mask('000.000.000.000', {reverse: true}).val(response.hpp).trigger('input');
+        }
+      });
+  });
    
-
-    $(".modal").on("hidden.bs.modal", function(){
-        reset_modal_form();
-        reset_modal_form_import();
-    });
+  $(".modal").on("hidden.bs.modal", function(){
+      reset_modal_form();
+      reset_modal_form_import();
+  });
+  
 });	
 
 function add_menu()
@@ -256,58 +297,6 @@ function reset_modal_form()
     $('#username').attr('disabled', false);
 }
 
-// function reset_modal_form_import()
-// {
-//     $('#form_import_excel')[0].reset();
-//     $('#label_file_excel').text('Pilih file excel yang akan diupload');
-// }
-
-// function import_excel(){
-//     $('#modal_import_excel').modal('show');
-// 	$('#modal_import_title').text('Import data user'); 
-// }
-
-// function import_data_excel(){
-//     var form = $('#form_import_excel')[0];
-//     var data = new FormData(form);
-    
-//     $("#btnSaveImport").prop("disabled", true);
-//     $('#btnSaveImport').text('Import Data');
-//     $.ajax({
-//         type: "POST",
-//         enctype: 'multipart/form-data',
-//         url: base_url + 'master_user/import_data_master',
-//         data: data,
-//         dataType: "JSON",
-//         processData: false, // false, it prevent jQuery form transforming the data into a query string
-//         contentType: false, 
-//         success: function (data) {
-//             if(data.status) {
-//                 swal.fire("Sukses!!", data.pesan, "success");
-//                 $("#btnSaveImport").prop("disabled", false);
-//                 $('#btnSaveImport').text('Simpan');
-//             }else {
-//                 swal.fire("Gagal!!", data.pesan, "error");
-//                 $("#btnSaveImport").prop("disabled", false);
-//                 $('#btnSaveImport').text('Simpan');
-//             }
-
-//             reset_modal_form_import();
-//             $(".modal").modal('hide');
-//             table.ajax.reload();
-//         },
-//         error: function (e) {
-//             console.log("ERROR : ", e);
-//             $("#btnSaveImport").prop("disabled", false);
-//             $('#btnSaveImport').text('Simpan');
-
-//             reset_modal_form_import();
-//             $(".modal").modal('hide');
-//             table.ajax.reload();
-//         }
-//     });
-// }
-
 function readURL(input) {
     if (input.files && input.files[0]) {
       var reader = new FileReader();
@@ -406,44 +395,6 @@ function ajax_send(kode)
     window.location.href = base_url+'pembelian/add_pembelian?kode_pembelian='+kode;
 }
  
-  
-$(document).ready(function(){
-  
-  // console.log(id);
-    getTable();
-    getTotal();
-
-    $('#regForm').submit(function(e){
-        e.preventDefault();
-        // var url = '<?php echo base_url(); ?>';
-        var reg = $('#regForm').serialize();
-        $.ajax({
-            type: 'POST',
-            data: reg,
-            dataType: 'json',
-            url: base_url + 'pembelian/save_pembelian',
-            success: function(data)
-            {
-                swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
-                $('#regForm')[0].reset();
-                getTable();
-                getTotal();
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                Swal.fire('Terjadi Kesalahan ');
-            }
-           
-        });
-    });
-
-
-    // $(document).on('click', '#clearMsg', function(){
-    //     $('#responseDiv').hide();
-    // });
-
-});
-
 function getTable(){
     var id = $('#id_pembelian').val();
     console.log(id);

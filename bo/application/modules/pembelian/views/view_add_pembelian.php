@@ -63,12 +63,36 @@
                    
         <div class="row invoice-info">
             <div class="col-sm-6 invoice-col">
-                <b>Kode Pembelian : <?= (isset($agen->nama_perusahaan)) ? $kode_trans : '-';?></b><br>
-                <b>Agen :</b> <?= (isset($agen->nama_perusahaan)) ? $agen->nama_perusahaan : "";?><br>
+              <address>
+                  <table class="table table-borderless">
+                    <tr>
+                      <th>Kode Pembelian</th>
+                      <td><?= (isset($agen->nama_perusahaan)) ? $kode_trans : '-';?></span></td>
+                    </tr>
+                    <tr>
+                      <th>Agen</th>
+                      <td><?= (isset($agen->nama_perusahaan)) ? $agen->nama_perusahaan : "";?></span></td>
+                    </tr>
+                  </table>
+              </address>
             </div><!-- /.col -->
+
             <div class="col-sm-6 invoice-col">
-                <b>Petugas :</b>  <?= $data_user[0]->nama;?><br>
-                <b>Metode Pembayaran :</b> <?= (isset($pembelian->is_kredit)) ? 'Kredit' : "Cash";?><br>
+              <table class="table table-borderless">
+                <tr>
+                  <th>Petugas</th>
+                  <td><?= $data_user[0]->nama;?></span></td>
+                </tr>
+                <tr>
+                  <th>Metode Pembayaran</th>
+                  <td><?= (isset($pembelian->is_kredit)) ? 'Kredit' : "Cash";?></span></td>
+                </tr>
+                <tr>
+                  <th colspan="2">Barang Tidak ada ? 
+                    <span><a data-target="#modal_frame" data-toggle="modal" href="#modal_frame">Klik disini untuk buka Form Master Barang</a></span>
+                  </th>
+                </tr>
+              </table>
             </div><!-- /.col -->
         </div>
 
@@ -81,7 +105,7 @@
                   <input type="hidden" name="id_pembelian" id="id_pembelian" value="<?=$id_pembelian;?>">
                   <input type="hidden" name="id_agen" id="id_agen" value="<?=$id_agen;?>">
                   <select name="id_barang" id="id_barang" class="form-control select2">
-                      <option value="0">-PILIH-</option>
+                      <option value="">-PILIH-</option>
                       <?php foreach($barang->result() as $row):?>
                           <option value="<?php echo $row->id_barang;?>"><?php echo $row->nama;?> | <?php echo $row->sku;?></option>
                       <?php endforeach;?>

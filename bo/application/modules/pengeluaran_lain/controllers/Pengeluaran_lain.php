@@ -411,11 +411,11 @@ class Pengeluaran_lain extends CI_Controller
 			['table' => 't_pengeluaran_lain', 'on' => 't_pengeluaran_lain_det.id_pengeluaran_lain = t_pengeluaran_lain.id'],
 		];
 
-		$data_where = ['t_pengeluaran_lain_det.id' => $id];
+		$data_where = ['t_pengeluaran_lain_det.id' => $id, 't_pengeluaran_lain_det.deleted_at' => null];
 
 		$cek_trans = $this->m_global->single_row('t_pengeluaran_lain_det.*, t_pengeluaran_lain.kode, t_pengeluaran_lain.id_kategori_trans, t_pengeluaran_lain.tanggal', $data_where, 't_pengeluaran_lain_det', $join);
 
-		$del = $this->m_global->force_delete($data_where, 't_pengeluaran_lain_det');
+		$del = $this->m_global->soft_delete($data_where, 't_pengeluaran_lain_det');
 
 		if ($this->db->trans_status() === FALSE) {
 			$this->db->trans_rollback();
@@ -490,12 +490,12 @@ class Pengeluaran_lain extends CI_Controller
 			$id = $this->input->post('id');
 			$kode = $this->input->post('kode');
 
-			$cek = $this->m_global->single_row('*', ['id' => $id], 't_pengeluaran_lain');
+			$cek = $this->m_global->single_row('*', ['id' => $id, 'deleted_at' => null], 't_pengeluaran_lain');
 			$cek2 = $this->t_out->getPengeluaranDet($id);
 			$cek2 = $cek2->result();
 
 			if ($cek2) {
-				$del = $this->m_global->force_delete(['id' => $id], 't_pengeluaran_lain');
+				$del = $this->m_global->soft_delete(['id' => $id], 't_pengeluaran_lain');
 			}
 
 			if ($cek2) {
@@ -521,7 +521,7 @@ class Pengeluaran_lain extends CI_Controller
 					}
 				}
 
-				$del2 = $this->m_global->force_delete(['id_pengeluaran_lain' => $id], 't_pengeluaran_lain_det');
+				$del2 = $this->m_global->soft_delete(['id_pengeluaran_lain' => $id], 't_pengeluaran_lain_det');
 			}
 
 			if ($this->db->trans_status() === FALSE) {

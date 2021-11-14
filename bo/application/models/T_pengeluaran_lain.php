@@ -14,10 +14,37 @@ class T_pengeluaran_lain extends CI_Model
 
 	function get_datatable_pengeluaran($param)
 	{
+		$is_filter_tgl = false;
+		$is_filter_kategori = false;
+		
+		if($param['bulan'] != 'all' && $param['tahun'] != 'all') {
+			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
+			$tgl_awal = $param['tahun'].'-'.$bulan.'-01';
+			$tgl_akhir = DateTime::createFromFormat('Y-m-d', $tgl_awal)->modify('first day of this month')->format('Y-m-d');
+			$is_filter_tgl = true;
+		}
+
+		if($param['kategori'] != 'all') {
+			$is_filter_kategori = true;
+		}
+		
+
 		$this->db->select('tp.*, kat.nama_kategori_trans, user.nama as nama_user');
 		$this->db->from('t_pengeluaran_lain tp');
 		$this->db->join('m_kategori_transaksi kat', 'tp.id_kategori_trans = kat.id_kategori_trans', 'left');
 		$this->db->join('m_user user', 'tp.id_user = user.id', 'left');
+
+		if($is_filter_tgl) {
+			$this->db->where('tp.tanggal >=', $tgl_awal);
+			$this->db->where('tp.tanggal <=', $tgl_akhir);
+		}
+
+		if($is_filter_kategori) {
+			$this->db->where('tp.id_kategori_trans', $param['kategori']);
+		}
+
+		$this->db->where('tp.deleted_at', null);
+		
 		$query = $this->db->get();
 
 		return $query->result();
