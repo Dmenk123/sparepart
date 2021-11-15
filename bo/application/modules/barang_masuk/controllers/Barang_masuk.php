@@ -50,7 +50,17 @@ class Barang_masuk extends CI_Controller {
 
 	public function list_barang_masuk()
 	{
-		$list = $this->t_penerimaan->get_datatable_penerimaan();
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$bulan = ($this->input->post('bulan') == '') ? (int)$obj_date->format('m') : $this->input->post('bulan');
+		$tahun = ($this->input->post('tahun') == '') ? (int)$obj_date->format('Y') : $this->input->post('tahun');
+
+		$paramdata = [
+			'bulan' => $bulan,
+			'tahun' => $tahun
+		];
+
+		$list = $this->t_penerimaan->get_datatable_penerimaan($paramdata);
 
 		$data = array();
 		$no =$_POST['start'];
@@ -100,8 +110,8 @@ class Barang_masuk extends CI_Controller {
 
 		$output = [
 			"draw" => $_POST['draw'],
-			"recordsTotal" => $this->t_penerimaan->count_all(),
-			"recordsFiltered" => $this->t_penerimaan->count_filtered(),
+			"recordsTotal" => $this->t_penerimaan->count_all($paramdata),
+			"recordsFiltered" => $this->t_penerimaan->count_filtered($paramdata),
 			"data" => $data
 		];
 		
@@ -436,7 +446,9 @@ class Barang_masuk extends CI_Controller {
 					$this->input->post('harga_total_raw')[$i], 
 					4, 
 					$cek_pembelian_det->kode_pembelian,
-					$cek_pembelian_det->is_kredit
+					$cek_pembelian_det->is_kredit,
+					null,
+					$cek_penerimaan->kode_penerimaan,
 				);
 				
 			}
@@ -598,10 +610,11 @@ class Barang_masuk extends CI_Controller {
 			$data_detail = $this->t_penerimaan->getPenerimaanDet($cek_header->id_penerimaan)->result();
 			
 			$arr_temp_detail = null;
+			
 			if($data_detail) {
 				$arr_temp_detail = $data_detail;
 			}
-
+			
 			foreach ($arr_temp_detail as $key => $value) {
 				#### hapus stok mutasi
 				$mutasi = $this->lib_mutasi->hapusMutasiMasuk(
@@ -637,7 +650,7 @@ class Barang_masuk extends CI_Controller {
 				}
 			}
 
-			### harddeletes
+			### soft_delete
 			$del = $this->m_global->soft_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan');
 			$del_det = $this->m_global->soft_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan_det');
 			
@@ -671,6 +684,12 @@ class Barang_masuk extends CI_Controller {
 
 				$data_where = ['id_pembelian' => $cek_header->id_pembelian];
 				$this->m_global->update('t_pembelian', $data_upd, $data_where);
+
+				// update data lap keuangan
+				$keu = $this->lib_mutasi->deleteDataLap(
+					4,
+					$cek_header->kode_penerimaan,
+				);
 
 				$retval['status'] = true;
 				$retval['pesan'] = 'Sukses menghapus Penerimaan';

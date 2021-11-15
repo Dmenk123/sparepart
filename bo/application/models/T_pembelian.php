@@ -28,12 +28,36 @@ class T_pembelian extends CI_Model
 
 	private function _get_datatables_query($term='', $param)
 	{
+		$obj_date = new DateTime();
 		$is_filter_tgl = false;
+		$is_filter_bln = false;
+		$is_filter_thn = false;
 
-		if($param['bulan'] != 'all' && $param['tahun'] != 'all') {
+		if($param['bulan'] != 'all') {
+			$is_filter_bln =  true;
+		}
+		
+		if($param['tahun'] != 'all') {
+			$is_filter_thn =  true;
+		}
+
+		if($is_filter_bln && $is_filter_thn) {
 			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
 			$tgl_awal = $param['tahun'].'-'.$bulan.'-01';
 			$tgl_akhir = DateTime::createFromFormat('Y-m-d', $tgl_awal)->modify('last day of this month')->format('Y-m-d');
+			$is_filter_tgl = true;
+		}
+		#### jika hanya tahun saja
+		elseif (!$is_filter_bln && $is_filter_thn) {
+			$tgl_awal = $param['tahun'].'-01-01';
+			$tgl_akhir = $param['tahun'].'-12-31';
+			$is_filter_tgl = true;
+		}
+		#### jika hanya bulan saja (menggunakan tahun saat ini)
+		elseif ($is_filter_bln && !$is_filter_thn) {
+			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
+			$tgl_awal = $obj_date->format('Y').'-'.$bulan.'-01';
+			$tgl_akhir = $obj_date->format('Y').'-'.$bulan.'-31';
 			$is_filter_tgl = true;
 		}
 

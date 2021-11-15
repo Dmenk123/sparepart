@@ -593,7 +593,8 @@ class Lib_mutasi extends CI_Controller {
 		$id_kategori_trans,
 		$kode_reff,
 		$is_kredit = null,
-		$tanggal=null
+		$tanggal=null,
+		$kode_reff2 = null
 	) {
 		try {
 			$obj_date = new DateTime();
@@ -629,6 +630,9 @@ class Lib_mutasi extends CI_Controller {
 					$arr_ins_laporan['piutang'] = -$nilaiRupiah;
 					$arr_ins_laporan['hutang'] = 0;
 					$arr_ins_laporan['kode_reff'] = $kode_reff;
+					if($kode_reff2 != null) {
+						$arr_ins_laporan['kode_reff2'] = $kode_reff2;
+					}
 					$arr_ins_laporan['id_kategori_trans'] = $id_kategori_trans;
 					$arr_ins_laporan['created_at'] = $timestamp;
 
@@ -927,7 +931,13 @@ class Lib_mutasi extends CI_Controller {
 				$tahun = $obj_date->format('Y');
 			}
 
-			$this->_ci->m_global->force_delete(['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff], 't_lap_keuangan');
+			## jika penerimaan
+			if($id_kategori_trans == '4') {
+				$this->_ci->m_global->force_delete(['id_kategori_trans' => $id_kategori_trans, 'kode_reff2' => $kode_reff], 't_lap_keuangan');
+			}else{
+				$this->_ci->m_global->force_delete(['id_kategori_trans' => $id_kategori_trans, 'kode_reff' => $kode_reff], 't_lap_keuangan');
+			}
+			
 
 			if ($this->_ci->db->trans_status() === FALSE) {
 				$this->_ci->db->trans_rollback();

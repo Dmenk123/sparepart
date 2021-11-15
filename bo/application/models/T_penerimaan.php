@@ -30,8 +30,41 @@ class T_penerimaan extends CI_Model
 		$this->load->database();
 	}
 
-	private function _get_datatables_query($term='')
+	private function _get_datatables_query($term='', $param)
 	{
+		$obj_date = new DateTime();
+		$is_filter_tgl = false;
+		$is_filter_bln = false;
+		$is_filter_thn = false;
+
+		if ($param['bulan'] != 'all') {
+			$is_filter_bln =  true;
+		}
+
+		if ($param['tahun'] != 'all') {
+			$is_filter_thn =  true;
+		}
+
+		if ($is_filter_bln && $is_filter_thn) {
+			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
+			$tgl_awal = $param['tahun'] . '-' . $bulan . '-01';
+			$tgl_akhir = DateTime::createFromFormat('Y-m-d', $tgl_awal)->modify('last day of this month')->format('Y-m-d');
+			$is_filter_tgl = true;
+		}
+		#### jika hanya tahun saja
+		elseif (!$is_filter_bln && $is_filter_thn) {
+			$tgl_awal = $param['tahun'] . '-01-01';
+			$tgl_akhir = $param['tahun'] . '-12-31';
+			$is_filter_tgl = true;
+		}
+		#### jika hanya bulan saja (menggunakan tahun saat ini)
+		elseif ($is_filter_bln && !$is_filter_thn) {
+			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
+			$tgl_awal = $obj_date->format('Y') . '-' . $bulan . '-01';
+			$tgl_akhir = $obj_date->format('Y') . '-' . $bulan . '-31';
+			$is_filter_tgl = true;
+		}
+
 		$this->db->select("
 			pn.*,
 			pb.kode_pembelian,
@@ -41,6 +74,11 @@ class T_penerimaan extends CI_Model
 		$this->db->join('t_pembelian pb', 'pn.id_pembelian = pb.id_pembelian');
 		$this->db->join('m_agen', 'pb.id_agen = m_agen.id_agen');
 		$this->db->where('pn.deleted_at is null');
+		
+		if ($is_filter_tgl) {
+			$this->db->where('pn.tanggal >=', $tgl_awal);
+			$this->db->where('pn.tanggal <=', $tgl_akhir);
+		}
 		
 		$i = 0;
 		// loop column 
@@ -86,10 +124,10 @@ class T_penerimaan extends CI_Model
 		}
 	}
 
-	function get_datatable_penerimaan()
+	function get_datatable_penerimaan($param)
 	{
 		$term = $_REQUEST['search']['value'];
-		$this->_get_datatables_query($term);
+		$this->_get_datatables_query($term, $param);
 		if($_REQUEST['length'] != -1)
 		$this->db->limit($_REQUEST['length'], $_REQUEST['start']);
 
@@ -97,16 +135,17 @@ class T_penerimaan extends CI_Model
 		return $query->result();
 	}
 
-	function count_filtered()
+	function count_filtered($param)
 	{
-		$this->_get_datatables_query();
+		$this->_get_datatables_query(null, $param);
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all()
+	public function count_all($param)
 	{
-		$this->db->from($this->table);
+		$this->_get_datatables_query(null, $param);
+		$query = $this->db->get();
 		return $this->db->count_all_results();
 	}
 	
@@ -159,7 +198,7 @@ class T_penerimaan extends CI_Model
 	{
 		$obj_date = new DateTime();
 		$tgl = $obj_date->format('Y-m-d');
-		$q = $this->db->query("SELECT count(*) as jml FROM t_penerimaan WHERE DATE_FORMAT(created_at ,'%Y-%m-%d') = '$tgl' and deleted_at is null");
+		$q = $this->db->query("SELECT count(*) as jml FROM t_penerimaan WHERE DATE_FORMAT(created_at ,'%Y-%m-%d') = '$tgl'");
 		$kd = "";
 		if($q->num_rows()>0){
 			$kd = $q->row();
@@ -227,7 +266,7 @@ class T_penerimaan extends CI_Model
 		$query = "
 			SELECT SUM(harga_total_fix) as total
 			FROM t_pembelian_det
-			WHERE id_pembelian = $id
+			WHERE id_pembelian = $id AND deleted_at is null
 		";
 		return $this->db->query($query);
 	}
@@ -238,7 +277,7 @@ class T_penerimaan extends CI_Model
 		$query = "
 			SELECT SUM(disc) as disc_total
 			FROM t_pembelian_det
-			WHERE id_pembelian = $id
+			WHERE id_pembelian = $id AND deleted_at is null
 		";
 		return $this->db->query($query);
 	}
@@ -256,6 +295,8 @@ class T_penerimaan extends CI_Model
 		$this->db->join('t_penerimaan p', 'pd.id_penerimaan=p.id_penerimaan');
 		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
 		$this->db->where('pd.id_penerimaan', $id);
+		$this->db->where('pd.deleted_at', null);
+		
 		$this->db->order_by('pd.id_penerimaan_det', 'ASC');
 		$q = $this->db->get();
 		return $q;
@@ -271,6 +312,7 @@ class T_penerimaan extends CI_Model
 		$this->db->from('t_pembelian_det pd');
 		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
 		$this->db->where('pd.id_pembelian', $id);
+		$this->db->where('pd.deleted_at', null);
 		$this->db->order_by('pd.id_pembelian_det', 'ASC');
 		$q = $this->db->get();
 		return $q;
@@ -282,7 +324,7 @@ class T_penerimaan extends CI_Model
 			SELECT COALESCE(SUM(pd.qty),0) as total_qty_masuk
 			FROM t_penerimaan p
 			LEFT JOIN t_penerimaan_det pd on pd.id_penerimaan = p.id_penerimaan
-			WHERE p.id_pembelian = '$id_pembelian' AND pd.id_barang = '$id_barang'
+			WHERE p.id_pembelian = '$id_pembelian' AND pd.id_barang = '$id_barang' AND pd.deleted_at is null
 		";
 		$q = $this->db->query($query)->row();
 		return $q->total_qty_masuk;

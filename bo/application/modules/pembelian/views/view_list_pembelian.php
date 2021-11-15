@@ -29,7 +29,7 @@
         </div>
       </div>
       <div class="kt-portlet__body">
-      <form method="get" class="kt-form kt-form--fit kt-margin-b-20" id="formFilter">
+        <form method="get" class="kt-form kt-form--fit kt-margin-b-20" id="formFilter">
           <div class="row kt-margin-b-20">
             <div class="col-lg-4 kt-margin-b-10-tablet-and-mobile">
               <label>Bulan :</label>
@@ -47,7 +47,7 @@
                   if((int)$this->input->get('bulan') == $i) {
                     echo "<option value='$i' selected>".bulan_indo($i)."</option>";
                   }else{
-                    if((int)date('m') == $i && $is_all_bln == false) {
+                    if ((int)date('Y') == $i && $is_all_thn == false && $is_selected == false) {
                       echo "<option value='$i' selected>".bulan_indo($i)."</option>";
                     }else{
                       echo "<option value='$i'>".bulan_indo($i)."</option>";
@@ -70,9 +70,11 @@
                   $is_all_thn = false;
                 }
 
+                $is_selected = false;
                 for ($i=(int)date('Y')+20; $i >= (int)date('Y')-20; $i--) { 
                   if ((int)$this->input->get('tahun') == $i) {
                     echo "<option value='$i' selected>$i</option>";
+                    $is_selected = true;
                   }else{
                     if ((int)date('Y') == $i && $is_all_thn == false) {
                       echo "<option value='$i' selected>$i</option>";
@@ -94,7 +96,6 @@
             </div>
           </div>
         
-
           <div class="kt-separator kt-separator--md kt-separator--dashed"></div>
         </form>
         <!--begin: Datatable -->

@@ -3,6 +3,16 @@ var table;
 var id_pen;
 
 $(document).ready(function() {
+    let uri = new URL(window.location.href);
+    bulanUri = uri.searchParams.get("bulan");
+    tahunUri = uri.searchParams.get("tahun");
+    kategoriUri = uri.searchParams.get("kategori");
+
+    let arrSegment = window.location.pathname.split('/');
+    if(arrSegment[4] == 'add_penerimaan') {
+      getTable();
+      getTotal();
+    }
 
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {
@@ -17,7 +27,12 @@ $(document).ready(function() {
       serverSide: true,
       ajax: {
         url  : base_url + "barang_masuk/list_barang_masuk",
-        type : "POST" 
+        type : "POST",
+        data: {
+          tahun: tahunUri,
+          bulan: bulanUri,
+          kategori: kategoriUri,
+        },
       },
 
 		  //set column definition initialisation properties
@@ -47,8 +62,6 @@ $(document).ready(function() {
         // reset_modal_form();
         // reset_modal_form_import();
     });
-
-    getTable();
 
     $('#regForm').submit(function(e){
         e.preventDefault();
@@ -490,52 +503,6 @@ function createAlert(title, summary, details, severity, dismissible, autoDismiss
       }, 5000);
     }
 }
-
-
- 
-
-// function hapus_trans_detail(id)
-// {
-//   // alert('kesini'); exit;
-//   swalConfirm.fire({
-//     title: 'Apakah Anda Yakin ?',
-//     text: "ingin menghapus daftar order ini ?",
-//     icon: 'warning',
-//     showCancelButton: true,
-//     confirmButtonText: 'Ya !',
-//     cancelButtonText: 'Tidak !',
-//     reverseButtons: true
-//   }).then((result) => {
-//     if (result.value) {
-//         $.ajax({
-//             url : base_url + 'barang_masuk/hapus_trans_detail',
-//             type: "POST",
-//             dataType: "JSON",
-//             data : {id : id},
-//             success: function(data)
-//             {
-//                 swalConfirm.fire('Berhasil !', data.pesan, 'success');
-//                 getTable();
-//                 getTotal();
-                
-//             },
-//             error: function (jqXHR, textStatus, errorThrown)
-//             {
-//                 Swal.fire('Terjadi Kesalahan');
-//             }
-//         });
-//     } else if (
-//       /* Read more about handling dismissals below */
-//       result.dismiss === Swal.DismissReason.cancel
-//     ) {
-//       swalConfirm.fire(
-//         'Dibatalkan',
-//         'Aksi Dibatalakan',
-//         'error'
-//       )
-//     }
-//   });
-// }
 
 /////////////////////////////////////////////
 function ajax_send(kode) {
