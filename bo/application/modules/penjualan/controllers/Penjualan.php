@@ -49,7 +49,17 @@ class Penjualan extends CI_Controller {
 
 	public function list_penjualan()
 	{
-		$list = $this->m_penjualan->get_datatable_user();
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$bulan = ($this->input->post('bulan') == '') ? (int)$obj_date->format('m') : $this->input->post('bulan');
+		$tahun = ($this->input->post('tahun') == '') ? (int)$obj_date->format('Y') : $this->input->post('tahun');
+
+		$paramdata = [
+			'bulan' => $bulan,
+			'tahun' => $tahun
+		];
+
+		$list = $this->m_penjualan->get_datatable_user($paramdata);
 		$data = array();
 		$no =$_POST['start'];
 		foreach ($list as $invoice) {
@@ -90,8 +100,8 @@ class Penjualan extends CI_Controller {
 
 		$output = [
 			"draw" => $_POST['draw'],
-			"recordsTotal" => $this->m_penjualan->count_all(),
-			"recordsFiltered" => $this->m_penjualan->count_filtered(),
+			"recordsTotal" => $this->m_penjualan->count_all($paramdata),
+			"recordsFiltered" => $this->m_penjualan->count_filtered($paramdata),
 			"data" => $data
 		];
 		

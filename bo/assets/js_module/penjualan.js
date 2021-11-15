@@ -3,21 +3,36 @@ var table;
 var id_pen;
 
 $(document).ready(function() {
-  
+    let uri = new URL(window.location.href);
+    bulanUri = uri.searchParams.get("bulan");
+    tahunUri = uri.searchParams.get("tahun");
+    kategoriUri = uri.searchParams.get("kategori");
+
+    let arrSegment = window.location.pathname.split('/');
+    if(arrSegment[4] == 'add_order') {
+      getTable();
+      getTotal();
+    }
+
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {
         return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
     });
 
-	//datatables
-	table = $('#tabel_penjualan').DataTable({
+	  //datatables
+	  table = $('#tabel_penjualan').DataTable({
 		responsive: true,
         searchDelay: 500,
         processing: true,
         serverSide: true,
 		ajax: {
 			url  : base_url + "penjualan/list_penjualan",
-			type : "POST" 
+			type : "POST",
+      data: {
+        tahun: tahunUri,
+        bulan: bulanUri,
+        kategori: kategoriUri,
+      },
 		},
 
 		//set column definition initialisation properties
@@ -106,6 +121,48 @@ $(document).ready(function() {
         });
       }
     });
+
+    $('#regForm').submit(function(e){
+        e.preventDefault();
+        // var url = '<?php echo base_url(); ?>';
+        var reg = $('#regForm').serialize();
+        $.ajax({
+            type: 'POST',
+            data: reg,
+            dataType: 'json',
+            url: base_url + 'penjualan/save_order',
+            success: function(data)
+            {
+                swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
+                $('#regForm')[0].reset();
+                getTable();
+                getTotal();
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+                Swal.fire('Terjadi Kesalahan');
+            }
+           
+        });
+    });
+
+    $("input").focusin(function() {
+      $("#btnSave").prop("disabled", true);
+    });
+
+    $("input").focusout(function() {
+      $.ajax({
+        type: "post",
+        url: base_url+"penjualan/cek_qty_stok",
+        data: {qty:$('#qty').val(), id_barang:$('#id_barang').val(), id_gudang:$('#id_gudang').val()},
+        dataType: "json",
+        success: function (response) {
+          $('#qty').val(response);
+          $("#btnSave").prop("disabled", false);
+        }
+      });
+    });
+
 });	
 
 const getSelectBarang = (obj) => {
@@ -501,60 +558,6 @@ function ajax_send(no_faktur)
     window.location.href = base_url+'penjualan/add_order?no_faktur='+no_faktur;
 }
  
-  
-$(document).ready(function(){
-  
-  // console.log(id);
-    getTable();
-    getTotal();
-
-    $('#regForm').submit(function(e){
-        e.preventDefault();
-        // var url = '<?php echo base_url(); ?>';
-        var reg = $('#regForm').serialize();
-        $.ajax({
-            type: 'POST',
-            data: reg,
-            dataType: 'json',
-            url: base_url + 'penjualan/save_order',
-            success: function(data)
-            {
-                swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
-                $('#regForm')[0].reset();
-                getTable();
-                getTotal();
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                Swal.fire('Terjadi Kesalahan');
-            }
-           
-        });
-    });
-
-    $("input").focusin(function() {
-      $("#btnSave").prop("disabled", true);
-    });
-
-    $("input").focusout(function() {
-      $.ajax({
-        type: "post",
-        url: base_url+"penjualan/cek_qty_stok",
-        data: {qty:$('#qty').val(), id_barang:$('#id_barang').val(), id_gudang:$('#id_gudang').val()},
-        dataType: "json",
-        success: function (response) {
-          $('#qty').val(response);
-          $("#btnSave").prop("disabled", false);
-        }
-      });
-    });
-
-
-    // $(document).on('click', '#clearMsg', function(){
-    //     $('#responseDiv').hide();
-    // });
-
-});
 function getTable(){
     var id = $('#id_penjualan').val();
     console.log(id);

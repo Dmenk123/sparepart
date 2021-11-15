@@ -33,25 +33,63 @@ class M_penjualan extends CI_Model
 		$this->load->database();
 	}
 
-	private function _get_datatables_query($term='')
+	private function _get_datatables_query($term='', $param)
 	{
+		$obj_date = new DateTime();
+		$is_filter_tgl = false;
+		$is_filter_bln = false;
+		$is_filter_thn = false;
+
+		if ($param['bulan'] != 'all') {
+			$is_filter_bln =  true;
+		}
+
+		if ($param['tahun'] != 'all') {
+			$is_filter_thn =  true;
+		}
+
+		if ($is_filter_bln && $is_filter_thn) {
+			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
+			$tgl_awal = $param['tahun'] . '-' . $bulan . '-01';
+			$tgl_akhir = DateTime::createFromFormat('Y-m-d', $tgl_awal)->modify('last day of this month')->format('Y-m-d');
+			$is_filter_tgl = true;
+		}
+		#### jika hanya tahun saja
+		elseif (!$is_filter_bln && $is_filter_thn) {
+			$tgl_awal = $param['tahun'] . '-01-01';
+			$tgl_akhir = $param['tahun'] . '-12-31';
+			$is_filter_tgl = true;
+		}
+		#### jika hanya bulan saja (menggunakan tahun saat ini)
+		elseif ($is_filter_bln && !$is_filter_thn) {
+			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
+			$tgl_awal = $obj_date->format('Y') . '-' . $bulan . '-01';
+			$tgl_akhir = $obj_date->format('Y') . '-' . $bulan . '-31';
+			$is_filter_tgl = true;
+		}
+
 		$this->db->select('
-				pj.id_penjualan,
-				pj.no_faktur,
-				pj.tgl_jatuh_tempo,
-				pj.created_at,
-				(CASE WHEN pj.is_kredit = 1 THEN \'Kredit\' ELSE \'Cash\' END) as metode,
-				mu.nama as nama_sales,
-				pl.nama_pembeli,
-				pl.alamat,
-				pl.no_telp,
-				pl.email,
-				pl.nama_toko
+			pj.id_penjualan,
+			pj.no_faktur,
+			pj.tgl_jatuh_tempo,
+			pj.created_at,
+			(CASE WHEN pj.is_kredit = 1 THEN \'Kredit\' ELSE \'Cash\' END) as metode,
+			mu.nama as nama_sales,
+			pl.nama_pembeli,
+			pl.alamat,
+			pl.no_telp,
+			pl.email,
+			pl.nama_toko
 		');
 		$this->db->from('t_penjualan pj');
 		$this->db->join('m_user mu', 'mu.id=pj.id_sales');
 		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=pj.id_pelanggan');
 		$this->db->where('pj.deleted_at is null');
+
+		if ($is_filter_tgl) {
+			$this->db->where('pj.created_at >=', $tgl_awal);
+			$this->db->where('pj.created_at <=', $tgl_akhir);
+		}
 		
 		$i = 0;
 		// loop column 
@@ -97,10 +135,10 @@ class M_penjualan extends CI_Model
 		}
 	}
 
-	function get_datatable_user()
+	function get_datatable_user($param)
 	{
 		$term = $_REQUEST['search']['value'];
-		$this->_get_datatables_query($term);
+		$this->_get_datatables_query($term, $param);
 		if($_REQUEST['length'] != -1)
 		$this->db->limit($_REQUEST['length'], $_REQUEST['start']);
 
@@ -108,16 +146,17 @@ class M_penjualan extends CI_Model
 		return $query->result();
 	}
 
-	function count_filtered()
+	function count_filtered($param)
 	{
-		$this->_get_datatables_query();
+		$this->_get_datatables_query(null, $param);
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all()
+	public function count_all($param)
 	{
-		$this->db->from($this->table);
+		$this->_get_datatables_query(null, $param);
+		$query = $this->db->get();
 		return $this->db->count_all_results();
 	}
 	
@@ -170,7 +209,7 @@ class M_penjualan extends CI_Model
 	{
 		$obj_date = new DateTime();
 		$tgl = $obj_date->format('Y-m-d');
-		$q = $this->db->query("SELECT count(*) as jml FROM t_penjualan WHERE DATE_FORMAT(created_at ,'%Y-%m-%d') = '$tgl' and deleted_at is null");
+		$q = $this->db->query("SELECT count(*) as jml FROM t_penjualan WHERE DATE_FORMAT(created_at ,'%Y-%m-%d') = '$tgl'");
 		$kd = "";
 		if($q->num_rows()>0){
 			$kd = $q->row();
@@ -214,21 +253,23 @@ class M_penjualan extends CI_Model
 	public function getPenjualan($no_faktur)
 	{
 		$this->db->select('
-						pj.id_penjualan,
-						pj.no_faktur,
-						pj.tgl_jatuh_tempo,
-						pj.created_at,
-						mu.username,
-						pl.nama_pembeli,
-						pl.alamat,
-						pl.no_telp,
-						pl.email,
-						pl.nama_toko
-						');
+			pj.id_penjualan,
+			pj.no_faktur,
+			pj.tgl_jatuh_tempo,
+			pj.created_at,
+			mu.username,
+			pl.nama_pembeli,
+			pl.alamat,
+			pl.no_telp,
+			pl.email,
+			pl.nama_toko
+		');
 		$this->db->from('t_penjualan pj');
 		$this->db->join('m_user mu', 'mu.id=pj.id_sales');
 		$this->db->join('m_pelanggan pl', 'pl.id_pelanggan=pj.id_pelanggan');
 		$this->db->where('pj.no_faktur', $no_faktur);
+		$this->db->where('pj.deleted_at', null);
+		
 		$q = $this->db->get();
 		return $q;
 	}
@@ -238,21 +279,22 @@ class M_penjualan extends CI_Model
 		$query = "
 				SELECT SUM(sub_total) as total
 				FROM t_penjualan_det
-				WHERE id_penjualan = $id
-				";
+				WHERE id_penjualan = $id AND deleted_at is null";
 		return $this->db->query($query);
 	}
 
 	function getPenjualanDet($id)
 	{
 		$this->db->select('
-				pd.*,
-				mb.nama,
-				mb.sku
+			pd.*,
+			mb.nama,
+			mb.sku
 		');
 		$this->db->from('t_penjualan_det pd');
 		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
 		$this->db->where('pd.id_penjualan', $id);
+		$this->db->where('pd.deleted_at', null);
+		
 		$this->db->order_by('pd.id_penjualan_det', 'ASC');
 		$q = $this->db->get();
 		return $q;
