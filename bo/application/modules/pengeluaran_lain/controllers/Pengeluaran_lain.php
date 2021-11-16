@@ -51,8 +51,10 @@ class Pengeluaran_lain extends CI_Controller
 
 	public function list_data_pengeluaran()
 	{
-		$bulan = $this->input->post('bulan');
-		$tahun = $this->input->post('tahun');
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$bulan = ($this->input->post('bulan') == '') ? (int)$obj_date->format('m') : $this->input->post('bulan');
+		$tahun = ($this->input->post('tahun') == '') ? (int)$obj_date->format('Y') : $this->input->post('tahun');
 		$kategori = $this->input->post('kategori');
 
 		$paramdata = [

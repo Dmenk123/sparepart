@@ -14,20 +14,43 @@ class T_pengeluaran_lain extends CI_Model
 
 	function get_datatable_pengeluaran($param)
 	{
+		$obj_date = new DateTime();
 		$is_filter_tgl = false;
-		$is_filter_kategori = false;
-		
-		if($param['bulan'] != 'all' && $param['tahun'] != 'all') {
-			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
-			$tgl_awal = $param['tahun'].'-'.$bulan.'-01';
-			$tgl_akhir = DateTime::createFromFormat('Y-m-d', $tgl_awal)->modify('first day of this month')->format('Y-m-d');
-			$is_filter_tgl = true;
+		$is_filter_bln = false;
+		$is_filter_thn = false;
+
+		if ($param['bulan'] != 'all') {
+			$is_filter_bln =  true;
 		}
 
-		if($param['kategori'] != 'all') {
+		if ($param['tahun'] != 'all') {
+			$is_filter_thn =  true;
+		}
+
+		if ($param['kategori'] != 'all') {
 			$is_filter_kategori = true;
 		}
-		
+
+		if ($is_filter_bln && $is_filter_thn) {
+			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
+			$tgl_awal = $param['tahun'] . '-' . $bulan . '-01';
+			$tgl_akhir = DateTime::createFromFormat('Y-m-d', $tgl_awal)->modify('last day of this month')->format('Y-m-d');
+			$is_filter_tgl = true;
+		}
+		#### jika hanya tahun saja
+		elseif (!$is_filter_bln && $is_filter_thn) {
+			$tgl_awal = $param['tahun'] . '-01-01';
+			$tgl_akhir = $param['tahun'] . '-12-31';
+			$is_filter_tgl = true;
+		}
+		#### jika hanya bulan saja (menggunakan tahun saat ini)
+		elseif ($is_filter_bln && !$is_filter_thn) {
+			$bulan = str_pad($param['bulan'], 2, '0', STR_PAD_LEFT);
+			$tgl_awal = $obj_date->format('Y') . '-' . $bulan . '-01';
+			$tgl_akhir = $obj_date->format('Y') . '-' . $bulan . '-31';
+			$is_filter_tgl = true;
+		}
+				
 
 		$this->db->select('tp.*, kat.nama_kategori_trans, user.nama as nama_user');
 		$this->db->from('t_pengeluaran_lain tp');

@@ -18,7 +18,7 @@
 
     <div class="kt-portlet kt-portlet--mobile">
       <div class="kt-portlet__head kt-portlet__head--lg">
-        
+
         <div class="kt-portlet__head-toolbar">
           <div class="kt-portlet__head-wrapper">
             <div class="kt-portlet__head-actions row">
@@ -34,13 +34,24 @@
             <div class="col-lg-4 kt-margin-b-10-tablet-and-mobile">
               <label>Bulan :</label>
               <select name="bulan" id="bulan" class="form-control select2">
-                <option value="all">Bulan Laporan</option>
-                <?php 
-                for ($i=1; $i <= 12; $i++) { 
-                  if((int)$this->input->get('bulan') == $i) {
-                    echo "<option value='$i' selected>".bulan_indo($i)."</option>";
-                  }else{
-                    echo "<option value='$i'>".bulan_indo($i)."</option>";
+                <?php
+                $is_all_bln = true;
+                if ($this->input->get('bulan') == 'all') {
+                  echo '<option value="all" selected>Bulan Laporan</option>';
+                } else {
+                  echo '<option value="all">Bulan Laporan</option>';
+                  $is_all_bln = false;
+                }
+
+                for ($i = 1; $i <= 12; $i++) {
+                  if ((int)$this->input->get('bulan') == $i) {
+                    echo "<option value='$i' selected>" . bulan_indo($i) . "</option>";
+                  } else {
+                    if ((int)date('m') == $i && $is_all_bln == false) {
+                      echo "<option value='$i' selected>" . bulan_indo($i) . "</option>";
+                    } else {
+                      echo "<option value='$i'>" . bulan_indo($i) . "</option>";
+                    }
                   }
                 }
                 ?>
@@ -49,13 +60,26 @@
             <div class="col-lg-4 kt-margin-b-10-tablet-and-mobile">
               <label>Tahun :</label>
               <select name="tahun" id="tahun" class="form-control select2">
-                <option value="all">Tahun Laporan</option>
-                <?php 
-                for ($i=(int)date('Y')+20; $i >= (int)date('Y')-20; $i--) { 
+                <?php
+                $is_all_thn = true;
+                if ($this->input->get('tahun') == 'all') {
+                  echo '<option value="all" selected>Tahun Laporan</option>';
+                } else {
+                  echo '<option value="all">Tahun Laporan</option>';
+                  $is_all_thn = false;
+                }
+
+                $is_selected = false;
+                for ($i = (int)date('Y') + 20; $i >= (int)date('Y') - 20; $i--) {
                   if ((int)$this->input->get('tahun') == $i) {
                     echo "<option value='$i' selected>$i</option>";
-                  }else{
-                    echo "<option value='$i'>$i</option>";
+                    $is_selected = true;
+                  } else {
+                    if ((int)date('Y') == $i && $is_all_thn == false && $is_selected == false) {
+                      echo "<option value='$i' selected>$i</option>";
+                    } else {
+                      echo "<option value='$i'>$i</option>";
+                    }
                   }
                 }
                 ?>
@@ -65,20 +89,19 @@
               <label>Kategori :</label>
               <select name="kategori" id="kategori" class="form-control select2">
                 <option value="all">Semua Kategori</option>
-                <?php 
-                  foreach ($kategori as $key => $value) {
-                    if ((int)$this->input->get('kategori') == $value->id_kategori_trans) {
-                      echo "<option value='$value->id_kategori_trans' selected>$value->nama_kategori_trans</option>";
-                    }else{
-                      echo "<option value='$value->id_kategori_trans'>$value->nama_kategori_trans</option>";
-                    }
-                  
+                <?php
+                foreach ($kategori as $key => $value) {
+                  if ((int)$this->input->get('kategori') == $value->id_kategori_trans) {
+                    echo "<option value='$value->id_kategori_trans' selected>$value->nama_kategori_trans</option>";
+                  } else {
+                    echo "<option value='$value->id_kategori_trans'>$value->nama_kategori_trans</option>";
                   }
+                }
                 ?>
               </select>
             </div>
           </div>
-        
+
           <div class="row">
             <div class="col-lg-12">
               <button type="submit" class="btn btn-primary btn-brand--icon" id="formFilter">
