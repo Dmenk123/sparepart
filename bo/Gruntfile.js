@@ -43,7 +43,7 @@ module.exports = (grunt) => {
                         cwd:'assets/js_module',
                         src:['*.js'],
                         dest:'build/js',
-                        ext:'.min.js'
+                        ext:'.js'
                     }]
                 }
             }
