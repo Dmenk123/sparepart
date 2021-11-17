@@ -2,7 +2,6 @@ var save_method;
 var table;
 
 $(document).ready(function() {
-    
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {
         return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
@@ -142,6 +141,17 @@ function changeModel() {
     else {
         Swal.fire(pesan)
         exit
+    }
+  }
+
+  function cetak(){
+    let searchParams = new URLSearchParams(window.location.search)
+    let model =  searchParams.get('model')
+    if (model) {
+      window.open(base_url+'pdf/cetak_laporan?model='+model+'&start='+searchParams.get('start')+'&end='+searchParams.get('end')+'&bulan='+searchParams.get('bulan')+'&tahun='+searchParams.get('tahun')+'&tahun2='+searchParams.get('tahun2')+'&jenis=laporan_penjualan', '_blank');
+      // window.location.href = ;
+    }else{
+      Swal.fire('Silahkan Pilih Periode Terlebih dahulu');
     }
   }
 
