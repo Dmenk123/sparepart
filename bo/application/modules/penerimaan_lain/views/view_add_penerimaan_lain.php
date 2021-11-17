@@ -47,7 +47,7 @@
         <div class="kt-portlet__head-toolbar">
           <div class="kt-portlet__head-wrapper">
             <div class="row" style="text-align:left!important;">
-              <h2>Form Pengeluaran Lain-Lain</h>
+              <h2>Form Penerimaan Lain-Lain</h>
             </div>
           </div>
         </div>
@@ -101,7 +101,7 @@
           <div class="row">
             <div class="form-group col-sm-5">
               <label for="lbl_namabarang" class="form-control-label">Nama Barang/Jasa : </label>
-              <input type="hidden" value="<?= (isset($data_header->id)) ? $data_header->id : ""; ?>" name="id_pengeluaran_lain" id="id_pengeluaran_lain">
+              <input type="hidden" value="<?= (isset($data_header->id)) ? $data_header->id : ""; ?>" name="id_penerimaan_lain" id="id_penerimaan_lain">
               <select name="id_barang" id="id_barang" class="form-control select2">
                 <option value="">-PILIH-</option>
                 <?php

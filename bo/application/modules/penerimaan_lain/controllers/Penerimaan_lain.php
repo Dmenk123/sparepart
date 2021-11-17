@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Pengeluaran_lain extends CI_Controller
+class Penerimaan_lain extends CI_Controller
 {
 
 	public function __construct()
@@ -11,7 +11,7 @@ class Pengeluaran_lain extends CI_Controller
 			return redirect('login');
 		}
 
-		$this->load->model('t_pengeluaran_lain', 't_out');
+		$this->load->model('t_penerimaan_lain', 't_in');
 		$this->load->model('m_user');
 		$this->load->model('m_global');
 		$this->load->model('set_role/m_set_role', 'm_role');
@@ -27,10 +27,10 @@ class Pengeluaran_lain extends CI_Controller
 		 * data passing ke halaman view content
 		 */
 		$data = array(
-			'title' => 'Pengelolaan Pengeluaran Lain-Lain',
+			'title' => 'Pengelolaan Penerimaan Lain-Lain',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
-			'kategori' => $this->m_global->multi_row('*', ['is_lain' => 1, 'deleted_at' => null, 'is_penerimaan' => null], 'm_kategori_transaksi', null, 'nama_kategori_trans')
+			'kategori' => $this->m_global->multi_row('*', ['is_lain' => 1, 'deleted_at' => null, 'is_penerimaan !=', null], 'm_kategori_transaksi', null, 'nama_kategori_trans')
 		);
 
 		/**
@@ -41,15 +41,15 @@ class Pengeluaran_lain extends CI_Controller
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => 'modal_detail_pengeluaran_lain',
-			'js'	=> 'pengeluaran_lain.js',
+			'modal' => 'modal_detail_penerimaan_lain',
+			'js'	=> 'penerimaan_lain.js',
 			'view'	=> 'view_list'
 		];
 
 		$this->template_view->load_view($content, $data);
 	}
 
-	public function list_data_pengeluaran()
+	public function list_data_penerimaan()
 	{
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
@@ -63,7 +63,7 @@ class Pengeluaran_lain extends CI_Controller
 			'kategori' => $kategori
 		];
 
-		$listData = $this->t_out->get_datatable_pengeluaran($paramdata);
+		$listData = $this->t_in->get_datatable_penerimaan($paramdata);
 		$datas = [];
 		$i = 1;
 		foreach ($listData as $key => $value) {
@@ -108,7 +108,7 @@ class Pengeluaran_lain extends CI_Controller
 		// $penjualan = $this->m_global->getSelectedData('t_penjualan', array('order_id'=>$order_id))->row();
 		// $id        = $penjualan->id_penjualan;
 		$id = $this->input->post('id');
-		$data = $this->t_out->getPengeluaranDet($id)->result();
+		$data = $this->t_in->getPenerimaanDet($id)->result();
 		foreach ($data as $row) {
 		?>
 			<tr>
@@ -127,7 +127,7 @@ class Pengeluaran_lain extends CI_Controller
 	{
 
 		$id = $this->input->post('id');
-		$hasil = $this->t_out->getTotalTransaksiDet($id)->row();
+		$hasil = $this->t_in->getTotalTransaksiDet($id)->row();
 		$data = array();
 		if (!empty($hasil)) {
 			// var_dump($data->total);
@@ -139,7 +139,7 @@ class Pengeluaran_lain extends CI_Controller
 		echo json_encode($data);
 	}
 
-	public function new_pengeluaran()
+	public function new_penerimaan()
 	{
 		$id_user = $this->session->userdata('id_user');
 		$data_user = $this->m_user->get_detail_user($id_user);
@@ -150,10 +150,10 @@ class Pengeluaran_lain extends CI_Controller
 		 */
 
 		$data = array(
-			'title' => 'Pengeluaran Baru',
+			'title' => 'Penerimaan Baru',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
-			'kategori' => $this->m_global->multi_row('*', ['deleted_at' => NULL, 'is_lain' => 1, 'is_penerimaan' => null], 'm_kategori_transaksi', NULL, 'nama_kategori_trans asc'),
+			'kategori' => $this->m_global->multi_row('*', ['deleted_at' => NULL, 'is_lain' => 1, 'is_penerimaan' => 1], 'm_kategori_transaksi', NULL, 'nama_kategori_trans asc'),
 			'mode'		=> 'add',
 		);
 
@@ -161,15 +161,15 @@ class Pengeluaran_lain extends CI_Controller
 
 		if ($mode == 'edit') {
 			$kode = $this->input->get('kode');
-			$data_header = $this->m_global->getSelectedData('t_pengeluaran_lain', array('kode' => $kode))->row();
+			$data_header = $this->m_global->getSelectedData('t_penerimaan_lain', array('kode' => $kode))->row();
 
 			if (!$data_header) {
-				return redirect('pengeluaran_lain');
+				return redirect('penerimaan_lain');
 			}
 
 			$data['old_data'] = $data_header;
 			$data['mode'] = $mode;
-			$data['title'] = "Edit Pengeluaran";
+			$data['title'] = "Edit Penerimaan";
 			$data['id_pengeluaran'] = $data_header->id;
 			$data['kode'] = $data_header->kode;
 			$data['kategori'] = $this->m_global->multi_row('*', ['deleted_at' => NULL, 'is_lain' => 1], 'm_kategori_transaksi', NULL, 'nama_kategori_trans asc');
@@ -188,14 +188,14 @@ class Pengeluaran_lain extends CI_Controller
 		$content = [
 			'css' 	=> null,
 			'modal' => null,
-			'js'	=> 'pengeluaran_lain.js',
-			'view'	=> 'view_new_pengeluaran_lain'
+			'js'	=> 'penerimaan_lain.js',
+			'view'	=> 'view_new_penerimaan_lain'
 		];
 
 		$this->template_view->load_view($content, $data);
 	}
 
-	public function add_new_pengeluaran()
+	public function add_new_penerimaan()
 	{
 		$this->load->library('Enkripsi');
 		$obj_date = new DateTime();
@@ -213,12 +213,12 @@ class Pengeluaran_lain extends CI_Controller
 
 		$is_update = false;
 
-		if ($this->input->post('id_pengeluaran') != '') {
-			$cek = $this->t_out->get_by_id($this->input->post('id_pengeluaran'));
+		if ($this->input->post('id_penerimaan') != '') {
+			$cek = $this->t_in->get_by_id($this->input->post('id_penerimaan'));
 			if ($cek) {
 				$is_update = true;
 				$kode = $cek->kode;
-				$id_pengeluaran_fix = $cek->id;
+				$id_penerimaan_fix = $cek->id;
 			} else {
 				$retval['status'] = false;
 				$retval['pesan'] = 'Data Tidak Ditemukan';
@@ -233,7 +233,7 @@ class Pengeluaran_lain extends CI_Controller
 				'deleted_at' => null,
 			], 'm_kategori_transaksi');
 
-			$counter_pengeluaran = $this->t_out->get_max_transaksi();
+			$counter_pengeluaran = $this->t_in->get_max_transaksi();
 			$kode = generate_kode_transaksi($tgl_fix, $counter_pengeluaran, strtoupper(strtolower($cek_kategori->singkatan)));
 
 			$data['kode'] = $kode;
@@ -250,26 +250,26 @@ class Pengeluaran_lain extends CI_Controller
 		$this->db->trans_begin();
 
 		if ($is_update) {
-			$this->t_out->update(['id' => $id_pengeluaran_fix], $data);
+			$this->t_in->update(['id' => $id_penerimaan_fix], $data);
 		} else {
-			$insert = $this->t_out->save($data);
+			$insert = $this->t_in->save($data);
 		}
 
 		if ($this->db->trans_status() === FALSE) {
 			$this->db->trans_rollback();
 			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan Data Pengeluaran';
+			$retval['pesan'] = 'Gagal menambahkan Data Penerimaan';
 		} else {
 			$this->db->trans_commit();
 			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Menambahkan Data Pengeluaran';
+			$retval['pesan'] = 'Sukses Menambahkan Data Penerimaan';
 			$retval['kode'] = $kode;
 		}
 
 		echo json_encode($retval);
 	}
 
-	public function add_pengeluaran_det()
+	public function add_penerimaan_det()
 	{
 		$kode = $this->input->get('kode');
 		$id = $this->input->get('index');
@@ -282,7 +282,7 @@ class Pengeluaran_lain extends CI_Controller
 		/**
 		 * data passing ke halaman view content
 		 */
-		$cek_header = $this->t_out->getPengeluaran($kode)->row();
+		$cek_header = $this->t_in->getPenerimaan($kode)->row();
 
 		if (!$cek_header) {
 			return redirect('pengeluaran_lain');
@@ -292,7 +292,7 @@ class Pengeluaran_lain extends CI_Controller
 
 
 		$data = array(
-			'title' => 'Tambah Pengeluaran Lain-Lain',
+			'title' => 'Tambah Penerimaan Lain-Lain',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
 			'profil' => $profil,
@@ -308,9 +308,9 @@ class Pengeluaran_lain extends CI_Controller
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => 'modal_detail_pengeluaran_lain',
-			'js'	=> 'pengeluaran_lain.js',
-			'view'	=> 'view_add_pengeluaran_lain'
+			'modal' => 'modal_detail_penerimaan_lain',
+			'js'	=> 'penerimaan_lain.js',
+			'view'	=> 'view_add_penerimaan_lain'
 		];
 
 		$this->template_view->load_view($content, $data);
@@ -324,19 +324,19 @@ class Pengeluaran_lain extends CI_Controller
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$arr_valid = $this->rule_validasi_order();
 
-		$id_pengeluaran_lain 	= $this->input->post('id_pengeluaran_lain');
+		$id_penerimaan_lain	= $this->input->post('id_penerimaan_lain');
 		$id_barang 	= $this->input->post('id_barang');
+		$keterangan = $this->input->post('keterangan');
 		$qty     = $this->input->post('qty');
 		$nilai   = $this->input->post('nilai');
 		$nilai   = str_replace('.', '', $nilai);
-		$keterangan 	= $this->input->post('keterangan');
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
 		}
 
-		$data_header = $this->m_global->getSelectedData('t_pengeluaran_lain', ['id' => $id_pengeluaran_lain])->row();
+		$data_header = $this->m_global->getSelectedData('t_penerimaan_lain', ['id' => $id_penerimaan_lain])->row();
 
 		if (!$data_header) {
 			$retval['status'] = false;
@@ -345,7 +345,7 @@ class Pengeluaran_lain extends CI_Controller
 			return;
 		}
 
-		$datadet = $this->m_global->getSelectedData('t_pengeluaran_lain_det', ['id_pengeluaran_lain' => $id_pengeluaran_lain, 'id_barang' => $id_barang])->row();
+		$datadet = $this->m_global->getSelectedData('t_penerimaan_lain_det', ['id_penerimaan_lain' => $id_penerimaan_lain, 'id_barang' => $id_barang])->row();
 
 		if ($datadet) {
 			$retval['status'] = false;
@@ -359,19 +359,19 @@ class Pengeluaran_lain extends CI_Controller
 		$this->db->trans_begin();
 
 		$data_trans = [
-			'id_pengeluaran_lain'  => $id_pengeluaran_lain,
+			'id_penerimaan_lain'  => $id_penerimaan_lain,
 			'id_barang' 	=> $id_barang,
 			'qty'           => $qty,
 			'nilai' 		=> $nilai,
 			'sub_total'     => $sub_total,
-			'keterangan'	=> $keterangan,
+			'keterangan'     => $keterangan,
 			'created_at'	=> $timestamp
 		];
 
 		### insert detail
-		$ins = $this->m_global->save($data_trans, 't_pengeluaran_lain_det');
+		$ins = $this->m_global->save($data_trans, 't_penerimaan_lain_det');
 		### update header
-		$sum_transaksi = $this->t_out->getTotalTransaksiDet($id_pengeluaran_lain)->row();
+		$sum_transaksi = $this->t_in->getTotalTransaksiDet($id_penerimaan_lain)->row();
 
 		if (!empty($sum_transaksi)) {
 			$nilai_sum_total = $sum_transaksi->total;
@@ -379,7 +379,7 @@ class Pengeluaran_lain extends CI_Controller
 			$nilai_sum_total = 0;
 		}
 
-		$upd = $this->m_global->update('t_pengeluaran_lain', ['nilai_total' => $nilai_sum_total, 'updated_at' => $timestamp], ['id' => $id_pengeluaran_lain]);
+		$upd = $this->m_global->update('t_penerimaan_lain', ['nilai_total' => $nilai_sum_total, 'updated_at' => $timestamp], ['id' => $id_penerimaan_lain]);
 
 		//if ($ins && $upd) {
 		$laporan = $this->lib_mutasi->insertDataLap($sub_total, $data_header->id_kategori_trans, $kode, null, $data_header->tanggal);
@@ -455,8 +455,8 @@ class Pengeluaran_lain extends CI_Controller
 		$id = $this->input->get('id');
 		$kode = $this->input->get('kode');
 
-		$header = $this->t_out->getPengeluaran($kode)->row();
-		$detail = $this->t_out->getPengeluaranDet($id)->result();
+		$header = $this->t_in->getPenerimaan($kode)->row();
+		$detail = $this->t_in->getPenerimaanDet($id)->result();
 
 		$html_det = '';
 		if ($detail) {
@@ -496,7 +496,7 @@ class Pengeluaran_lain extends CI_Controller
 			$kode = $this->input->post('kode');
 
 			$cek = $this->m_global->single_row('*', ['id' => $id, 'deleted_at' => null], 't_pengeluaran_lain');
-			$cek2 = $this->t_out->getPengeluaranDet($id);
+			$cek2 = $this->t_in->getPengeluaranDet($id);
 			$cek2 = $cek2->result();
 
 			if ($cek2) {

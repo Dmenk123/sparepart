@@ -1,8 +1,8 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-class T_pengeluaran_lain extends CI_Model
+class T_penerimaan_lain extends CI_Model
 {
-	var $table = 't_pengeluaran_lain';
+	var $table = 't_penerimaan_lain';
 	
 	public function __construct()
 	{
@@ -12,7 +12,7 @@ class T_pengeluaran_lain extends CI_Model
 	}
 
 
-	function get_datatable_pengeluaran($param)
+	function get_datatable_penerimaan($param)
 	{
 		$obj_date = new DateTime();
 		$is_filter_kategori = false;
@@ -54,7 +54,7 @@ class T_pengeluaran_lain extends CI_Model
 				
 
 		$this->db->select('tp.*, kat.nama_kategori_trans, user.nama as nama_user');
-		$this->db->from('t_pengeluaran_lain tp');
+		$this->db->from('t_penerimaan_lain tp');
 		$this->db->join('m_kategori_transaksi kat', 'tp.id_kategori_trans = kat.id_kategori_trans', 'left');
 		$this->db->join('m_user user', 'tp.id_user = user.id', 'left');
 
@@ -118,7 +118,7 @@ class T_pengeluaran_lain extends CI_Model
 	{
 		$obj_date = new DateTime();
 		$tgl = $obj_date->format('Y-m-d');
-		$q = $this->db->query("SELECT count(*) as jml FROM t_pengeluaran_lain WHERE tanggal = '$tgl' and deleted_at is null");
+		$q = $this->db->query("SELECT count(*) as jml FROM t_penerimaan_lain WHERE tanggal = '$tgl' and deleted_at is null");
 		$kd = "";
 		if ($q->num_rows() > 0) {
 			$kd = $q->row();
@@ -129,14 +129,14 @@ class T_pengeluaran_lain extends CI_Model
 	}
 	
 
-	public function getPengeluaran($kode)
+	public function getPenerimaan($kode)
 	{
 		$this->db->select('
 			pl.*,
 			mu.username,
 			mu.nama as nama_user,
 		');
-		$this->db->from('t_pengeluaran_lain pl');
+		$this->db->from('t_penerimaan_lain pl');
 		// $this->db->join('t_pengeluaran_lain_det pld', 'pl.id = pld.id_pengeluaran_lain');
 		$this->db->join('m_user mu', 'mu.id = pl.id_user');
 		$this->db->join('m_kategori_transaksi mk', 'pl.id_kategori_trans = mk.id_kategori_trans');
@@ -145,17 +145,17 @@ class T_pengeluaran_lain extends CI_Model
 		return $q;
 	}
 
-	function getPengeluaranDet($id)
+	function getPenerimaanDet($id)
 	{
 		$this->db->select('
 			pd.*,
 			mb.nama,
 			mb.sku
 		');
-		$this->db->from('t_pengeluaran_lain_det pd');
-		$this->db->join('t_pengeluaran_lain p', 'pd.id_pengeluaran_lain=p.id');
+		$this->db->from('t_penerimaan_lain_det pd');
+		$this->db->join('t_penerimaan_lain p', 'pd.id_penerimaan_lain=p.id');
 		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
-		$this->db->where('pd.id_pengeluaran_lain', $id);
+		$this->db->where('pd.id_penerimaan_lain', $id);
 		$this->db->order_by('pd.created_at', 'ASC');
 		$q = $this->db->get();
 		return $q;
@@ -165,8 +165,8 @@ class T_pengeluaran_lain extends CI_Model
 	{
 		$query = "
 			SELECT SUM(sub_total) as total
-			FROM t_pengeluaran_lain_det
-			WHERE id_pengeluaran_lain = $id
+			FROM t_penerimaan_lain_det
+			WHERE id_penerimaan_lain = $id
 		";
 		return $this->db->query($query);
 	}

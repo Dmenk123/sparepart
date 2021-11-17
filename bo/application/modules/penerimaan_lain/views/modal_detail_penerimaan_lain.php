@@ -56,7 +56,7 @@
     </div>
   </div>
 </div>
-<?php if ($this->uri->segment(2) == 'add_pengeluaran_det') { ?>
+<?php if ($this->uri->segment(2) == 'add_penerimaan_det') { ?>
   <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="add_menu" aria-hidden="true" id="modal_frame">
     <div class="modal-dialog modal-xl" role="document">
       <div class="modal-content">
