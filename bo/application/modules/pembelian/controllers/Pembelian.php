@@ -213,7 +213,7 @@ class Pembelian extends CI_Controller {
 		$data['kode_trans']  = $kode;
 		$data['id_pembelian']  = $cek_kode->id_pembelian;
 		$data['id_agen']  = $cek_kode->id_agen;
-		$data['barang']  = $this->m_global->getSelectedData('m_barang', array('deleted_at'=>NULL, 'sku !=' => null));
+		$data['barang']  = $this->db->query("SELECT m_barang.*, t_stok.qty, t_stok.qty_min FROM m_barang JOIN t_stok on m_barang.id_barang = t_stok.id_barang WHERE m_barang.deleted_at is null");
 		$data['agen']  = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'deleted_at' => null], 'm_agen');
 		
 
@@ -671,6 +671,7 @@ class Pembelian extends CI_Controller {
 		$q_mutasi = $this->db->select('hpp')
 						->from('t_stok_mutasi')
 						->where('deleted_at', null)
+						->where('id_barang', $id_barang)
 						->group_start()
 							->where('id_kategori_trans', 1)
 							->or_where('id_kategori_trans', 3)
