@@ -519,5 +519,13 @@ $config['rewrite_short_tags'] = FALSE;
 */
 $config['proxy_ips'] = '';
 
+<<<<<<< HEAD
 #### SET TRUE jika Production
+=======
+/**
+ * Set TRUE jika production
+ * sebagai flag untuk load assset js/css 
+ * jika true akan ambil dari hasil build (minify)
+ */
+>>>>>>> 0e352e2d4a74cf4f1b57fb91cb5c70889b17ddd2
 $config['is_production'] = FALSE;

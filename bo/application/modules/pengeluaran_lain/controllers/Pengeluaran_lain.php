@@ -30,7 +30,7 @@ class Pengeluaran_lain extends CI_Controller
 			'title' => 'Pengelolaan Pengeluaran Lain-Lain',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
-			'kategori' => $this->m_global->multi_row('*', ['is_lain' => 1, 'deleted_at' => null], 'm_kategori_transaksi', null, 'nama_kategori_trans')
+			'kategori' => $this->m_global->multi_row('*', ['is_lain' => 1, 'deleted_at' => null, 'is_penerimaan' => null], 'm_kategori_transaksi', null, 'nama_kategori_trans')
 		);
 
 		/**
@@ -55,7 +55,7 @@ class Pengeluaran_lain extends CI_Controller
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$bulan = ($this->input->post('bulan') == '') ? (int)$obj_date->format('m') : $this->input->post('bulan');
 		$tahun = ($this->input->post('tahun') == '') ? (int)$obj_date->format('Y') : $this->input->post('tahun');
-		$kategori = $this->input->post('kategori');
+		$kategori = ($this->input->post('kategori') == '') ? 'all' : $this->input->post('kategori');
 
 		$paramdata = [
 			'bulan' => $bulan,
@@ -110,15 +110,16 @@ class Pengeluaran_lain extends CI_Controller
 		$id = $this->input->post('id');
 		$data = $this->t_out->getPengeluaranDet($id)->result();
 		foreach ($data as $row) {
-			?>
+		?>
 			<tr>
 				<td width="10%"><input type="hidden" class="form-control" width="5" id="qty_order_<?php echo $row->id; ?>" value="<?php echo $row->qty; ?>" onchange="tes(<?php echo $row->id ?>)"><?php echo $row->qty; ?></td>
 				<td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
+				<td style="vertical-align: middle;"><?php echo $row->keterangan; ?></td>
 				<td style="vertical-align: middle;"><?php echo 'Rp ' . number_format($row->nilai); ?></td>
 				<td style="vertical-align: middle;"><?php echo 'Rp ' . number_format($row->sub_total); ?></td>
 				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_trans_det(<?php echo $row->id; ?>)"><i class="fa fa-times"></i></button></td>
 			</tr>
-			<?php
+		<?php
 		}
 	}
 
@@ -152,7 +153,7 @@ class Pengeluaran_lain extends CI_Controller
 			'title' => 'Pengeluaran Baru',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
-			'kategori' => $this->m_global->multi_row('*', ['deleted_at' => NULL, 'is_lain' => 1], 'm_kategori_transaksi', NULL, 'nama_kategori_trans asc'),
+			'kategori' => $this->m_global->multi_row('*', ['deleted_at' => NULL, 'is_lain' => 1, 'is_penerimaan' => null], 'm_kategori_transaksi', NULL, 'nama_kategori_trans asc'),
 			'mode'		=> 'add',
 		);
 
@@ -328,6 +329,7 @@ class Pengeluaran_lain extends CI_Controller
 		$qty     = $this->input->post('qty');
 		$nilai   = $this->input->post('nilai');
 		$nilai   = str_replace('.', '', $nilai);
+		$keterangan 	= $this->input->post('keterangan');
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
@@ -362,6 +364,7 @@ class Pengeluaran_lain extends CI_Controller
 			'qty'           => $qty,
 			'nilai' 		=> $nilai,
 			'sub_total'     => $sub_total,
+			'keterangan'	=> $keterangan,
 			'created_at'	=> $timestamp
 		];
 
@@ -375,18 +378,18 @@ class Pengeluaran_lain extends CI_Controller
 		} else {
 			$nilai_sum_total = 0;
 		}
-		
+
 		$upd = $this->m_global->update('t_pengeluaran_lain', ['nilai_total' => $nilai_sum_total, 'updated_at' => $timestamp], ['id' => $id_pengeluaran_lain]);
 
 		//if ($ins && $upd) {
-			$laporan = $this->lib_mutasi->insertDataLap($sub_total, $data_header->id_kategori_trans, $kode, null, $data_header->tanggal);
+		$laporan = $this->lib_mutasi->insertDataLap($sub_total, $data_header->id_kategori_trans, $kode, null, $data_header->tanggal);
 
-			if ($laporan['status'] === FALSE) {
-				$this->db->trans_rollback();
-				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal menambahkan detil transaksi';
-				return;
-			}
+		if ($laporan['status'] === FALSE) {
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal menambahkan detil transaksi';
+			return;
+		}
 		// }else{
 		// 	echo 'jaran';
 		// 	exit;
@@ -442,7 +445,6 @@ class Pengeluaran_lain extends CI_Controller
 				$retval['status'] = false;
 				$retval['pesan'] = 'Gagal Hapus Data';
 			}
-			
 		}
 
 		echo json_encode($retval);
@@ -464,17 +466,18 @@ class Pengeluaran_lain extends CI_Controller
 				$html_det .= '<tr>
 					<td style="vertical-align: middle;">' . $value->qty . '</td>
 					<td style="vertical-align: middle;">' . $value->nama . '</td>
+					<td style="vertical-align: middle;">' . $value->keterangan . '</td>
 					<td style="vertical-align: middle;" align="right">' . number_format($value->nilai) . '</td>
 					<td style="vertical-align: middle;" align="right">' . number_format($value->sub_total) . '</td>
 				</tr>';
 			}
 			$html_det .= '<tr>
-				<td colspan="3" style="vertical-align: middle;font-weight:bold;" align="center">Grand Total</td>
+				<td colspan="4" style="vertical-align: middle;font-weight:bold;" align="center">Grand Total</td>
 				<td style="vertical-align: middle;font-weight:bold;" align="right">' . number_format($total_harga_sum) . '</td>
 			</tr>';
 		} else {
 			$html_det .= '<tr>
-				<td style="vertical-align: middle;" colspan="4" align="center">Belum ada data transaksi ...</td>
+				<td style="vertical-align: middle;" colspan="5" align="center">Belum ada data transaksi ...</td>
 			</tr>';
 		}
 
@@ -552,9 +555,9 @@ class Pengeluaran_lain extends CI_Controller
 
 
 
-	
 
-	
+
+
 
 	// ===============================================
 	private function rule_validasi($is_update = false, $skip_pass = false)
@@ -692,7 +695,7 @@ class Pengeluaran_lain extends CI_Controller
 		return $no_faktur;
 	}
 
-	
+
 
 	public function menu_edit()
 	{

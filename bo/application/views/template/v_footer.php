@@ -11,6 +11,7 @@ if (isset($modal)) {
 
 echo $modal_excel_upload;
 ?>
+<?php if ($is_show_menu) { ?>
 <!-- begin:: Footer -->
 <div class="kt-footer  kt-grid__item kt-grid kt-grid--desktop kt-grid--ver-desktop" id="kt_footer">
     <div class="kt-container  kt-container--fluid ">
@@ -34,6 +35,8 @@ echo $modal_excel_upload;
 <div id="kt_scrolltop" class="kt-scrolltop">
     <i class="fa fa-arrow-up"></i>
 </div>
+
+<?php } ?>
 <!-- end::Scrolltop -->
 
 <!-- end::Global Config -->

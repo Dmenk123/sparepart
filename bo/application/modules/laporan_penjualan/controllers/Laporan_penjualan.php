@@ -99,5 +99,6 @@ class Laporan_penjualan extends CI_Controller {
         ]);
 	} 
 
+
 	
 }

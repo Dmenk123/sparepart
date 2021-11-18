@@ -69,7 +69,7 @@
           </div>
           <div class="modal-body">
             <div class="table-responsive">
-              <iframe src="<?= base_url('master_barang'); ?>" width="100%" height="480" frameborder="0" allowtransparency="true"></iframe>
+              <iframe src="<?= base_url('master_barang'); ?>?showmenu=false" width="100%" height="480" frameborder="0" allowtransparency="true"></iframe>
             </div>
           </div>
           <div class="modal-footer">

@@ -28,4 +28,4 @@ ada buy a get b free
 
 
 bug (hapus penjualan)
-ketika hapus penjualan maka stok belum dikembalikan ke awal
+ketika hapus penjualan maka stok belum dikembalikan ke awal (done)
