@@ -21,7 +21,8 @@ class Master_barang extends CI_Controller {
 		$id_user = $this->session->userdata('id_user'); 
 		$data_user = $this->m_user->get_detail_user($id_user);
 		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
-			
+		$show_menu = ($this->input->get('showmenu') != null && $this->input->get('showmenu') == 'false') ? false : true;
+		
 		/**
 		 * data passing ke halaman view content
 		 */
@@ -38,6 +39,7 @@ class Master_barang extends CI_Controller {
 		 * param (js : link js pada direktori assets/js_module)
 		 */
 		$content = [
+			'show_menu' => $show_menu,
 			'css' 	=> null,
 			'modal' => ['modal_master_barang','modal_detail_gambar', ],
 			'js'	=> 'master_barang.js',

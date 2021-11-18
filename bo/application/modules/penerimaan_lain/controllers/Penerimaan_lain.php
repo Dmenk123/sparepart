@@ -413,14 +413,14 @@ class Penerimaan_lain extends CI_Controller
 		$this->db->trans_begin();
 		$id = $this->input->post('id');
 		$join = [
-			['table' => 't_pengeluaran_lain', 'on' => 't_pengeluaran_lain_det.id_pengeluaran_lain = t_pengeluaran_lain.id'],
+			['table' => 't_penerimaan_lain', 'on' => 't_penerimaan_lain_det.id_penerimaan_lain = t_penerimaan_lain.id'],
 		];
 
-		$data_where = ['t_pengeluaran_lain_det.id' => $id, 't_pengeluaran_lain_det.deleted_at' => null];
+		$data_where = ['t_penerimaan_lain_det.id' => $id, 't_penerimaan_lain_det.deleted_at' => null];
 
-		$cek_trans = $this->m_global->single_row('t_pengeluaran_lain_det.*, t_pengeluaran_lain.kode, t_pengeluaran_lain.id_kategori_trans, t_pengeluaran_lain.tanggal', $data_where, 't_pengeluaran_lain_det', $join);
+		$cek_trans = $this->m_global->single_row('t_penerimaan_lain_det.*, t_penerimaan_lain.kode, t_penerimaan_lain.id_kategori_trans, t_penerimaan_lain.tanggal', $data_where, 't_penerimaan_lain_det', $join);
 
-		$del = $this->m_global->soft_delete($data_where, 't_pengeluaran_lain_det');
+		$del = $this->m_global->soft_delete($data_where, 't_penerimaan_lain_det');
 
 		if ($this->db->trans_status() === FALSE) {
 			$this->db->trans_rollback();
@@ -495,12 +495,12 @@ class Penerimaan_lain extends CI_Controller
 			$id = $this->input->post('id');
 			$kode = $this->input->post('kode');
 
-			$cek = $this->m_global->single_row('*', ['id' => $id, 'deleted_at' => null], 't_pengeluaran_lain');
-			$cek2 = $this->t_in->getPengeluaranDet($id);
+			$cek = $this->m_global->single_row('*', ['id' => $id, 'deleted_at' => null], 't_penerimaan_lain');
+			$cek2 = $this->t_in->getPenerimaanDet($id);
 			$cek2 = $cek2->result();
 
 			if ($cek2) {
-				$del = $this->m_global->soft_delete(['id' => $id], 't_pengeluaran_lain');
+				$del = $this->m_global->soft_delete(['id' => $id], 't_penerimaan_lain');
 			}
 
 			if ($cek2) {
@@ -526,7 +526,7 @@ class Penerimaan_lain extends CI_Controller
 					}
 				}
 
-				$del2 = $this->m_global->soft_delete(['id_pengeluaran_lain' => $id], 't_pengeluaran_lain_det');
+				$del2 = $this->m_global->soft_delete(['id_penerimaan_lain' => $id], 't_penerimaan_lain_det');
 			}
 
 			if ($this->db->trans_status() === FALSE) {
@@ -547,17 +547,6 @@ class Penerimaan_lain extends CI_Controller
 			echo json_encode($retval);
 		}
 	}
-
-
-
-
-
-
-
-
-
-
-
 
 	// ===============================================
 	private function rule_validasi($is_update = false, $skip_pass = false)

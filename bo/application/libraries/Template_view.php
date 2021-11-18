@@ -339,10 +339,16 @@ class Template_view extends CI_Controller {
 
 			$noMenuSatu++;
 		}
-		
-		// echo $sidebarComponent;exit;
-		// var_dump($sidebarComponent);exit;
+
+
 		$data['tampil_menu'] = $sidebarComponent;
+
+		if(isset($content['show_menu']) && $content['show_menu'] == false) {
+			$is_show_menu = false;
+		}else{
+			$is_show_menu = true;
+		}
+
 		if($content['css']){
 			// $data['css'] = $this->_ci->load->view($content['css'], $data, TRUE);
 			$data['link_js']      = 'assets/css_module/'.$content['css'];
@@ -378,13 +384,12 @@ class Template_view extends CI_Controller {
 		
 		//global modal for upload excel to master
 		$data['modal_excel_upload'] = $this->_ci->load->view('template/modal_upload_excel', $data, TRUE);
-        
+        $data['is_show_menu'] = $is_show_menu;
 		$data['header']     = $this->_ci->load->view('template/v_header', $data, TRUE);
 		$data['navbar']     = $this->_ci->load->view('template/v_navbar', $data, TRUE);
         $data['content']    = $this->_ci->load->view($content['view'], $data, TRUE);
         $data['footer']     = $this->_ci->load->view('template/v_footer', $data, TRUE);
 		
-
         $this->_ci->load->view('template/v_index', $data);
 
     }

@@ -141,6 +141,7 @@ class T_penerimaan_lain extends CI_Model
 		$this->db->join('m_user mu', 'mu.id = pl.id_user');
 		$this->db->join('m_kategori_transaksi mk', 'pl.id_kategori_trans = mk.id_kategori_trans');
 		$this->db->where('pl.kode', $kode);
+		$this->db->where('pl.deleted_at', null);
 		$q = $this->db->get();
 		return $q;
 	}
@@ -156,6 +157,7 @@ class T_penerimaan_lain extends CI_Model
 		$this->db->join('t_penerimaan_lain p', 'pd.id_penerimaan_lain=p.id');
 		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
 		$this->db->where('pd.id_penerimaan_lain', $id);
+		$this->db->where('pd.deleted_at', null);
 		$this->db->order_by('pd.created_at', 'ASC');
 		$q = $this->db->get();
 		return $q;
@@ -166,7 +168,7 @@ class T_penerimaan_lain extends CI_Model
 		$query = "
 			SELECT SUM(sub_total) as total
 			FROM t_penerimaan_lain_det
-			WHERE id_penerimaan_lain = $id
+			WHERE id_penerimaan_lain = $id and deleted_at is NULL
 		";
 		return $this->db->query($query);
 	}

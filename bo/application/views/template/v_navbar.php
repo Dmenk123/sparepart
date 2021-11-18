@@ -1,3 +1,4 @@
+<?php if ($is_show_menu) { ?>
 <!-- begin:: Header -->
 <div id="kt_header" class="kt-header kt-grid__item  kt-header--fixed ">
 
@@ -137,3 +138,4 @@
 
 </div>
 <!-- end:: Header -->
+<?php } ?>
