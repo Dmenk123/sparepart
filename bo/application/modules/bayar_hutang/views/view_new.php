@@ -1,4 +1,4 @@
-z<style>
+<style>
 #pageMessages {
   position: fixed;
   bottom: 15px;
@@ -56,43 +56,63 @@ z<style>
 
         <!--begin: Form Invoice -->
     
-        <form id="form-user" name="form-user">
-            <div class="row">
-                <div class="form-group col-sm-4">
-                    <input type="hidden" class="form-control" id="id_trans" name="id_trans"  value="<?php $value = (isset($id_trans))?$id_trans:''; echo $value; ?>">
-                    <input type="hidden" class="form-control" id="mode" name="mode" value="<?php echo $mode;?>">
-                    <label for="lbl_username" class="form-control-label">Kode Pembelian :</label>
-                        <select name="kode_pembelian" id="kode_pembelian" class="form-control select2">
-                            <option value="0" data-id="0">-PILIH-</option>
-                            <?php foreach($data_hutang as $row):?>
-                                <option value="<?php echo $row->kode;?>" title="<?php echo $row->hutang_fix;?>"><?php echo $row->kode;?></option>
-                            <?php endforeach;?>
-                        </select>
-                    <span class="help-block"></span>
+        <form id="form_pembayaran" name="form_pembayaran">
+           <div class="kt-portlet">
+              <div class="kt-portlet__head">
+                <div class="kt-portlet__head-label">
+                  <h3 class="kt-portlet__head-title">
+                    Formulir Pembayaran
+                  </h3>
                 </div>
-                <div class="form-group col-sm-4">
-                    <label for="lbl_username" class="form-control-label">Sisa Hutang :</label>
-                      <input type="text"  class="form-control" id="hutang_txt" name="hutang_txt" value="" disabled>
-                      <input type="hidden" class="form-control" id="hutang" name="hutang" value="">
-                    <span class="help-block"></span>
-                </div>
-                <div class="form-group col-sm-4">
-                    <label for="lbl_namabarang" class="form-control-label">Kode Transaksi :</label>
+              </div>
+              <div class="kt-portlet__body">
+                  <div class="form-group">
+                    <label>Kode Pembayaran</label>
                     <input type="text" class="form-control" value="<?= $kode_trans; ?>" disabled>
                     <input type="hidden" class="form-control" id="kode_trans" name="kode_trans" value="<?= $kode_trans; ?>">
+                    <input type="hidden" class="form-control" id="id_trans" name="id_trans"  value="<?php $value = (isset($id_trans))?$id_trans:''; echo $value; ?>">
+                    <input type="hidden" class="form-control" id="id_trans_det" name="id_trans_det"  value="<?php $value = (isset($id_trans_det))?$id_trans_det:''; echo $value; ?>">
                     <span class="help-block"></span>
+                  </div>
+                  <div class="form-group">
+                    <label for="">Tanggal</label>
+                    <input type="text" class="form-control kt_datepicker" id="tanggal" readonly="" name="tanggal"> 
+                    <span class="help-block"></span>
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleSelect1">Kode Pembelian</label>
+                    <select name="kode_pembelian" id="kode_pembelian" class="form-control select2">
+                      <option value="0" data-id="0">-PILIH-</option>
+                      <?php foreach($data_hutang as $row):?>
+                          <option value="<?php echo $row->kode;?>" title="<?php echo $row->hutang_fix;?>"><?php echo $row->kode;?></option>
+                      <?php endforeach;?>
+                    </select>
+                    <span class="help-block"></span>
+                  </div>
+                  <div class="form-group">
+                    <label>Sisa Hutang</label>
+                    <input type="text"  class="form-control" id="hutang_txt" name="hutang_txt" value="" disabled>
+                    <input type="hidden" class="form-control" id="hutang" name="hutang" value="">
+                    <span class="help-block"></span>
+                  </div>
+                  <div class="form-group">
+                    <label>Pembayaran</label>
+                    <input type="text"  class="form-control uang" id="pembayaran" name="pembayaran" value="">
+                    <span class="help-block"></span>
+                  </div>
+                  <div class="form-group">
+                    <label>Keterangan</label>
+                    <input type="text"  class="form-control" id="keterangan" name="keterangan" value="">
+                    <span class="help-block"></span>
+                  </div>
+              </div>
+              <div class="kt-portlet__foot">
+                <div class="kt-form__actions">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                  <button type="reset" class="btn btn-secondary">Cancel</button>
                 </div>
-            </div>
-         
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            <?php if ($mode == 'edit') { ?>
-                <button type="button" class="btn btn-primary" id="btnSave" onclick="editNew()">Simpan
-            <?php } else { ?>
-                <button type="button" class="btn btn-primary" id="btnSave" onclick="saveNew()">Selanjutnya <i class="fa fa-angle-double-right"></i></button>
-            <?php } ?>
-          </div>
-         
+              </div>
+            </div>         
         </form>
       </div>
     </div>

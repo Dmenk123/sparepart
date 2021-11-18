@@ -91,12 +91,13 @@
                 <option value="all">Semua Kategori</option>
                 <?php
                 $arr_data = [
-                  ['id' => '0', 'txt' => 'Hutang'],
+                  ['id' => '2', 'txt' => 'Hutang'],
                   ['id' => '1', 'txt' => 'Lunas'],
                 ];
                
                 foreach ($arr_data as $key => $value) {
-                  if ((int)$this->input->get('kategori') == $value['id']) {
+                 
+                  if ((int)$this->input->get('kategori') == (int)$value['id']) {
                     echo "<option value='" . $value['id'] . "' selected>" . $value['txt'] . "</option>";
                   } else {
                     echo "<option value='" . $value['id'] . "'>" . $value['txt'] . "</option>";

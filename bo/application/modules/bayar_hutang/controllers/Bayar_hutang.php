@@ -150,121 +150,260 @@ class Bayar_hutang extends CI_Controller {
 		$this->template_view->load_view($content, $data);
 	}
 
-	public function save_new_transaksi()
+	public function simpan_pembayaran()
 	{
-		$this->load->library('Enkripsi');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$tgl = $obj_date->format('Y-m-d');
-		$arr_valid = $this->rule_validasi();
-		$counter_trans = $this->t_bayar_hutang->get_max_transaksi();
+		try {
+			$this->db->trans_begin();
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			$tgl = $obj_date->format('Y-m-d');
 
-		$mode = $this->input->post('mode');
-		$kode_pembelian  = $this->input->post('kode_pembelian');
-		$data_beli = $this->m_global->single_row('*', ['kode_pembelian' => $kode_pembelian, 'deleted_at' => null], 't_pembelian');
+			$arr_valid = $this->rule_validasi();
+			if ($arr_valid['status'] == FALSE) {
+				echo json_encode($arr_valid);
+				return;
+			}
+			
+			$id_trans = $this->input->post('id_trans');
+			$id_trans_det = $this->input->post('id_trans_det');
+			$kode_trans = $this->input->post('kode_trans');
+			$tanggal = $this->input->post('tanggal');
+			$tanggal = DateTime::createFromFormat('d-m-Y', $tanggal)->format('Y-m-d');
+			
+			$kode_pembelian = $this->input->post('kode_pembelian');
+			$data_beli = $this->m_global->single_row('*', ['kode_pembelian' => $kode_pembelian, 'deleted_at' => null], 't_pembelian');
+			if(!$data_beli) {
+				$retval['status'] = false;
+				$retval['pesan'] = 'Data Pembelian tidak ditemukan';
+				echo json_encode($arr_valid);
+				return;
+			}
 
-		$hutang = $this->input->post('hutang');
-		$kode_trans = $this->input->post('kode_trans');
-		$cek_kode = generate_kode_transaksi($tgl, $counter_trans, 'BYR');
+			$hutang = $this->input->post('hutang');
+			$pembayaran = trim($this->input->post('pembayaran'));
+			$pembayaran = str_replace('.', '', $pembayaran);
+			$keterangan = $this->input->post('keterangan');
 
-		## untuk menghindari duplikat kode
-		if ($kode_trans == $cek_kode) {
-			$kode_penerimaan_fix = $kode_trans;
-		} else {
-			$kode_penerimaan_fix = $cek_kode;
-		}
+			if($id_trans == '') {
+				$is_update = true;
+			}else{
+				$is_update = false;
+			}
 
-		if ($arr_valid['status'] == FALSE) {
-			echo json_encode($arr_valid);
-			return;
-		}
+			if($is_update == false) {
+				$max_transaksi = $this->m_global->max('id', 't_bayar_hutang', [
+					'id_pembelian' => $data_beli->id_pembelian,
+					'deleted_at' => null
+				]);
+	
+				if($max_transaksi) {
+					$id_max_trans = $max_transaksi->id;
+				}else{
+					$new_id = $this->m_global->max('id', 't_bayar_hutang', [
+						'deleted_at' => null
+					]);
+	
+					if($new_id) {
+						$id_max_trans = $max_transaksi->id+1;
+					}else{
+						$id_max_trans = 1;
+					}
+				}
+	
+				$max_transaksi_det = $this->m_global->max('id_bayar_det', 't_bayar_hutang', [
+					'id_pembelian' => $data_beli->id_pembelian
+				]);
+	
+				if($max_transaksi_det) {
+					$id_max_trans_det = $max_transaksi->id_bayar_det+1;
+				}else{
+					$id_max_trans_det = 1;
+				}
+			}else{
+				$id_max_trans = $id_trans;
+				$id_max_trans_det = $id_trans_det;
+			}
 
-		$this->db->trans_begin();
+			### insert pembayaran
+			$arr_pembayaran = [
+				'id_pembelian' => $data_beli->id_pembelian,
+				'kode' => $kode_trans,
+				'tanggal' => $tanggal,
+				'nilai_bayar' => $pembayaran,
+				'keterangan' => $keterangan,
+				'id_user' => $this->session->userdata('id_user'),
+			];
 
-		$data_bayar_hutang = [
-			'id_pembelian' 	=> $data_beli->id_pembelian,
-			'total_bayar' => $hutang,
-			'id_user' 	=> $this->session->userdata('id_user'),
-			'id_gudang' => $this->input->post('id_gudang'),
-			'tanggal' 	=> $tgl,
-			'total_harga' => 0,
-			'created_at' => $timestamp,
-		];
+			if(!$is_update) {
+				$arr_pembayaran += [
+					'id' => $id_max_trans,
+					'id_bayar_det' => $id_max_trans_det,
+					'created_at' => $timestamp,
+				];
+			}else{
+				$arr_pembayaran += [
+					'updated_at' => $timestamp,
+				];
+			}
 
-		$insert = $this->m_global->save($data_bayar_hutang, 't_penerimaan');
+			if(!$is_update) {
+				$simpan = $this->m_global->save($arr_pembayaran, 't_bayar_hutang');
+			}else{
+				$simpan = $this->m_global->update('t_bayar_hutang', $arr_pembayaran, 't_bayar_hutang', ['id' => $id_max_trans, 'id_bayar_det' => $id_max_trans_det]);
+			}
 
-		if ($this->db->trans_status() === FALSE) {
-			$this->db->trans_rollback();
+			if ($this->db->trans_status() === FALSE) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal menambahkan Pembayaran';
+			} else {
+				$this->db->trans_commit();
+
+				### cek data pembayaran disamakan dengan total pembelian apakah sudah sama
+				if((float)$data_beli->total_pembelian == (float)$this->t_bayar_hutang->sum_pembayaran_by_id($id_max_trans)) {
+					$data_update['is_lunas'] = 1;
+					$data_update['tgl_lunas'] = $tanggal;
+					$update = $this->t_pembelian->update(['id_pembelian' => $data_beli->id_pembelian], ['is_lunas' => 1, 'tgl_lunas' => $tanggal]);
+				} 
+				
+				#### insert laporan keuangan (pengurangan piutang pembelian)
+				// $lap = $this->lib_mutasi->insertDataLap(
+				// 	$pembayaran, 
+				// 	4, 
+				// 	$cek_pembelian_det->kode_pembelian,
+				// 	$cek_pembelian_det->is_kredit,
+				// 	null,
+				// 	$cek_penerimaan->kode_penerimaan,
+				// );
+
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses menambahkan Penerimaan';
+			}
+						
+		} catch (\Throwable $th) {
+			// $this->db->trans_rollback();
 			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan Data Barang Masuk';
-		} else {
-			$this->db->trans_commit();
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Menambahkan Data Barang Masuk';
-			$retval['kode'] = $kode_penerimaan_fix;
+			$retval['pesan'] = $th;
 		}
 
 		echo json_encode($retval);
 	}
 
-	public function add_penerimaan()
-	{
-		$id_user = $this->session->userdata('id_user'); 
-		$data_user = $this->m_user->get_detail_user($id_user);
-		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
-		$kode = $this->input->get('reff');
-		$is_update = $this->input->get('update');
-		
-		### cek jika kode valid
-		$join = [ 
-			['table' => 't_pembelian', 'on'	=> 't_penerimaan.id_pembelian = t_pembelian.id_pembelian'],
-			['table' => 'm_agen', 'on' => 't_pembelian.id_agen = m_agen.id_agen']
-		];
-		
-		$cek_kode = $this->m_global->single_row('t_penerimaan.*, t_pembelian.kode_pembelian, t_pembelian.tanggal as tanggal_beli, m_agen.nama_perusahaan', ['kode_penerimaan' => $kode, 't_penerimaan.deleted_at' => null], 't_penerimaan', $join);
+	// public function save_new_transaksi()
+	// {
+	// 	$this->load->library('Enkripsi');
+	// 	$obj_date = new DateTime();
+	// 	$timestamp = $obj_date->format('Y-m-d H:i:s');
+	// 	$tgl = $obj_date->format('Y-m-d');
+	// 	$arr_valid = $this->rule_validasi();
+	// 	$counter_trans = $this->t_bayar_hutang->get_max_transaksi();
 
-		if(!$cek_kode) {
-			return redirect('barang_masuk');
-		}
+	// 	$mode = $this->input->post('mode');
+	// 	$kode_pembelian  = $this->input->post('kode_pembelian');
+	// 	$data_beli = $this->m_global->single_row('*', ['kode_pembelian' => $kode_pembelian, 'deleted_at' => null], 't_pembelian');
 
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$tgl = $obj_date->format('Y-m-d');
+	// 	$hutang = $this->input->post('hutang');
+	// 	$kode_trans = $this->input->post('kode_trans');
+	// 	$cek_kode = generate_kode_transaksi($tgl, $counter_trans, 'BYR');
+
+	// 	## untuk menghindari duplikat kode
+	// 	if ($kode_trans == $cek_kode) {
+	// 		$kode_penerimaan_fix = $kode_trans;
+	// 	} else {
+	// 		$kode_penerimaan_fix = $cek_kode;
+	// 	}
+
+	// 	if ($arr_valid['status'] == FALSE) {
+	// 		echo json_encode($arr_valid);
+	// 		return;
+	// 	}
+
+	// 	$this->db->trans_begin();
+
+	// 	$data_bayar_hutang = [
+	// 		'id_pembelian' 	=> $data_beli->id_pembelian,
+	// 		'total_bayar' => $hutang,
+	// 		'id_user' 	=> $this->session->userdata('id_user'),
+	// 		'id_gudang' => $this->input->post('id_gudang'),
+	// 		'tanggal' 	=> $tgl,
+	// 		'total_harga' => 0,
+	// 		'created_at' => $timestamp,
+	// 	];
+
+	// 	$insert = $this->m_global->save($data_bayar_hutang, 't_penerimaan');
+
+	// 	if ($this->db->trans_status() === FALSE) {
+	// 		$this->db->trans_rollback();
+	// 		$retval['status'] = false;
+	// 		$retval['pesan'] = 'Gagal menambahkan Data Barang Masuk';
+	// 	} else {
+	// 		$this->db->trans_commit();
+	// 		$retval['status'] = true;
+	// 		$retval['pesan'] = 'Sukses Menambahkan Data Barang Masuk';
+	// 		$retval['kode'] = $kode_penerimaan_fix;
+	// 	}
+
+	// 	echo json_encode($retval);
+	// }
+
+	// public function add_penerimaan()
+	// {
+	// 	$id_user = $this->session->userdata('id_user'); 
+	// 	$data_user = $this->m_user->get_detail_user($id_user);
+	// 	$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
+	// 	$kode = $this->input->get('reff');
+	// 	$is_update = $this->input->get('update');
 		
-		// var_dump($diskon); die();
+	// 	### cek jika kode valid
+	// 	$join = [ 
+	// 		['table' => 't_pembelian', 'on'	=> 't_penerimaan.id_pembelian = t_pembelian.id_pembelian'],
+	// 		['table' => 'm_agen', 'on' => 't_pembelian.id_agen = m_agen.id_agen']
+	// 	];
+		
+	// 	$cek_kode = $this->m_global->single_row('t_penerimaan.*, t_pembelian.kode_pembelian, t_pembelian.tanggal as tanggal_beli, m_agen.nama_perusahaan', ['kode_penerimaan' => $kode, 't_penerimaan.deleted_at' => null], 't_penerimaan', $join);
+
+	// 	if(!$cek_kode) {
+	// 		return redirect('barang_masuk');
+	// 	}
+
+	// 	$obj_date = new DateTime();
+	// 	$timestamp = $obj_date->format('Y-m-d H:i:s');
+	// 	$tgl = $obj_date->format('Y-m-d');
+		
+	// 	// var_dump($diskon); die();
 			
-		/**
-		 * data passing ke halaman view content
-		 */
-		$retval = array(
-			'data_user' => $data_user,
-			'data_role'	=> $data_role,
-			'data' => $cek_kode,
-			'is_update' => $is_update
-		);
+	// 	/**
+	// 	 * data passing ke halaman view content
+	// 	 */
+	// 	$retval = array(
+	// 		'data_user' => $data_user,
+	// 		'data_role'	=> $data_role,
+	// 		'data' => $cek_kode,
+	// 		'is_update' => $is_update
+	// 	);
 
-		if($is_update == 'true') {
-			$retval['title'] = 'Update Barang Masuk';
-		}else{
-			$retval['title'] = 'Barang Masuk Baru';
-		}
+	// 	if($is_update == 'true') {
+	// 		$retval['title'] = 'Update Barang Masuk';
+	// 	}else{
+	// 		$retval['title'] = 'Barang Masuk Baru';
+	// 	}
 		
 
-		/**
-		 * content data untuk template
-		 * param (css : link css pada direktori assets/css_module)
-		 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
-		 * param (js : link js pada direktori assets/js_module)
-		 */
-		$content = [
-			'css' 	=> null,
-			'modal' => null,
-			'js'	=> 'penerimaan.js',
-			'view'	=> 'view_add_barang_masuk'
-		];
+	// 	/**
+	// 	 * content data untuk template
+	// 	 * param (css : link css pada direktori assets/css_module)
+	// 	 * param (modal : modal komponen pada modules/nama_modul/views/nama_modal)
+	// 	 * param (js : link js pada direktori assets/js_module)
+	// 	 */
+	// 	$content = [
+	// 		'css' 	=> null,
+	// 		'modal' => null,
+	// 		'js'	=> 'penerimaan.js',
+	// 		'view'	=> 'view_add_barang_masuk'
+	// 	];
 
-		$this->template_view->load_view($content, $retval);
-	}
+	// 	$this->template_view->load_view($content, $retval);
+	// }
 
 	
 
@@ -358,132 +497,7 @@ class Bayar_hutang extends CI_Controller {
 		
 	}
 	
-	public function simpan_penerimaan_barang()
-	{
-		try {
-			$this->db->trans_begin();
-
-			$obj_date = new DateTime();
-			$timestamp = $obj_date->format('Y-m-d H:i:s');
-			$tgl = $obj_date->format('Y-m-d');
-			
-			$id_penerimaan = $this->input->post('id_penerimaan');
-			$id_pembelian = $this->input->post('id_pembelian');
-			$kode_penerimaan = $this->input->post('kode_penerimaan');
-			
-			$cek_penerimaan = $this->m_global->single_row("*", ['id_penerimaan' => $id_penerimaan, 'deleted_at' => null], 't_penerimaan');
-
-			$sum_harga_total = 0;
-			for ($i=0; $i < count($this->input->post('qty')); $i++) { 
-				$sum_harga_total += $this->input->post('harga_total_raw')[$i];
-				
-				$joni = [ 
-					['table' => 't_pembelian', 'on'	=> 't_pembelian_det.id_pembelian = t_pembelian.id_pembelian'],
-				];
-
-				$cek_pembelian_det = $this->m_global->single_row(
-					"t_pembelian_det.*, t_pembelian.kode_pembelian, t_pembelian.is_kredit", 
-					['id_pembelian_det' => $this->input->post('pembelian_det')[$i], 't_pembelian_det.deleted_at' => null], 
-					't_pembelian_det', 
-					$joni
-				);
-
-				### insert penerimaan det
-				$arr_penerimaan_det = [
-					'qty' => $this->input->post('qty')[$i],
-					'id_penerimaan' => $id_penerimaan,
-					'id_barang' => $this->input->post('id_barang')[$i],
-					'harga' => $cek_pembelian_det->harga_fix,
-					'harga_total' => $this->input->post('harga_total_raw')[$i],
-					'created_at' => $timestamp,
-				];
-
-				$insert_det = $this->m_global->save($arr_penerimaan_det, 't_penerimaan_det');
-				
-				#### update pembelian det
-				$where_update = ['id_pembelian_det' => $this->input->post('pembelian_det')[$i]];
-				$data_update['qty_terima'] = $cek_pembelian_det->qty_terima + $this->input->post('qty')[$i];
-
-				// $data_update['tgl_terima'] = $tgl;
-				// $data_update['reff_terima'] = $kode_penerimaan;
-
-				### cek qty tabel pembelian det, jika qty penerimaan / sum penerimaan sesuai jumlah, set flag is_terima
-				if($cek_pembelian_det->qty == $this->t_penerimaan->sum_barang_masuk_pertransaksi($this->input->post('id_barang')[$i], $id_pembelian)) {
-					$data_update['is_terima'] = 1;
-				} 
-
-				$update = $this->t_pembelian->updatePembelianDet($where_update, $data_update);
-
-				#### mutasi
-				$mutasi = $this->lib_mutasi->mutasiMasuk(
-					$this->input->post('id_barang')[$i], 
-					$this->input->post('qty')[$i], 
-					null, 
-					4, 
-					null, 
-					$cek_pembelian_det->harga_fix, 
-					$cek_penerimaan->id_gudang, 
-					$cek_penerimaan->kode_penerimaan
-				);
-
-				#### insert laporan keuangan (pengurangan piutang pembelian)
-				$lap = $this->lib_mutasi->insertDataLap(
-					$this->input->post('harga_total_raw')[$i], 
-					4, 
-					$cek_pembelian_det->kode_pembelian,
-					$cek_pembelian_det->is_kredit,
-					null,
-					$cek_penerimaan->kode_penerimaan,
-				);
-				
-			}
-
-			### update t_penerimaan (total_harga)
-			$data_where = ['id_penerimaan' => $id_penerimaan];
-			$this->m_global->update('t_penerimaan', ['total_harga' => $sum_harga_total + $cek_penerimaan->total_harga], $data_where);
-
-			if ($this->db->trans_status() === FALSE) {
-				$this->db->trans_rollback();
-				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal menambahkan Penerimaan';
-			} else {
-				$this->db->trans_commit();
-
-				$data_pembelian_det = $this->m_global->multi_row('*', ['id_pembelian' => $id_pembelian], 't_pembelian_det');
-				$arr = [];
-
-				foreach ($data_pembelian_det as $key => $value) {
-					if($value->qty == $value->qty_terima) {
-						$txt = 'ok';	
-					}else{
-						$txt = 'belum';
-					}
-
-					$arr[] = $txt; 
-				}
-
-				### jika tidak ada yg belum
-				### update t_pembelian set flag is_terima_all = 1 where is_terima di masing-masing det not null
-				if(!in_array('belum', $arr)) {
-					$data_where = ['id_pembelian' => $id_pembelian];
-					$this->m_global->update('t_pembelian', ['is_terima_all' => 1], $data_where);
-				}
-				
-				$retval['status'] = true;
-				$retval['pesan'] = 'Sukses menambahkan Penerimaan';
-			}
-
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses menambahkan Penerimaan';
-			
-		} catch (\Throwable $th) {
-			// $this->db->trans_rollback();
-			$retval['status'] = false;
-			$retval['pesan'] = $th;
-		}
-
-		echo json_encode($retval);
-	}
+	
 
 	public function change_qty()
 	{
@@ -699,21 +713,27 @@ class Bayar_hutang extends CI_Controller {
 		$data['inputerror'] = array();
 		$data['status'] = TRUE;
 
-		if ($this->input->post('id_pembelian') == '') {
-			$data['inputerror'][] = 'id_pembelian';
-			$data['error_string'][] = 'Wajib Memilih Kode Pembelian';
+		if ($this->input->post('kode_trans') == '') {
+			$data['inputerror'][] = 'kode_trans';
+			$data['error_string'][] = 'Wajib Mengisi Kode Transaksi';
 			$data['status'] = FALSE;
 		}
 
-		if ($this->input->post('id_gudang') == '') {
-			$data['inputerror'][] = 'id_gudang';
-			$data['error_string'][] = 'Wajib Memilih Gudang';
+		if ($this->input->post('tanggal') == '') {
+			$data['inputerror'][] = 'tanggal';
+			$data['error_string'][] = 'Wajib Memilih Tanggal';
 			$data['status'] = FALSE;
 		}
 
-		if ($this->input->post('kode_penerimaan') == '') {
-			$data['inputerror'][] = 'kode_penerimaan';
-			$data['error_string'][] = 'Wajib Menginputkan kode penerimaan';
+		if ($this->input->post('kode_pembelian') == '') {
+			$data['inputerror'][] = 'kode_pembelian';
+			$data['error_string'][] = 'Wajib Menginputkan Kode Pembelian';
+			$data['status'] = FALSE;
+		}
+
+		if ($this->input->post('pembayaran') == '') {
+			$data['inputerror'][] = 'pembayaran';
+			$data['error_string'][] = 'Wajib Menginputkan Pembayayaran';
 			$data['status'] = FALSE;
 		}
 

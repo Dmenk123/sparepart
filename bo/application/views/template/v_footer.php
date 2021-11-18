@@ -49,7 +49,7 @@ echo $modal_excel_upload;
 <script src="<?= base_url('assets/'); ?>plugins/ckeditor/adapters/jquery.js" type="text/javascript"></script>
 <script src="<?= base_url('assets/'); ?>plugins/jquery-mask/jquery.mask.min.js" type="text/javascript"></script>
 <script src="<?= base_url('assets/'); ?>plugins/moment/moment.min.js" type="text/javascript"></script>
-<script src="<?= base_url('build/'); ?>js/custom.js" type="text/javascript"></script>
+<script src="<?= base_url('build/'); ?>js/custom.js" type="text/javascript"></script>>
 <?php if (isset($link_js)) { ?>
 <?php if (is_array($link_js)) { ?>
 <?php foreach ($link_js as $keys => $values) { ?>

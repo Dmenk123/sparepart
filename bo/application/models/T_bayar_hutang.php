@@ -129,6 +129,20 @@ class T_bayar_hutang extends CI_Model
 		}
 	}
 
+	function sum_pembayaran_by_id($id)
+	{
+		$query = "
+			SELECT COALESCE(SUM(pd.qty),0) as total_harga
+			FROM t_bayar_hutang
+			WHERE id = '$id' AND deleted_at is null
+		";
+		$q = $this->db->query($query)->row();
+		return $q->total_harga;
+	}
+
+
+
+
 	public function getDataLapKeuangan()
 	{
 		$q = $this->db->query("SELECT
@@ -178,15 +192,7 @@ class T_bayar_hutang extends CI_Model
 		return $q;
 	}
 
-	function getTotalTransaksiDet($id)
-	{
-		$query = "
-			SELECT SUM(sub_total) as total
-			FROM t_penerimaan_lain_det
-			WHERE id_penerimaan_lain = $id and deleted_at is NULL
-		";
-		return $this->db->query($query);
-	}
+	
 
 	############################################################################################
 }
