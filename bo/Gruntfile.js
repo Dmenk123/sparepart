@@ -14,7 +14,6 @@ module.exports = (grunt) => {
         * Create configuration.
         */
         grunt.initConfig({
-
             /**
             * Minify CSS code.
             */
@@ -25,12 +24,18 @@ module.exports = (grunt) => {
                 main: {
                     files: [{
                         expand:true,
-                        cwd:'/assets/build/css',
-                        src:'style.css',
-                        dest:'_dist/css',
-                        ext:'.css'
+                        cwd:'assets/css_module',
+                        src:['*.css'],
+                        dest:'build/css',
+                        ext:'.min.css'
                     }]
-                }
+                },
+                // joka properti combine dijalankan, maka otomatis di minify
+                // combine: {
+                //     files: {
+                //         'build/css/bundle.min.css': ['assets/css_module/*.css']
+                //     }
+                // },
             },
 
             /**
@@ -46,7 +51,9 @@ module.exports = (grunt) => {
                         ext:'.js'
                     }]
                 }
-            }
+            },
+
+            
         })
 
         /**

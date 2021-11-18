@@ -18,17 +18,19 @@
 
 		<!--begin::Global Theme Styles(used by all pages) -->
 		<link href="<?= base_url('assets/template/'); ?>assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
-		<link href="<?= base_url('assets/template/'); ?>assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
-		<link href="<?= base_url('assets/template/'); ?>assets/plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
+		
+		<!-- <link href="<?= base_url('assets/template/'); ?>assets/css/style.bundle.css" rel="stylesheet" type="text/css" /> -->
+		<link href="<?= base_url('build/'); ?>css/style.min.css" rel="stylesheet" type="text/css" />
+
+		<!-- <link href="<?= base_url('assets/template/'); ?>assets/plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" /> -->
+		<link href="<?= base_url('build/'); ?>css/datatables.min.css" rel="stylesheet" type="text/css" />
 		<!--end::Global Theme Styles -->
 
 		<!--begin::Layout Skins(used by all pages) -->
-		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/header/base/light.css" rel="stylesheet" type="text/css" />
-		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/header/menu/light.css" rel="stylesheet" type="text/css" />
-		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/brand/dark.css" rel="stylesheet" type="text/css" />
-		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/aside/dark.css" rel="stylesheet" type="text/css" />
-		<!-- <link href="<?= base_url('assets/'); ?>loader/main.css" rel="stylesheet" type="text/css" />
-		<link href="<?= base_url('assets/'); ?>loader/normalize.css" rel="stylesheet" type="text/css" /> -->
+		<link href="<?= base_url('build/'); ?>css/light.min.css" rel="stylesheet" type="text/css" />
+		<link href="<?= base_url('build/'); ?>css/light-menu.min.css" rel="stylesheet" type="text/css" />
+		<link href="<?= base_url('build/'); ?>css/dark-brand.min.css" rel="stylesheet" type="text/css" />
+		<link href="<?= base_url('build/'); ?>css/dark.min.css" rel="stylesheet" type="text/css" />
 
 		<!--end::Layout Skins -->
     	<link rel="shortcut icon" href="<?= base_url('assets/template/'); ?>assets/media/logos/favicon.ico" />

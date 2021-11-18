@@ -520,4 +520,4 @@ $config['rewrite_short_tags'] = FALSE;
 $config['proxy_ips'] = '';
 
 #### SET TRUE jika Production
-$config['is_production'] = TRUE;
+$config['is_production'] = FALSE;

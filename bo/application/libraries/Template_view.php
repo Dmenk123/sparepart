@@ -347,7 +347,7 @@ class Template_view extends CI_Controller {
 			// $data['css'] = $this->_ci->load->view($content['css'], $data, TRUE);
 			$data['link_js']      = 'assets/css_module/'.$content['css'];
 		}
-		
+
 		if($content['js']){
 			if(config_item('is_production') == TRUE) {
 				$path_url = 'build/js';
