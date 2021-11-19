@@ -26,7 +26,7 @@
           </div>
         </div>
 
-        <div class="kt-portlet__head-toolbar" style="float-right;"><?= $this->template_view->getAddButton(false, 'add_menu', 'new_bayar_utang', 'Transaksi Baru'); ?></div>
+        <div class="kt-portlet__head-toolbar" style="float-right;"><?= $this->template_view->getAddButton(false, 'add_menu', 'new_pengeluaran', 'Tambah Pengeluaran'); ?></div>
       </div>
       <div class="kt-portlet__body">
         <form method="get" class="kt-form kt-form--fit kt-margin-b-20" id="formFilter">
@@ -90,17 +90,11 @@
               <select name="kategori" id="kategori" class="form-control select2">
                 <option value="all">Semua Kategori</option>
                 <?php
-                $arr_data = [
-                  ['id' => '2', 'txt' => 'Hutang'],
-                  ['id' => '1', 'txt' => 'Lunas'],
-                ];
-               
-                foreach ($arr_data as $key => $value) {
-                 
-                  if ((int)$this->input->get('kategori') == (int)$value['id']) {
-                    echo "<option value='" . $value['id'] . "' selected>" . $value['txt'] . "</option>";
+                foreach ($kategori as $key => $value) {
+                  if ((int)$this->input->get('kategori') == $value->id_kategori_trans) {
+                    echo "<option value='$value->id_kategori_trans' selected>$value->nama_kategori_trans</option>";
                   } else {
-                    echo "<option value='" . $value['id'] . "'>" . $value['txt'] . "</option>";
+                    echo "<option value='$value->id_kategori_trans'>$value->nama_kategori_trans</option>";
                   }
                 }
                 ?>
@@ -130,7 +124,7 @@
         </form>
 
         <!--begin: Datatable -->
-        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_penerimaan">
+        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_pengeluaran">
           <thead>
             <tr>
               <th style="width: 5%;">No</th>
@@ -138,7 +132,6 @@
               <th>Kode</th>
               <th>Kategori</th>
               <th>User</th>
-              <th>Keterangan</th>
               <th>Total Rupiah</th>
               <th style="width: 5%;">Aksi</th>
             </tr>

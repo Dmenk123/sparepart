@@ -142,22 +142,36 @@ class T_bayar_hutang extends CI_Model
 	}
 
 
-
-
 	public function getDataLapKeuangan()
 	{
 		$q = $this->db->query("SELECT
 				kode_reff AS kode,
-				IFNULL(((select sum(hutang) from t_lap_keuangan b where b.kode_reff2 = a.kode_reff) + a.hutang), a.hutang) as hutang_fix
+				IFNULL((select sum(hutang) from t_lap_keuangan b where b.kode_reff = a.kode_reff and b.deleted_at is null), a.hutang) as hutang_fix
 			FROM
 				t_lap_keuangan a
 			WHERE
-				IFNULL(((select sum(hutang) from t_lap_keuangan b where b.kode_reff2 = a.kode_reff) + a.hutang), a.hutang) > 0 AND 
+				IFNULL((select sum(hutang) from t_lap_keuangan b where b.kode_reff = a.kode_reff and b.deleted_at is null), a.hutang) > 0 AND 
 				a.id_kategori_trans = 1	
 		");
 
 		return $q->result();
 	}
+
+
+	// public function getDataLapKeuangan()
+	// {
+	// 	$q = $this->db->query("SELECT
+	// 			kode_reff AS kode,
+	// 			IFNULL(((select sum(hutang) from t_lap_keuangan b where b.kode_reff2 = a.kode_reff) + a.hutang), a.hutang) as hutang_fix
+	// 		FROM
+	// 			t_lap_keuangan a
+	// 		WHERE
+	// 			IFNULL(((select sum(hutang) from t_lap_keuangan b where b.kode_reff2 = a.kode_reff) + a.hutang), a.hutang) > 0 AND 
+	// 			a.id_kategori_trans = 1	
+	// 	");
+
+	// 	return $q->result();
+	// }
 
 	public function getPenerimaan($kode)
 	{

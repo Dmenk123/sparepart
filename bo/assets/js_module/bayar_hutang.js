@@ -22,9 +22,8 @@ $(document).ready(function() {
 	  //datatables
 	  table = $('#tabel_penerimaan').DataTable({
 		  responsive: true,
-      searchDelay: 500,
       processing: true,
-      serverSide: true,
+      serverside: true,
       ajax: {
         url  : base_url + "bayar_hutang/list_bayar_hutang",
         type : "POST",
@@ -35,13 +34,10 @@ $(document).ready(function() {
         },
       },
 
-		  //set column definition initialisation properties
-      columnDefs: [
-        {
-          targets: [-1], //last column
-          orderable: false, //set not orderable
-        },
-      ],
+		  language: {
+        decimal: ",",
+        thousands: "."
+      },
 
       createdRow: function( row, data, dataIndex){
         if(data[3] ==  'Lunas'){
@@ -154,24 +150,24 @@ $(document).ready(function() {
     });
 });	
 
-const detail_penerimaan = (kode, id) => {  
+const detail_transaksi = (kode, id) => {  
   // reset_modal_form();
   $.ajax({
     type: 'GET',
     data: {kode:kode, id:id},
     dataType: 'json',
-    url: base_url + 'barang_masuk/get_detail_penerimaan',
+    url: base_url + 'bayar_hutang/get_detail_transaksi',
     success: function(data)
     {
         let header = data.header;
-        $('#span_kode_beli_det').text(header.kode_pembelian);
-        $('#span_tgl_beli_det').text(moment(header.tanggal_beli).format('LL'));
-        $('#span_agen_det').text(header.nama_perusahaan);
-        $('#span_kode_masuk_det').text(header.kode_penerimaan);
-        $('#span_petugas_det').text(header.nama_user);
-        $('#tbl_konten_detail tbody').html(data.html_det);
-        $('#modal_det_masuk').modal('show');
-        $('#modal_title').text('Detail Barang Masuk'); 
+        $('#span_kode').text(header.kode);
+        $('#span_tanggal').text(moment(header.tanggal).format('LL'));
+        $('#span_kode_beli').text(header.kode_pembelian);
+        $('#span_nilai').text('Rp. '+parseFloat(header.nilai_bayar).toLocaleString('id'));
+        $('#span_petugas').text(header.nama_user);
+        $('#span_keterangan').text(header.keterangan);
+        $('#modal_detail').modal('show');
+        $('#modal_title').text('Detail Pembayaran Hutang'); 
     },
     error: function (jqXHR, textStatus, errorThrown)
     {
@@ -179,7 +175,48 @@ const detail_penerimaan = (kode, id) => {
     }
     
   });
-	
+}
+
+const delete_transaksi = (kode, id) => {
+  swalConfirmDelete.fire({
+      title: 'Hapus Data ?',
+      text: "Data Akan dihapus permanen ?",
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus Data !',
+      cancelButtonText: 'Tidak, Batalkan!',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.value) {
+          $.ajax({
+              url : base_url + 'bayar_hutang/delete_transaksi',
+              type: "POST",
+              dataType: "JSON",
+              data : {
+                kode:kode, 
+                id:id
+              },
+              success: function(data)
+              {
+                  swalConfirm.fire('Berhasil Hapus Data !', data.pesan, 'success');
+                  table.ajax.reload();
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                  Swal.fire('Terjadi Kesalahan');
+              }
+          });
+      } else if (
+        /* Read more about handling dismissals below */
+        result.dismiss === Swal.DismissReason.cancel
+      ) {
+        swalConfirm.fire(
+          'Dibatalkan',
+          'Aksi Dibatalakan',
+          'error'
+        )
+      }
+  });
 }
 
 function edit_penerimaan(kode)
@@ -319,47 +356,7 @@ function reload_table()
 //     });
 // }
 
-function delete_penerimaan(kode, id){
-  swalConfirmDelete.fire({
-      title: 'Hapus Data ?',
-      text: "Data Akan dihapus permanen ?",
-      type: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Ya, Hapus Data !',
-      cancelButtonText: 'Tidak, Batalkan!',
-      reverseButtons: true
-    }).then((result) => {
-      if (result.value) {
-          $.ajax({
-              url : base_url + 'barang_masuk/delete_penerimaan',
-              type: "POST",
-              dataType: "JSON",
-              data : {
-                kode:kode, 
-                id:id
-              },
-              success: function(data)
-              {
-                  swalConfirm.fire('Berhasil Hapus Data !', data.pesan, 'success');
-                  table.ajax.reload();
-              },
-              error: function (jqXHR, textStatus, errorThrown)
-              {
-                  Swal.fire('Terjadi Kesalahan');
-              }
-          });
-      } else if (
-        /* Read more about handling dismissals below */
-        result.dismiss === Swal.DismissReason.cancel
-      ) {
-        swalConfirm.fire(
-          'Dibatalkan',
-          'Aksi Dibatalakan',
-          'error'
-        )
-      }
-  });
-}
+
 
 /* Fungsi formatRupiah */
 function formatRupiah(angka, prefix) {

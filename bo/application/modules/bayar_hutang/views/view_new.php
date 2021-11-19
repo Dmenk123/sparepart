@@ -108,8 +108,8 @@
               </div>
               <div class="kt-portlet__foot">
                 <div class="kt-form__actions">
-                  <button type="submit" id="btnSaveAdd" class="btn btn-primary">Submit</button>
-                  <button type="reset" class="btn btn-secondary">Cancel</button>
+                  <button type="submit" id="btnSaveAdd" class="btn btn-primary">Simpan</button>
+                  <a type="button" class="btn btn-secondary" href="<?= base_url($this->uri->segment(1));?>">Kembali</a>
                 </div>
               </div>
             </div>         
