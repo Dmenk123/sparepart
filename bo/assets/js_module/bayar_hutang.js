@@ -42,6 +42,12 @@ $(document).ready(function() {
           orderable: false, //set not orderable
         },
       ],
+
+      createdRow: function( row, data, dataIndex){
+        if(data[3] ==  'Lunas'){
+            $(row).addClass('highlight_row_success');
+        }
+      }
     });
     
     $('#id_barang').on('select2:select', function (e) {
