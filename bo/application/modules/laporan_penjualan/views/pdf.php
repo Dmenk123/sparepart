@@ -145,6 +145,7 @@
     </thead>
     <tbody>
       <?php
+        if ($table) {   
         foreach ($table as $key => $value) {
       ?>
         <tr>
@@ -158,6 +159,9 @@
 
       <?php
         }
+      }else{
+        echo '<tr><td colspan="6" align="center">Tidak ada data</td></th>';
+      }
       ?>
     </tbody>
   </table>
