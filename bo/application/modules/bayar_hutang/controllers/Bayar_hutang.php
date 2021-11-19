@@ -62,16 +62,16 @@ class Bayar_hutang extends CI_Controller {
 			'kategori' => $kategori
 		];
 
-		$listData = $this->t_in->get_datatable_penerimaan($paramdata);
+		$listData = $this->t_bayar_hutang->get_datatable_transaksi($paramdata);
 		$datas = [];
 		$i = 1;
 		foreach ($listData as $key => $value) {
 			$datas[$key][] = $i++;
 			$datas[$key][] = tanggal_indo($value->tanggal);
 			$datas[$key][] = $value->kode;
-			$datas[$key][] = $value->nama_kategori_trans;
+			$datas[$key][] = ($value->is_lunas == 1) ? 'Lunas' : 'Belum Lunas';
+			$datas[$key][] = number_format($value->nilai_bayar, 0, ',', '.');
 			$datas[$key][] = $value->nama_user;
-			$datas[$key][] = number_format($value->nilai_total, 0, ',', '.');
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
@@ -597,7 +597,7 @@ class Bayar_hutang extends CI_Controller {
 	
 
 	// ===============================================
-	private function rule_validasi($hutang, $pembayaran)
+	private function rule_validasi($hutang=null, $pembayaran=null)
 	{
 		$data = array();
 		$data['error_string'] = array();

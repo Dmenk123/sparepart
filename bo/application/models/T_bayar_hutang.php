@@ -12,10 +12,10 @@ class T_bayar_hutang extends CI_Model
 	}
 
 
-	function get_datatable_pembayaran($param)
+	function get_datatable_transaksi($param)
 	{
 		$obj_date = new DateTime();
-		// $is_filter_kategori = false;
+		$is_filter_kategori = false;
 		$is_filter_tgl = false;
 		$is_filter_bln = false;
 		$is_filter_thn = false;
@@ -29,6 +29,7 @@ class T_bayar_hutang extends CI_Model
 		}
 
 		if ($param['kategori'] != 'all') {
+			$kategori_fix = ($param['kategori'] == '2') ? null : 1;
 			$is_filter_kategori = true;
 		}
 
@@ -53,19 +54,19 @@ class T_bayar_hutang extends CI_Model
 		}
 
 
-		$this->db->select('tb.*, pb.kode_pembelian');
+		$this->db->select('tb.*, pb.kode_pembelian, pb.is_lunas, user.nama as nama_user');
 		$this->db->from('t_bayar_hutang tb');
 		$this->db->join('t_pembelian pb', 'tb.id_pembelian = pb.id_pembelian', 'left');
+		$this->db->join('m_user user', 'tb.id_user = user.id', 'left');
 		// $this->db->join('m_kategori_transaksi kat', 'tb.id_kategori_trans = kat.id_kategori_trans', 'left');
-		// $this->db->join('m_user user', 'tb.id_user = user.id', 'left');
 
 		if ($is_filter_tgl) {
-			$this->db->where('tb.tanggal_pelunasan >=', $tgl_awal);
-			$this->db->where('tb.tanggal_pelunasan <=', $tgl_akhir);
+			$this->db->where('tb.tanggal >=', $tgl_awal);
+			$this->db->where('tb.tanggal <=', $tgl_akhir);
 		}
 
 		if ($is_filter_kategori) {
-			$this->db->where('tb.is_lunas', 1);
+			$this->db->where('pb.is_lunas', $kategori_fix);
 		}
 
 		$this->db->where('tb.deleted_at', null);
