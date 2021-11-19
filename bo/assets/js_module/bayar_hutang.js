@@ -61,9 +61,9 @@ $(document).ready(function() {
     $('#kode_pembelian').on('select2:select', function (e) {
         var data = e.params.data;
         let uang = String(parseFloat(data.title));
-      
+        console.log(uang);
         $('#hutang_txt').val(formatRupiah(uang));
-        $('#hutang').val(data.title);
+        $('#hutang').val(uang);
     });
    
     $(".modal").on("hidden.bs.modal", function(){
@@ -102,17 +102,18 @@ $(document).ready(function() {
                 timeout: 600000,
                 success: function (data) {
                     if(data.status) {
-                      swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
-                      $('#regForm')[0].reset();
-                      window.location.href = base_url +'barang_masuk';
+                      swalConfirm.fire('Sukses!', data.pesan, 'success');
+                      $('#form_pembayaran')[0].reset();
+                      window.location.href = base_url +'bayar_hutang';
                     }else {
                       for (var i = 0; i < data.inputerror.length; i++) 
                       {
-                          if (data.inputerror[i] != 'pegawai') {
-                              $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
-                              $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
-                          }else{
+                          if (data.inputerror[i] != 'kode_pembelian') {
                               //ikut style global
+                              $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
+                              $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback');
+                          }else{
+                              //select span help-block class set text error string
                               $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
                           }
                       }

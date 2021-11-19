@@ -82,7 +82,7 @@
                   <div class="form-group">
                     <label for="exampleSelect1">Kode Pembelian</label>
                     <select name="kode_pembelian" id="kode_pembelian" class="form-control select2">
-                      <option value="0" data-id="0">-PILIH-</option>
+                      <option value="" title="">-PILIH-</option>
                       <?php foreach($data_hutang as $row):?>
                           <option value="<?php echo $row->kode;?>" title="<?php echo $row->hutang_fix;?>"><?php echo $row->kode;?></option>
                       <?php endforeach;?>
@@ -91,7 +91,7 @@
                   </div>
                   <div class="form-group">
                     <label>Sisa Hutang</label>
-                    <input type="text"  class="form-control" id="hutang_txt" name="hutang_txt" value="" disabled>
+                    <input type="text"  class="form-control" id="hutang_txt" name="hutang_txt" value="" readonly>
                     <input type="hidden" class="form-control" id="hutang" name="hutang" value="">
                     <span class="help-block"></span>
                   </div>
@@ -108,7 +108,7 @@
               </div>
               <div class="kt-portlet__foot">
                 <div class="kt-form__actions">
-                  <button type="submit" class="btn btn-primary">Submit</button>
+                  <button type="submit" id="btnSaveAdd" class="btn btn-primary">Submit</button>
                   <button type="reset" class="btn btn-secondary">Cancel</button>
                 </div>
               </div>

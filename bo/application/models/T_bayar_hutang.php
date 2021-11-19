@@ -132,7 +132,7 @@ class T_bayar_hutang extends CI_Model
 	function sum_pembayaran_by_id($id)
 	{
 		$query = "
-			SELECT COALESCE(SUM(pd.qty),0) as total_harga
+			SELECT COALESCE(SUM(nilai_bayar),0) as total_harga
 			FROM t_bayar_hutang
 			WHERE id = '$id' AND deleted_at is null
 		";

@@ -648,7 +648,40 @@ class Lib_mutasi extends CI_Controller {
 					}
 	
 					return $retval;
-				}else{
+				}
+				#### jika kode transaksi (16) pembayaran hutang maka insert sebagai pengurangan pengeluaran & pengurangan hutang
+				elseif ($id_kategori_trans == 16) {
+					$this->_ci->db->trans_begin();
+					$max_mutasi_det = $this->_ci->m_global->max('id_laporan_det', 't_lap_keuangan', ['kode_reff' => $kode_reff]);
+					$id_laporan_det = $max_mutasi_det->id_laporan_det + 1;
+
+					$arr_ins_laporan['id_laporan'] = $cek->id_laporan;
+					$arr_ins_laporan['id_laporan_det'] = $id_laporan_det;
+					$arr_ins_laporan['tgl_laporan'] = $tgl;
+					$arr_ins_laporan['bulan_laporan'] = $bulan;
+					$arr_ins_laporan['tahun_laporan'] = $tahun;
+					$arr_ins_laporan['pengeluaran'] = $nilaiRupiah;
+					$arr_ins_laporan['piutang'] = 0;
+					$arr_ins_laporan['hutang'] = -$nilaiRupiah;
+					$arr_ins_laporan['kode_reff'] = $kode_reff;
+					if ($kode_reff2 != null) {
+						$arr_ins_laporan['kode_reff2'] = $kode_reff2;
+					}
+					$arr_ins_laporan['id_kategori_trans'] = $id_kategori_trans;
+					$arr_ins_laporan['created_at'] = $timestamp;
+
+					$this->_ci->m_global->save($arr_ins_laporan, 't_lap_keuangan');
+
+					if ($this->_ci->db->trans_status() === FALSE) {
+						$this->_ci->db->trans_rollback();
+						$retval = ['status' => false];
+					} else {
+						$this->_ci->db->trans_commit();
+						$retval = ['status' => true];
+					}
+
+					return $retval;
+				} else{
 					return $this->updateDataLap(
 						$nilaiRupiah,
 						$id_kategori_trans,

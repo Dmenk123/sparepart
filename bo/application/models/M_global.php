@@ -89,7 +89,7 @@ class M_global extends CI_Model
         	$this->db->order_by($order_by);
         }
 
-        if(isset($$limit)) {
+        if(isset($limit)) {
             $this->db->limit($limit);
         }
 		
