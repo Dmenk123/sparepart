@@ -70,16 +70,22 @@ class Bayar_hutang extends CI_Controller {
 			$datas[$key][] = tanggal_indo($value->tanggal);
 			$datas[$key][] = $value->kode;
 			$datas[$key][] = ($value->is_lunas == 1) ? 'Lunas' : 'Belum Lunas';
-			$datas[$key][] = number_format($value->nilai_bayar, 0, ',', '.');
 			$datas[$key][] = $value->nama_user;
+			$datas[$key][] = $value->keterangan;
+			$datas[$key][] = number_format($value->nilai_bayar, 0, ',', '.');
+
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
-					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
-							<i class="la la-pencil"></i> Edit Transaksi
-						</button>
-						<button class="dropdown-item" onclick="detail_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
+					<div class="dropdown-menu">';
+
+			if($value->is_lunas != 1) {
+				$str_aksi .= '<button class="dropdown-item" onclick="edit_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
+								<i class="la la-pencil"></i> Edit Transaksi
+							</button>';
+			}
+			
+			$str_aksi .= '<button class="dropdown-item" onclick="detail_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
 							<i class="la la-desktop"></i> Lihat Detail
 						</button>
 						<button class="dropdown-item" onclick="delete_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
@@ -110,6 +116,7 @@ class Bayar_hutang extends CI_Controller {
 		$data_user = $this->m_user->get_detail_user($id_user);
 		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
 		$counter_trans = $this->t_bayar_hutang->get_max_transaksi();
+		$a = $this->t_bayar_hutang->getDataLapKeuangan();
 		/**
 		 * data passing ke halaman view content
 		 */
@@ -275,8 +282,6 @@ class Bayar_hutang extends CI_Controller {
 
 					### cek data pembayaran disamakan dengan total pembelian apakah sudah sama
 					if ((float)$data_beli->total_pembelian == (float)$this->t_bayar_hutang->sum_pembayaran_by_id($id_transaksi)) {
-						$data_update['is_lunas'] = 1;
-						$data_update['tgl_lunas'] = $tanggal;
 						$update = $this->t_pembelian->update(['id_pembelian' => $data_beli->id_pembelian], ['is_lunas' => 1, 'tgl_lunas' => $tanggal]);
 					} 
 
@@ -298,291 +303,82 @@ class Bayar_hutang extends CI_Controller {
 		echo json_encode($retval);
 	}
 
-	public function fetch()
-	{
-		$id = $this->input->post('id');
-		$id_masuk = $this->input->post('idMasuk');
-		$flag_is_update = false;
-		$flag_has_transaksi = false;
-		$data_beli_det = null;
-		
-		$data_masuk = $this->t_penerimaan->getPenerimaanDet($id_masuk)->result();
-		
-		if($data_masuk == null) {			
-			### transaksi baru
-			$data = $this->t_penerimaan->getPembelianDet($id)->result();
-			$flag_has_transaksi = true;
-		}else{
-			### transaksi update
-			$data = $data_masuk;
-			$flag_is_update = true;
-		}
-        
-        foreach($data as $row){ 
-			$idx_row = ($flag_is_update) ? $row->id_penerimaan_det : $row->id_pembelian_det;
-			$harga = ($flag_is_update) ? $row->harga : $row->harga_fix;
-			$harga_total = ($flag_is_update) ? $row->harga_total : $row->harga_total_fix;
-
-			if($flag_has_transaksi) {
-				### qty pembelian - qty diterima (jika pembelian ini sudah pernah diterima)
-				$qty = $row->qty - $row->qty_terima;
-				### replace value harga_total
-				$harga_total = $qty * $harga;
-			}else{
-				$qty = $row->qty;
-			}
-
-			if(!$qty == 0) {  ?>
-            <tr>
-                <td width="10%">
-					<input type="number" min="1" max="<?=$qty;?>" class="form-control" width="5" id="qty_order_<?php echo $idx_row;?>" value="<?php echo $qty; ?>" onchange="tes(<?php echo $idx_row ?>)" name="qty[]">
-					<input type="hidden" class="form-control kelas_htotal" name="harga_total_raw[]" id="harga_total_raw_<?php echo $idx_row;?>" value="<?php echo $harga_total; ?>">
-					<input type="hidden" class="form-control" value="<?php echo $idx_row; ?>" name="pembelian_det[]">
-					<input type="hidden" class="form-control" value="<?php echo $row->id_barang; ?>" name="id_barang[]">
-				</td>
-                <td style="vertical-align: middle;"><?php echo $row->nama; ?></td>
-                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($harga); ?></td>
-                <td style="vertical-align: middle;" id="harga_total_<?php echo $idx_row;?>"><?php echo 'Rp '.number_format($harga_total); ?></td>
-				<td style="vertical-align: middle;"><button type="button" class="btn-danger" alt="batalkan" onclick="hapus_trans_detail(this)"><i class="fa fa-times"></i></button></td>
-            </tr>
-            <?php
-			}
-        }
-	}
-
-	public function get_detail_penerimaan()
+	public function get_detail_transaksi()
 	{
 		$id = $this->input->get('id');
 		$kode = $this->input->get('kode');
 		
 		$join = [ 
-			['table' => 't_pembelian', 'on'	=> 't_penerimaan.id_pembelian = t_pembelian.id_pembelian'],
-			['table' => 'm_agen', 'on' => 't_pembelian.id_agen = m_agen.id_agen'],
+			['table' => 't_pembelian', 'on'	=> 't_bayar_hutang.id_pembelian = t_pembelian.id_pembelian'],
 			['table' => 'm_user', 'on' => 't_pembelian.id_user = m_user.id'],
 		];
-		$header = $this->m_global->single_row('t_penerimaan.*, t_pembelian.kode_pembelian, t_pembelian.tanggal as tanggal_beli, m_agen.nama_perusahaan, m_user.nama as nama_user', ['kode_penerimaan' => $kode, 't_penerimaan.deleted_at' => null], 't_penerimaan', $join);
-
-		$detail = $this->t_penerimaan->getPenerimaanDet($id)->result();
-		$html_det = '';
-		if($detail) {
-			$total_harga_sum = 0;
-			foreach ($detail as $key => $value) {
-				$total_harga_sum += $value->harga_total;
-				$html_det .= '<tr>
-					<td style="vertical-align: middle;">'.$value->qty.'</td>
-					<td style="vertical-align: middle;">'.$value->nama.'</td>
-					<td style="vertical-align: middle;" align="right">'.number_format($value->harga).'</td>
-					<td style="vertical-align: middle;" align="right">'.number_format($value->harga_total).'</td>
-				</tr>';
-			}
-			$html_det .= '<tr>
-				<td colspan="3" style="vertical-align: middle;font-weight:bold;" align="center">Grand Total</td>
-				<td style="vertical-align: middle;font-weight:bold;" align="right">'.number_format($total_harga_sum).'</td>
-			</tr>';
-		}
+		$header = $this->m_global->single_row('t_bayar_hutang.*, t_pembelian.kode_pembelian, t_pembelian.is_lunas, m_user.nama as nama_user', ['t_bayar_hutang.kode' => $kode, 't_bayar_hutang.deleted_at' => null], 't_bayar_hutang', $join);
 		
 		echo json_encode([
 			'header' => $header,
-			'html_det' => $html_det
 		]);
 		
 	}
-	
-	
 
-	public function change_qty()
-	{
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$tgl = $obj_date->format('Y-m-d');
-
-		$this->db->trans_begin();
-		$id_pembelian_det = $this->input->post('id');
-		$qty              = $this->input->post('qty');
-		$kodereff		  = $this->input->post('kodereff');
-
-		$pembelian_det     = $this->m_global->getSelectedData('t_pembelian_det', array('id_pembelian_det' => $id_pembelian_det))->row();
-		$penerimaan = $this->m_global->getSelectedData('t_penerimaan', ['id_pembelian' => $pembelian_det->id_pembelian, 'kode_penerimaan' => $kodereff])->row();
-		$penerimaan_det     =  $this->m_global->getSelectedData('t_penerimaan_det', array('id_penerimaan' => $penerimaan->id_penerimaan, 'id_barang' => $pembelian_det->id_barang))->result();
-
-		$qty_in = 0;
-		
-		if($penerimaan_det) {
-			foreach ($penerimaan_det as $key => $value) {
-				$qty_in += $value->qty;
-			}
-		}
-
-		### jika qty inputan lebih besar dari seharusnya (bisa karena barang sudah diterima)
-		### return false
-		if(($qty > $qty_in) && ($qty_in > 0)) {
-			$this->db->trans_rollback();
-			$retval['qty'] = $qty_in;
-			$retval['harga_total'] = 'Rp '.number_format($pembelian_det->harga_fix * $qty_in);
-			$retval['harga_raw'] = $pembelian_det->harga_fix * $qty_in;
-			echo json_encode($retval);
-			return;
-		}
-
-		$qty_remaining = $pembelian_det->qty - $qty_in;
-
-		### jika qty inputan lebih besar dari seharusnya (bisa karena barang sudah diterima)
-		### return false
-		if($qty > $qty_remaining) {
-			$retval['qty'] = $qty_remaining;
-			$retval['harga_total'] = 'Rp '.number_format($pembelian_det->harga_fix * $qty_remaining);
-			$retval['harga_raw'] = $pembelian_det->harga_fix * $qty_remaining;
-			echo json_encode($retval);
-			return;
-		}
-
-		$subtotal = $pembelian_det->harga_fix * $qty; 
-		
-		// #### insert/update penerimaan detail
-		// $cek     =  $this->m_global->getSelectedData('t_penerimaan_det', ['id_penerimaan' => $penerimaan->id_penerimaan, 'id_barang' => $pembelian_det->id_barang])->row();
-		// if($cek) {
-		// 	##### update
-		// 	$data = array(
-		// 		'id_barang' => $pembelian_det->id_barang,
-		// 		'qty' => $qty,
-		// 		'harga_total' => $subtotal,
-		// 		'harga' => $pembelian_det->harga_fix,
-		// 		'updated_at' => $timestamp
-		// 	);
-					
-		// 	$data_where = array('id_pembelian_det' => $id_pembelian_det);
-		// 	$update = $this->t_penerimaan->updatePenerimaanDet($data_where, $data);
-		// }else{
-		// 	##### insert
-		// 	$data = array(
-		// 		'id_barang' => $pembelian_det->id_barang,
-		// 		'qty' => $qty,
-		// 		'harga_total' => $subtotal,
-		// 		'harga' => $pembelian_det->harga_fix,
-		// 		'created_at' => $timestamp
-		// 	);
-		// 	$insert = $this->t_penerimaan->save($data);
-		// }
-		
-		$retval['qty'] = $qty;
-		$retval['harga_total'] = 'Rp '.number_format($pembelian_det->harga_fix * $qty);
-		$retval['harga_raw'] = $pembelian_det->harga_fix * $qty;
-
-		echo json_encode($retval);
-	}
-
-	public function delete_penerimaan()
+	public function delete_transaksi()
 	{
 		try {
 			$obj_date = new DateTime();
 			$timestamp = $obj_date->format('Y-m-d H:i:s');
 			$tgl = $obj_date->format('Y-m-d');
-			$id_penerimaan = $this->input->post('id');
-			$kode_penerimaan = $this->input->post('kode');
+			$id = $this->input->post('id');
+			$kode = $this->input->post('kode');
 			
-			$cek_header = $this->m_global->single_row("*", ['id_penerimaan' => $id_penerimaan, 'deleted_at' => null], 't_penerimaan');
+			$cek_header = $this->m_global->single_row("*", ['id' => $id, 'kode' => $kode, 'deleted_at' => null], 't_bayar_hutang');
 
 			if(!$cek_header) {
 				$this->db->trans_rollback();
 				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal hapus Penerimaan';
+				$retval['pesan'] = 'Gagal hapus Transaksi';
 				echo json_encode($retval);
 				return;
 			}
 
+			$data_beli = $this->m_global->single_row('*', ['id_pembelian' => $cek_header->id_pembelian, 'deleted_at' => null], 't_pembelian');
+			if(!$data_beli) {
+				$retval['status'] = false;
+				$retval['pesan'] = 'Data Pembelian tidak ditemukan';
+				echo json_encode($retval);
+				return;
+			}
+
+
 			$this->db->trans_begin();
 
-			$cek_lap_keu = $this->m_global->single_row("*", ['id_kategori_trans' => 4, 'kode_reff' => $cek_header->kode_penerimaan], 't_lap_keuangan');
+			$cek_lap_keu = $this->m_global->single_row("*", ['id_kategori_trans' => 16, 'kode_reff2' => $cek_header->kode], 't_lap_keuangan');
+
 			if($cek_lap_keu) {
-				$del_lap = $this->m_global->soft_delete(['id_kategori_trans' => 4, 'kode_reff' => $cek_header->kode_penerimaan], 't_lap_keuangan');
-			}
-
-			$data_detail = $this->t_penerimaan->getPenerimaanDet($cek_header->id_penerimaan)->result();
-			
-			$arr_temp_detail = null;
-			
-			if($data_detail) {
-				$arr_temp_detail = $data_detail;
+				$del_lap = $this->m_global->soft_delete(['id_kategori_trans' => 16, 'kode_reff2' => $cek_header->kode], 't_lap_keuangan');
 			}
 			
-			foreach ($arr_temp_detail as $key => $value) {
-				#### hapus stok mutasi
-				$mutasi = $this->lib_mutasi->hapusMutasiMasuk(
-					$value->id_barang, 
-					$value->qty, 
-					4,  
-					null, 
-					$cek_header->id_gudang, 
-					$cek_header->kode_penerimaan,
-				);
-
-				// rollback pembelian
-				$joni = [ 
-					['table' => 't_pembelian', 'on'	=> 't_pembelian_det.id_pembelian = t_pembelian.id_pembelian'],
-				];
-
-				$cek_pembelian_det = $this->m_global->single_row(
-					"t_pembelian_det.*, t_pembelian.kode_pembelian, t_pembelian.is_kredit", 
-					['t_pembelian_det.id_pembelian' => $value->id_pembelian, 't_pembelian_det.id_barang' => $value->id_barang, 't_pembelian_det.deleted_at' => null], 
-					't_pembelian_det', 
-					$joni
-				);
-
-				if($cek_pembelian_det) {
-					$where_update = ['id_pembelian' => $value->id_pembelian, 'id_barang' => $value->id_barang, 'deleted_at' => null];
-					$data_update['is_terima'] = null;
-					$data_update['qty_terima'] = $cek_pembelian_det->qty_terima - $value->qty;
-
-					// $data_update['tgl_terima'] = $cek_pembelian_det->qty_terima - $value->qty;
-					// $data_update['reff_terima'] = $cek_pembelian_det->qty_terima - $value->qty;
-					
-					$update = $this->t_pembelian->updatePembelianDet($where_update, $data_update);
-				}
-			}
-
 			### soft_delete
-			$del = $this->m_global->soft_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan');
-			$del_det = $this->m_global->soft_delete(['id_penerimaan' => $cek_header->id_penerimaan], 't_penerimaan_det');
+			$del = $this->m_global->soft_delete(['id' => $cek_header->id, 'kode' => $cek_header->kode], 't_bayar_hutang');
 			
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();
 				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal menghapus Penerimaan';
+				$retval['pesan'] = 'Gagal menghapus Pembayaran Hutang';
 			} else {
 				$this->db->trans_commit();
 
-				$data_pembelian_det = $this->m_global->multi_row('*', ['id_pembelian' => $cek_header->id_pembelian], 't_pembelian_det');
-				$arr = [];
-
-				foreach ($data_pembelian_det as $key => $value) {
-					if ($value->qty == $value->qty_terima) {
-						$txt = 'ok';
-					} else {
-						$txt = 'belum';
-					}
-
-					$arr[] = $txt;
-				}
-
-				### jika tidak ada yg belum
-				### update t_pembelian set flag is_terima_all = 1 where is_terima di masing-masing det not null
-				if (!in_array('belum', $arr)) {
-					$data_upd = ['is_terima_all' => 1];
+				### cek data pembayaran disamakan dengan total pembelian apakah sudah sama
+				if ((float)$data_beli->total_pembelian == (float)$this->t_bayar_hutang->sum_pembayaran_by_id($cek_header->id)) {
+					$data_update['is_lunas'] = 1;
+					$data_update['tgl_lunas'] = $tgl;
 				}else{
-					$data_upd = ['is_terima_all' => null];
+					$data_update['is_lunas'] = null;
+					$data_update['tgl_lunas'] = null;
 				}
 
-				$data_where = ['id_pembelian' => $cek_header->id_pembelian];
-				$this->m_global->update('t_pembelian', $data_upd, $data_where);
-
-				// update data lap keuangan
-				$keu = $this->lib_mutasi->deleteDataLap(
-					4,
-					$cek_header->kode_penerimaan,
-				);
+				$update = $this->t_pembelian->update(['id_pembelian' => $data_beli->id_pembelian], $data_update);
 
 				$retval['status'] = true;
-				$retval['pesan'] = 'Sukses menghapus Penerimaan';
+				$retval['pesan'] = 'Sukses menghapus Pembayaran';
 			}
 
 		} catch (\Throwable $th) {
@@ -593,9 +389,6 @@ class Bayar_hutang extends CI_Controller {
 
 		echo json_encode($retval);
 	}
-
-	
-
 	// ===============================================
 	private function rule_validasi($hutang=null, $pembayaran=null)
 	{
