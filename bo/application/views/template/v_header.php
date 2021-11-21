@@ -179,6 +179,10 @@
 				background-color: greenyellow !important;
 			}
 
+			.highlight_row_info {
+				background-color: lightblue !important;
+			}
+
 		</style>
 		<!-- load file css per modul -->
 		<?php if(isset($link_css)){ ?>
