@@ -33,9 +33,10 @@ class Pdf extends CI_Controller {
 				$bulan = $this->input->get('bulan');
 				$tahun = $this->input->get('tahun');
 				$tahun2 = $this->input->get('tahun2');
-
+					#yantoss b
 				if ($this->input->get('start')) {
-					$start = date('Y-d-m', strtotime($this->input->get('start')));
+					$exp_date2 = str_replace('/', '-', $this->input->get('start'));
+					$start = date('Y-m-d', strtotime($exp_date2));
 				}
 		
 				if ($this->input->get('end')) {
@@ -43,14 +44,33 @@ class Pdf extends CI_Controller {
 					$end = date('Y-m-d', strtotime($exp_date));
 				}
 		
+				$title = 'Laporan Penjualan';
 				if ($model == 2) {
 					$data['table'] = $this->m_laporan->get_laporan_penjualan($model, $tahun2);
+					$title .= '<br>Tahun '.$tahun2;
 				}elseif ($model == 1) {
 					$data['table'] = $this->m_laporan->get_laporan_penjualan($model, null, $tahun, $bulan );
+
+					$nama_bulan = [
+						'1' => 'Januari',
+						'2' => 'Februari',
+						'3' => 'Maret',
+						'4' => 'April',
+						'5' => 'Mei',
+						'6' => 'Juni',
+						'7' => 'Juli',
+						'8' => 'Agustus',
+						'9' => 'September',
+						'10' => 'Oktober',
+						'11' => 'Nopember',
+						'12' => 'Desember',
+					];
+					$title .= '<br>Bulan '.$nama_bulan[$bulan].' Tahun '.$tahun;
 				}elseif ($model == 3) {
 					$data['table'] = $this->m_laporan->get_laporan_penjualan($model, null, null, null, $start, $end );
+					$title .= '<br>per tanggal '.tanggal_indo($start).' s/d tanggal '.tanggal_indo($end);
 				}
-				$data['title'] = 'Laporan Penjualan';
+				$data['title'] = $title;
 				$data_pdf['content'] = $this->load->view('laporan_penjualan/pdf', $data, true);
 				break;
 		}
