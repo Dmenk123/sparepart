@@ -53,9 +53,12 @@ class T_retur_beli extends CI_Model
 		}
 				
 
-		$this->db->select('tr.*, user.nama as nama_user');
+		$this->db->select('tr.*, user.nama as nama_user, ma.nama_perusahaan');
 		$this->db->from('t_retur_beli tr');
 		$this->db->join('m_user user', 'tr.id_user = user.id', 'left');
+		$this->db->join('t_penerimaan tp', 'tr.id_penerimaan = tp.id_penerimaan');
+		$this->db->join('t_pembelian tpb', 'tp.id_pembelian = tpb.id_pembelian');
+		$this->db->join('m_agen ma', 'tpb.id_agen = ma.id_agen');
 
 		if($is_filter_tgl) {
 			$this->db->where('tr.tanggal >=', $tgl_awal);

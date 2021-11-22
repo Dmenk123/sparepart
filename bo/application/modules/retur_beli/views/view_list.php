@@ -90,7 +90,7 @@
               <select name="kategori" id="kategori" class="form-control select2">
                 <option value="all">Semua Kategori</option>
                 <?php
-                for ($i=1; $i <= 2; $i++) { 
+                for ($i = 1; $i <= 2; $i++) {
                   if ((int)$this->input->get('kategori') == $i) {
                     echo "<option value='$i' selected>$arr_kat[$i]</option>";
                   } else {
@@ -130,6 +130,7 @@
               <th style="width: 5%;">No</th>
               <th>Tanggal</th>
               <th>Kode</th>
+              <th>Supplier</th>
               <th>Kategori</th>
               <th>User</th>
               <th>Total Rupiah</th>

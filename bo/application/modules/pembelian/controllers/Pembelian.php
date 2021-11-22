@@ -215,7 +215,13 @@ class Pembelian extends CI_Controller {
 		$data['id_agen']  = $cek_kode->id_agen;
 		$data['barang']  = $this->db->query("SELECT m_barang.*, t_stok.qty, t_stok.qty_min FROM m_barang JOIN t_stok on m_barang.id_barang = t_stok.id_barang WHERE m_barang.deleted_at is null");
 		$data['agen']  = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'deleted_at' => null], 'm_agen');
-		
+
+		$cek_retur = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'id_pembelian_potong_nota' => null, 'deleted_at' => null], 't_retur_beli');
+		if ($cek_retur) {
+			$data['potong_nota']  = $cek_retur->total_nilai_retur;
+		} else {
+			$data['potong_nota']  = 0;
+		}
 
 		/**
 		 * content data untuk template
@@ -270,7 +276,6 @@ class Pembelian extends CI_Controller {
 		}
 
 		$this->db->trans_begin();
-
 		$data_pembelian = [
 			'kode_pembelian' => $kode_pembelian_fix,
 			'id_agen' 	=> $id_agen,
@@ -405,15 +410,31 @@ class Pembelian extends CI_Controller {
 
 	public function total_pembelian()
 	{
-		
+		$is_potong_nota = false;
 		$id = $this->input->post('id');
 		$hasil = $this->t_pembelian->getTotalPembelian($id)->row();
+		$cek_header = $this->m_global->single_row("*", ['id_pembelian' => $id, 'deleted_at' => null], 't_pembelian');
+		if ($cek_header && $cek_header->total_potong_nota) {
+			$is_potong_nota = true;
+		}
 		$data = array();
 		if (!empty($hasil)) {
 			// var_dump($data->total);
-			$data['total'] = 'Rp '.number_format($hasil->total);
+			if ($is_potong_nota) {
+				$total_fix = $hasil->total - $cek_header->total_potong_nota;
+			}else{
+				$total_fix = $hasil->total;
+			}
+
+			$data['total'] = 'Rp '.number_format($total_fix);
 		} else {
-			$data['total'] = 0;
+			if ($is_potong_nota) {
+				$total_fix = 0 - $cek_header->total_potong_nota;
+			} else {
+				$total_fix = 0;
+			}
+
+			$data['total'] = $total_fix;
 		}
 
 		echo json_encode($data);

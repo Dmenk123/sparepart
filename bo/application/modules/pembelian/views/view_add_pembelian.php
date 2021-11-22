@@ -161,6 +161,15 @@
                 <div class="table-responsive">
                     <table class="table" width="100%" >
                         <tbody>
+                            <?php if($potong_nota > 0) {
+                              $txt_ket = '<b>Belum Dipakai</b>';
+                            }else {
+                              $txt_ket = '';
+                            } ?>
+                            <tr>
+                                <td width="69%" >Disc Potong Nota : <span id="txt_ket_potong_nota"><?=$txt_ket;?></td>
+                                <td>Rp <?=number_format($potong_nota);?></td>
+                              </tr>
                             <tr>
                                 <td width="69%" >Total:</td>
                                 <td id="total">0</td>

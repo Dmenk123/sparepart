@@ -71,6 +71,7 @@ class Retur_beli extends CI_Controller
 			$datas[$key][] = $i++;
 			$datas[$key][] = tanggal_indo($value->tanggal);
 			$datas[$key][] = $value->kode_retur;
+			$datas[$key][] = $value->nama_perusahaan;
 			$datas[$key][] = ($value->jenis_retur == '1') ? 'Ganti Barang' : 'Potong Nota';
 			$datas[$key][] = $value->nama_user;
 			$datas[$key][] = number_format($value->total_nilai_retur, 0, ',', '.');
@@ -173,6 +174,22 @@ class Retur_beli extends CI_Controller
 			return;
 		}
 
+		$q_penerimaan = $this->m_global->single_row('*', ['id_penerimaan' => $id_penerimaan, 'deleted_at' => null], 't_penerimaan');
+		if(!$q_penerimaan) {
+			$retval['status'] = false;
+			$retval['pesan'] = 'Data Penerimaan Tidak Ditemukan';
+			echo json_encode($retval);
+			return;
+		}
+
+		$q_pembelian = $this->m_global->single_row('*', ['id_pembelian' => $q_penerimaan->id_pembelian, 'deleted_at' => null], 't_pembelian');
+		if (!$q_pembelian) {
+			$retval['status'] = false;
+			$retval['pesan'] = 'Data Pembelian Tidak Ditemukan';
+			echo json_encode($retval);
+			return;
+		}
+
 		$is_update = false;
 
 		if ($this->input->post('index') != '') {
@@ -198,6 +215,7 @@ class Retur_beli extends CI_Controller
 			$data['id_user'] = $this->session->userdata('id_user');
 			$data['jenis_retur'] = $jenis;	
 			$data['kode_retur'] = $kode;
+			$data['id_agen'] = $q_pembelian->id_agen;
 			$data['total_nilai_retur'] = 0;
 			$data['created_at']	= $timestamp;
 		} else {
@@ -300,7 +318,17 @@ class Retur_beli extends CI_Controller
 			if(!$cek_trans) {
 				echo json_encode([
 					'status' => false,
-					'pesan' => 'Data tidak ditemukan'
+					'pesan' => 'Data Penerimaan tidak ditemukan'
+				]);
+				return;
+			}
+
+			$cek_trans_retur = $this->m_global->single_row('*', ['id' => $id_retur, 'deleted_at' => null], 't_retur_beli');
+
+			if(!$cek_trans_retur) {
+				echo json_encode([
+					'status' => false,
+					'pesan' => 'Data Retur tidak ditemukan'
 				]);
 				return;
 			}

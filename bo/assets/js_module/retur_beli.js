@@ -40,7 +40,7 @@ $(document).ready(function() {
             thousands: "."
         },
         createdRow: function( row, data, dataIndex){
-          if(data[3] ==  'Ganti Barang'){
+          if(data[4] ==  'Ganti Barang'){
               $(row).addClass('highlight_row_info');
           }
         }
