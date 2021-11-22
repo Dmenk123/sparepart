@@ -47,7 +47,7 @@
         <div class="kt-portlet__head-toolbar">
           <div class="kt-portlet__head-wrapper">
             <div class="row" style="text-align:left!important;">
-              <h2>Form Pengeluaran Lain-Lain</h>
+              <h2>Form Retur Penerimaan Pembelian</h>
             </div>
           </div>
         </div>
@@ -72,11 +72,15 @@
               <table class="table table-borderless">
                 <tr>
                   <th>Tanggal</th>
-                  <td><?= (isset($data_header->tanggal)) ? tanggal_indo($data_header->tanggal) : '-'; ?></td>
+                  <td><span><?= (isset($data_header->tanggal)) ? tanggal_indo($data_header->tanggal) : '-'; ?><span</td>
                 </tr>
                 <tr>
                   <th>Kode</th>
-                  <td><?= (isset($data_header->kode)) ? $data_header->kode : '-'; ?></span></td>
+                  <td>
+                    <span><?= (isset($data_header->kode_retur)) ? $data_header->kode_retur : '-'; ?></span>
+                    <span id="span-id-retur" class="hidden"><?= (isset($data_header->id)) ? $data_header->id : '-'; ?></span>
+                    <span id="span-kode-retur" class="hidden"><?= (isset($data_header->kode_retur)) ? $data_header->kode_retur : '-'; ?></span>
+                  </td>
                 </tr>
               </table>
             </address>
@@ -86,90 +90,101 @@
             <table class="table table-borderless">
               <tr>
                 <th>Petugas</th>
-                <td><?= (isset($data_header->nama_user)) ? $data_header->nama_user : ""; ?></span></td>
+                <td><span><?= (isset($data_header->nama_user)) ? $data_header->nama_user : ""; ?></span></td>
               </tr>
               <tr>
-                <th colspan="2">Barang Tidak ada ?
-                  <span><a data-target="#modal_frame" data-toggle="modal" href="#modal_frame">Klik disini untuk buka Form Master Barang</a></span>
-                </th>
+                <th>Jenis Retur</th>
+                <td><span><?= (isset($data_header->jenis_retur) && $data_header->jenis_retur == '1') ? 'Ganti Barang' : "Potong Nota"; ?></span></td>
+              </tr>
+              <tr>
+                <th>Supplier</th>
+                <td><span><?= (isset($data_header->nama_perusahaan)) ? $data_header->nama_perusahaan : ""; ?></span></td>
               </tr>
             </table>
           </div><!-- /.col -->
         </div><!-- /.row -->
 
-        <form id="regForm">
-          <div class="row">
-            <div class="form-group col-sm-5">
-              <label for="lbl_namabarang" class="form-control-label">Nama Barang/Jasa : </label>
-              <input type="hidden" value="<?= (isset($data_header->id)) ? $data_header->id : ""; ?>" name="id_pengeluaran_lain" id="id_pengeluaran_lain">
-              <select name="id_barang" id="id_barang" class="form-control select2">
-                <option value="">-PILIH-</option>
-                <?php
-                foreach ($barang as $key => $value) {
-                  echo "<option value='$value->id_barang'>$value->nama</option>";
-                }
-                ?>
-              </select>
-              <span class="help-block"></span>
-            </div>
-            <div class="form-group col-sm-1">
-              <label for="lbl_hargabarang" class="form-control-label">Qty :</label>
-              <input type="number" class="form-control" id="qty" name="qty" autocomplete="off">
-              <span class="help-block"></span>
-            </div>
-            <div class="form-group col-sm-3">
-              <label for="lbl_hargabarang" class="form-control-label">Nilai Rupiah :</label>
-              <input type="text" class="form-control uang" id="nilai" name="nilai" autocomplete="off" align="right">
-              <span class="help-block"></span>
-            </div>
-            <div class="form-group col-sm-3">
-              <label for="lbl_hargabarang" class="form-control-label">Keterangan :</label>
-              <input type="text" class="form-control" id="keterangan" name="keterangan" autocomplete="off" align="right">
-              <span class="help-block"></span>
-            </div>
+        <br />
 
-            <div class="form-group col-sm-3" style="padding-top:25px;">
-              <button id="btnSave" type="submit" class="btn btn-primary">Simpan</button>
+        <!-- Table row -->
+        <div class="kt-portlet">
+          <div class="kt-portlet__head">
+            <div class="kt-portlet__head-label">
+              <h3 class="kt-portlet__head-title">
+                Data Penerimaan Pembelian ( Kode : <?= $data_header->kode_penerimaan; ?> )
+              </h3>
             </div>
           </div>
-        </form>
-        <br />
-        <!-- Table row -->
-        <div class="row">
-          <div class="col-xs-12 table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Qty</th>
-                  <th>Product</th>
-                  <th>Keterangan</th>
-                  <th>Price</th>
-                  <th>Sub Total</th>
-                  <th>&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody id="tbody">
-              </tbody>
-            </table>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
+          <div class="kt-portlet__body">
 
-        <div class="row">
-          <!-- accepted payments column -->
-          <div class="col-md-12">
-            <div class="table-responsive">
-              <table class="table" width="100%">
-                <tbody>
-                  <tr>
-                    <td width="69%">Total:</td>
-                    <td id="total" align="right">0</td>
-                  </tr>
-                </tbody>
-              </table>
+            <!--begin::Section-->
+            <div class="kt-section">
+              <span class="kt-section__info">
+                Klik Tombol <b>Gunakan Data</b> pada tabel penerimaan dibawah, untuk diproses pada <b>Transaksi Retur.</b>
+              </span>
+              <div class="kt-section__content">
+                <table class="table">
+                  <thead class="thead-light">
+                    <tr>
+                      <th style="text-align:center">No</th>
+                      <th style="text-align:center">Barang</th>
+                      <th style="text-align:center">Gudang</th>
+                      <th style="text-align:center">Qty</th>
+                      <th style="text-align:center">Harga</th>
+                      <th style="text-align:center">Total</th>
+                      <th style="text-align:center">Qty (Retur)</th>
+                      <th style="text-align:center">#</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($data_penerimaan as $key => $value) {
+                       echo "<tr>
+                          <th scope='row'>".($key+1)."</th>
+                          <td>$value->nama_barang</td>
+                          <td>$value->nama_gudang</td>
+                          <td>$value->qty</td>
+                          <td align='right'>".number_format($value->harga,0,',','.')."</td>
+                          <td align='right'>".number_format($value->harga*$value->qty,0,',','.')."</td>
+                          <td width='10%'>
+                            <input type ='text' class='form-control numberinput' id='inputQty-".$value->id_penerimaan_det."' name='inputQty-".$value->id_penerimaan_det."' value='' />
+                            <input type ='hidden' class='form-control' id='inputIdStok-".$value->id_penerimaan_det."' name='inputIdStok-".$value->id_penerimaan_det."' value='".$value->id_stok."' />
+                          </td>
+                          <td width='15%' align='right'><button class='btn btn-sm btn-primary' onclick='gunakanDataPenerimaan(".$value->id_penerimaan_det.")'>Gunakan Data</button></td>
+                        </tr>";
+                    } ?>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
+            <!--end::Section-->
 
+            
+            <!--begin::Section-->
+            <div class="kt-section">
+            <span class="kt-section__info">
+                <b>Tabel dibawah ini adalah data Penerimaan Pembelian yang akan dilakukan Retur</b>
+              </span>
+              <div class="kt-section__content">
+                <table class="table">
+                  <thead class="thead-dark">
+                    <tr>
+                      <th style="text-align:center">No</th>
+                      <th style="text-align:center">Barang</th>
+                      <th style="text-align:center">Gudang</th>
+                      <th style="text-align:center">Qty</th>
+                      <th style="text-align:center">Harga</th>
+                      <th style="text-align:center">Total</th>
+                      <th style="text-align:center">#</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody"></tbody>
+                </table>
+              </div>
+            </div>
+            <!--end::Section-->
+          </div>
+        </div>
+                  
         <!-- this row will not appear when printing -->
         <div class="row no-print">
           <div class="form-group col-sm-6" style="padding-top:25px;">

@@ -524,4 +524,4 @@ $config['proxy_ips'] = '';
  * sebagai flag untuk load assset js/css 
  * jika true akan ambil dari hasil build (minify)
  */
-$config['is_production'] = TRUE;
+$config['is_production'] = FALSE;

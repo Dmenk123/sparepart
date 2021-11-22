@@ -26,7 +26,7 @@
           </div>
         </div>
 
-        <div class="kt-portlet__head-toolbar" style="float-right;"><?= $this->template_view->getAddButton(false, 'add_menu', 'new_pengeluaran', 'Tambah Pengeluaran'); ?></div>
+        <div class="kt-portlet__head-toolbar" style="float-right;"><?= $this->template_view->getAddButton(false, 'add_menu', 'new_transaksi', 'Tambah Transaksi'); ?></div>
       </div>
       <div class="kt-portlet__body">
         <form method="get" class="kt-form kt-form--fit kt-margin-b-20" id="formFilter">
@@ -90,11 +90,11 @@
               <select name="kategori" id="kategori" class="form-control select2">
                 <option value="all">Semua Kategori</option>
                 <?php
-                foreach ($kategori as $key => $value) {
-                  if ((int)$this->input->get('kategori') == $value->id_kategori_trans) {
-                    echo "<option value='$value->id_kategori_trans' selected>$value->nama_kategori_trans</option>";
+                for ($i=1; $i <= 2; $i++) { 
+                  if ((int)$this->input->get('kategori') == $i) {
+                    echo "<option value='$i' selected>$arr_kat[$i]</option>";
                   } else {
-                    echo "<option value='$value->id_kategori_trans'>$value->nama_kategori_trans</option>";
+                    echo "<option value='$i'>$arr_kat[$i]</option>";
                   }
                 }
                 ?>
@@ -124,7 +124,7 @@
         </form>
 
         <!--begin: Datatable -->
-        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_pengeluaran">
+        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_transaksi">
           <thead>
             <tr>
               <th style="width: 5%;">No</th>
