@@ -116,9 +116,15 @@ const gunakan_potongan_nota = (id) => {
               data : {id:id},
               success: function(data)
               {
-                  swalConfirm.fire('Berhasil Pakai Potongan !', data.pesan, 'success');
-                  getTable();
-                  getTotal();
+                  if(data.status) {
+                    swalConfirm.fire('Berhasil Pakai Potongan !', data.pesan, 'success');
+                    // getTable();
+                    // getTotal();
+                    location.reload();
+                  }else{
+                    swalConfirm.fire('Gagal Pakai Potongan !', data.pesan, 'error');
+                  }
+                 
               },
               error: function (jqXHR, textStatus, errorThrown)
               {
@@ -156,9 +162,14 @@ const hapus_potongan_nota = (id) => {
               data : {id:id},
               success: function(data)
               {
-                  swalConfirm.fire('Berhasil Pakai Potongan !', data.pesan, 'success');
-                  getTable();
-                  getTotal();
+                if(data.status) {
+                  swalConfirm.fire('Berhasil Hapus Potongan !', data.pesan, 'success');
+                  // getTable();
+                  // getTotal();
+                  location.reload();
+                }else{
+                  swalConfirm.fire('Gagal Hapus Potongan !', data.pesan, 'error');
+                }
               },
               error: function (jqXHR, textStatus, errorThrown)
               {

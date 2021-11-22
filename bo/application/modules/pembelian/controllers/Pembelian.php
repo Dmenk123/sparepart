@@ -230,7 +230,12 @@ class Pembelian extends CI_Controller {
 			$data['potong_nota']  = $cek_retur->total_nilai_retur;
 			$data['potongan_terpakai']  = $is_potongan_terpakai;
 		} else {
-			$data['potong_nota']  = 0;
+			if($cek_kode && $cek_kode->total_potong_nota) {
+				$data['potong_nota']  = $cek_kode->total_potong_nota;
+			}else{
+				$data['potong_nota']  = 0;
+			}
+			
 			$data['potongan_terpakai']  = $is_potongan_terpakai;
 		}
 
@@ -371,9 +376,15 @@ class Pembelian extends CI_Controller {
 			$q_grand_total = $this->t_pembelian->getTotalPembelian($id_pembelian)->row();
 			$q_disc_total = $this->t_pembelian->getTotalDiskon($id_pembelian)->row();
 
-			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $q_grand_total->total, 'total_disc' => $q_disc_total->disc_total, 'updated_at' => $timestamp], ['id_pembelian' => $id_pembelian]);
+			if ($cek_header && $cek_header->total_potong_nota) {
+				$total_fix = $q_grand_total->total - $cek_header->total_potong_nota;
+			}else{
+				$total_fix = $q_grand_total->total;
+			}
+
+			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $total_fix, 'total_disc' => $q_disc_total->disc_total, 'updated_at' => $timestamp], ['id_pembelian' => $id_pembelian]);
 			
-			$ins_laporan = $this->lib_mutasi->insertDataLap($q_grand_total->total ,1, $cek_header->kode_pembelian, $cek_header->is_kredit);
+			$ins_laporan = $this->lib_mutasi->insertDataLap($total_fix ,1, $cek_header->kode_pembelian, $cek_header->is_kredit);
 			
 			if($ins_laporan['status'] == false) {
 				$this->db->trans_rollback();
@@ -425,9 +436,11 @@ class Pembelian extends CI_Controller {
 		$id = $this->input->post('id');
 		$hasil = $this->t_pembelian->getTotalPembelian($id)->row();
 		$cek_header = $this->m_global->single_row("*", ['id_pembelian' => $id, 'deleted_at' => null], 't_pembelian');
+		
 		if ($cek_header && $cek_header->total_potong_nota) {
 			$is_potong_nota = true;
 		}
+
 		$data = array();
 		if (!empty($hasil)) {
 			// var_dump($data->total);
@@ -438,6 +451,7 @@ class Pembelian extends CI_Controller {
 			}
 
 			$data['total'] = 'Rp '.number_format($total_fix);
+
 		} else {
 			if ($is_potong_nota) {
 				$total_fix = 0 - $cek_header->total_potong_nota;
@@ -479,10 +493,17 @@ class Pembelian extends CI_Controller {
 				$this->db->trans_commit();
 
 				$hasil_total = $this->t_pembelian->getTotalPembelian($pembelian_det->id_pembelian)->row();
-				$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $hasil_total->total], ['id_pembelian' => $pembelian_det->id_pembelian]);
-				
+
 				$cek_header = $this->m_global->single_row("*", ['id_pembelian' => $pembelian_det->id_pembelian, 'deleted_at' => null], 't_pembelian');
-				$ins_laporan = $this->lib_mutasi->insertDataLap($hasil_total->total ,1, $cek_header->kode_pembelian, $cek_header->is_kredit);
+
+				if ($cek_header && $cek_header->total_potong_nota) {
+					$total_fix = $hasil_total->total - $cek_header->total_potong_nota;
+				}else{
+					$total_fix = $hasil_total->total;
+				}
+
+				$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $total_fix], ['id_pembelian' => $pembelian_det->id_pembelian]);
+				$ins_laporan = $this->lib_mutasi->insertDataLap($total_fix ,1, $cek_header->kode_pembelian, $cek_header->is_kredit);
 
 				$retval['status'] = true;
 				$retval['pesan'] = 'Sukses Mengubah Data ';
@@ -639,28 +660,115 @@ class Pembelian extends CI_Controller {
 
 	public function pakai_potongan_nota()
 	{
-		$id = $this->input->post('name');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$tgl = $obj_date->format('Y-m-d');
+		try {
+			$this->db->trans_begin();
+			$id = $this->input->post('id');
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			$tgl = $obj_date->format('Y-m-d');
 
-		$cek_kode = $this->m_global->single_row("*", ['id_pembelian' => $id, 'deleted_at' => null], 't_pembelian');
-		if (!$cek_kode) {
-			echo json_encode([
-				'status' => false,
-				'pesan' => 'Pembelian tidak diketemukan'
-			]);
-			return;
+			$cek_kode = $this->m_global->single_row("*", ['id_pembelian' => $id, 'deleted_at' => null], 't_pembelian');
+			if (!$cek_kode) {
+				echo json_encode([
+					'status' => false,
+					'pesan' => 'Pembelian tidak diketemukan'
+				]);
+				return;
+			}
+
+			$cek_retur = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'id_pembelian_potong_nota' => null, 'deleted_at' => null], 't_retur_beli');
+
+			if ($cek_retur) {
+				$total_pembelian = $cek_kode->total_pembelian - $cek_retur->total_nilai_retur;
+				$total_potong_nota = $cek_retur->total_nilai_retur;
+			}else{
+				$total_pembelian = $cek_kode->total_pembelian;
+				$total_potong_nota = null;
+			}
+
+			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $total_pembelian, 'total_potong_nota' => $total_potong_nota, 'updated_at' => $timestamp], ['id_pembelian' => $id]);
+
+			$update_retur = $this->m_global->update('t_retur_beli', ['id_pembelian_potong_nota' => $id, 'updated_at' => $timestamp], ['id_agen' => $cek_kode->id_agen, 'id_pembelian_potong_nota' => null, 'deleted_at' => null, 'jenis_retur' => '2']);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Pakai Potongan';
+			}else{
+				$this->db->trans_commit();
+
+				$ins_laporan = $this->lib_mutasi->insertDataLap($total_pembelian, 1, $cek_kode->kode_pembelian, $cek_kode->is_kredit);
+
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Pakai Potongan';
+			}
+			
+		} catch (\Throwable $th) {
+			$retval['status'] = true;
+			$retval['pesan'] = $th;
+		}
+		
+		echo json_encode($retval);
+	}
+
+	public function hapus_potongan_nota()
+	{
+		try {
+			$this->db->trans_begin();
+			$id = $this->input->post('id');
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			$tgl = $obj_date->format('Y-m-d');
+
+			$cek_kode = $this->m_global->single_row("*", ['id_pembelian' => $id, 'deleted_at' => null], 't_pembelian');
+			if (!$cek_kode) {
+				echo json_encode([
+					'status' => false,
+					'pesan' => 'Pembelian tidak diketemukan'
+				]);
+				return;
+			}
+
+			$cek_retur = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'id_pembelian_potong_nota' => $cek_kode->id_pembelian, 'deleted_at' => null], 't_retur_beli');
+
+			if ($cek_retur) {
+				$total_pembelian = $cek_kode->total_pembelian + $cek_retur->total_nilai_retur;
+				$total_potong_nota = null;
+			}else{
+				$total_pembelian = $cek_kode->total_pembelian;
+				$total_potong_nota = $cek_kode->total_potong_nota;
+			}
+
+			$update_header = $this->m_global->update('t_pembelian', ['total_pembelian' => $total_pembelian, 'total_potong_nota' => $total_potong_nota, 'updated_at' => $timestamp], ['id_pembelian' => $id]);
+
+			$update_retur = $this->m_global->update('t_retur_beli', ['id_pembelian_potong_nota' => null, 'updated_at' => $timestamp], ['id_agen' => $cek_kode->id_agen, 'id_pembelian_potong_nota' => $id, 'deleted_at' => null, 'jenis_retur' => '2']);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Hapus Potongan';
+			}else{
+				$this->db->trans_commit();
+
+				$ins_laporan = $this->lib_mutasi->insertDataLap($total_pembelian, 1, $cek_kode->kode_pembelian, $cek_kode->is_kredit);
+
+				$upd_laporan = $this->lib_mutasi->updateDataLap(
+					$total_pembelian,
+					1, 
+					$cek_kode->kode_pembelian,
+					$cek_kode->is_kredit,
+				);
+
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Hapus Potongan';
+			}
+
+		} catch (\Throwable $th) {
+			$retval['status'] = false;
+			$retval['pesan'] = $th;
 		}
 
-		$cek_retur = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'id_pembelian_potong_nota' => null, 'deleted_at' => null], 't_retur_beli');
-
-		if ($cek_retur) {
-			// $is_ada_potongan = true;
-			// $data['potong_nota']  = $cek_retur->total_nilai_retur;
-			// $data['potongan_terpakai']  = $is_potongan_terpakai;
-
-		} 
+		echo json_encode($retval);
 	}
 
 	// ===============================================
