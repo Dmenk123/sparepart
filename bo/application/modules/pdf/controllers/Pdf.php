@@ -33,7 +33,7 @@ class Pdf extends CI_Controller {
 				$bulan = $this->input->get('bulan');
 				$tahun = $this->input->get('tahun');
 				$tahun2 = $this->input->get('tahun2');
-					#yantoss
+					#yantoss b
 				if ($this->input->get('start')) {
 					$exp_date2 = str_replace('/', '-', $this->input->get('start'));
 					$start = date('Y-m-d', strtotime($exp_date2));
