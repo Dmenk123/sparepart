@@ -27,7 +27,7 @@ $(document).ready(function() {
         processing: true,
         serverside: true,
         ajax: {
-            url  : base_url + "retur_beli/list_data_tabel",
+            url  : base_url + "retur_masuk/list_data_tabel",
             type : "POST", 
             data: {
                 tahun: tahunUri,
