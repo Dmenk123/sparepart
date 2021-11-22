@@ -161,7 +161,7 @@
                 <div class="table-responsive">
                     <table class="table" width="100%" >
                         <tbody>
-                            <?php if($potong_nota > 0) {
+                            <?php if($potongan_terpakai == false) {
                               $txt_ket = '<b>Belum Dipakai</b>';
                             }else {
                               $txt_ket = '';
@@ -169,10 +169,11 @@
                             <tr>
                                 <td width="69%" >Disc Potong Nota : <span id="txt_ket_potong_nota"><?=$txt_ket;?></td>
                                 <td>Rp <?=number_format($potong_nota);?></td>
+                                <td><?php if($potongan_terpakai == false) { echo '<button class="btn-primary" onclick="gunakan_potongan_nota(\''.$id_pembelian.'\')">Pakai Potongan</button>'; }else{ echo '<button class="btn-danger" onclick="hapus_potongan_nota(\''.$id_pembelian.'\')">Hapus Potongan</button>'; }?></td>
                               </tr>
                             <tr>
                                 <td width="69%" >Total:</td>
-                                <td id="total">0</td>
+                                <td id="total" colspan="2">0</td>
                             </tr>
                         </tbody>
                     </table>

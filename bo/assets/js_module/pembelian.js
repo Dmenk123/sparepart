@@ -98,11 +98,90 @@ $(document).ready(function() {
   
 });	
 
+const gunakan_potongan_nota = (id) => {
+   swalConfirm.fire({
+      title: 'Gunakan Potongan ?',
+      text: "Total Transaksi akan dikurangi nilai retur ?",
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya !',
+      cancelButtonText: 'Tidak !',
+      reverseButtons: false
+  }).then((result) => {
+      if (result.value) {
+          $.ajax({
+              url : base_url + 'pembelian/pakai_potongan_nota',
+              type: "POST",
+              dataType: "JSON",
+              data : {id:id},
+              success: function(data)
+              {
+                  swalConfirm.fire('Berhasil Pakai Potongan !', data.pesan, 'success');
+                  getTable();
+                  getTotal();
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                  Swal.fire('Terjadi Kesalahan');
+              }
+          });
+      } else if (
+        /* Read more about handling dismissals below */
+        result.dismiss === Swal.DismissReason.cancel
+      ) {
+        swalConfirm.fire(
+          'Dibatalkan',
+          'Aksi Dibatalakan',
+          'error'
+        )
+      }
+  });
+}
+
+const hapus_potongan_nota = (id) => {
+   swalConfirm.fire({
+      title: 'Hapus Potongan ?',
+      text: "Yakin Hapus Potongan Pembelian ?",
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya !',
+      cancelButtonText: 'Tidak !',
+      reverseButtons: false
+  }).then((result) => {
+      if (result.value) {
+          $.ajax({
+              url : base_url + 'pembelian/hapus_potongan_nota',
+              type: "POST",
+              dataType: "JSON",
+              data : {id:id},
+              success: function(data)
+              {
+                  swalConfirm.fire('Berhasil Pakai Potongan !', data.pesan, 'success');
+                  getTable();
+                  getTotal();
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                  Swal.fire('Terjadi Kesalahan');
+              }
+          });
+      } else if (
+        /* Read more about handling dismissals below */
+        result.dismiss === Swal.DismissReason.cancel
+      ) {
+        swalConfirm.fire(
+          'Dibatalkan',
+          'Aksi Dibatalakan',
+          'error'
+        )
+      }
+  });
+}
+
 function add_menu()
 {
-    
-    reset_modal_form();
-    save_method = 'add';
+  reset_modal_form();
+  save_method = 'add';
 	$('#modal_agen_form').modal('show');
 	$('#modal_title').text('Tambah Master Agen'); 
 }
@@ -253,7 +332,7 @@ function delete_pembelian(id){
       confirmButtonText: 'Ya, Hapus Data !',
       cancelButtonText: 'Tidak, Batalkan!',
       reverseButtons: true
-    }).then((result) => {
+  }).then((result) => {
       if (result.value) {
           $.ajax({
               url : base_url + 'pembelian/delete_pembelian',

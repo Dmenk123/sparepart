@@ -216,11 +216,22 @@ class Pembelian extends CI_Controller {
 		$data['barang']  = $this->db->query("SELECT m_barang.*, t_stok.qty, t_stok.qty_min FROM m_barang JOIN t_stok on m_barang.id_barang = t_stok.id_barang WHERE m_barang.deleted_at is null");
 		$data['agen']  = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'deleted_at' => null], 'm_agen');
 
+		$is_ada_potongan = false;
+		$is_potongan_terpakai = false;
+
 		$cek_retur = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'id_pembelian_potong_nota' => null, 'deleted_at' => null], 't_retur_beli');
+		
+		if ($cek_kode->total_potong_nota && $cek_kode->total_potong_nota > 0) {
+			$is_potongan_terpakai = true;
+		}
+
 		if ($cek_retur) {
+			$is_ada_potongan = true;
 			$data['potong_nota']  = $cek_retur->total_nilai_retur;
+			$data['potongan_terpakai']  = $is_potongan_terpakai;
 		} else {
 			$data['potong_nota']  = 0;
+			$data['potongan_terpakai']  = $is_potongan_terpakai;
 		}
 
 		/**
@@ -624,6 +635,32 @@ class Pembelian extends CI_Controller {
 			'html_det' => $html_det
 		]);
 		
+	}
+
+	public function pakai_potongan_nota()
+	{
+		$id = $this->input->post('name');
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tgl = $obj_date->format('Y-m-d');
+
+		$cek_kode = $this->m_global->single_row("*", ['id_pembelian' => $id, 'deleted_at' => null], 't_pembelian');
+		if (!$cek_kode) {
+			echo json_encode([
+				'status' => false,
+				'pesan' => 'Pembelian tidak diketemukan'
+			]);
+			return;
+		}
+
+		$cek_retur = $this->m_global->single_row("*", ['id_agen' => $cek_kode->id_agen, 'id_pembelian_potong_nota' => null, 'deleted_at' => null], 't_retur_beli');
+
+		if ($cek_retur) {
+			// $is_ada_potongan = true;
+			// $data['potong_nota']  = $cek_retur->total_nilai_retur;
+			// $data['potongan_terpakai']  = $is_potongan_terpakai;
+
+		} 
 	}
 
 	// ===============================================
