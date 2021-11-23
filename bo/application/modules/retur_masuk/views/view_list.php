@@ -108,6 +108,7 @@
               <th>Tanggal</th>
               <th>Kode</th>
               <th>Kode Retur</th>
+              <th>Supplier</th>
               <th>User</th>
               <th>Total Rupiah</th>
               <th style="width: 5%;">Aksi</th>

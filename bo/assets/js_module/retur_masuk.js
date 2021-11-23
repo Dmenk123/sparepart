@@ -9,7 +9,6 @@ $(document).ready(function() {
     let uri = new URL(window.location.href);
     bulanUri = uri.searchParams.get("bulan");
     tahunUri = uri.searchParams.get("tahun");
-    kategoriUri = uri.searchParams.get("kategori");
 
     let arrSegment = window.location.pathname.split('/');
     if(arrSegment[4] == 'add_transaksi_det') {
@@ -32,18 +31,17 @@ $(document).ready(function() {
             data: {
                 tahun: tahunUri,
                 bulan: bulanUri,
-                kategori: kategoriUri,
             },
         },
         language: {
             decimal: ",",
             thousands: "."
         },
-        createdRow: function( row, data, dataIndex){
-          if(data[4] ==  'Potong Nota'){
-              $(row).addClass('highlight_row_info');
-          }
-        }
+        // createdRow: function( row, data, dataIndex){
+        //   if(data[4] ==  'Potong Nota'){
+        //       $(row).addClass('highlight_row_info');
+        //   }
+        // }
     });
 
 
@@ -77,7 +75,7 @@ const saveNewTransaksi = () => {
     var txtAksi;
     const loadingCircle = $("#loading-circle");
  
-    url = base_url + 'retur_beli/add_new_transaksi';
+    url = base_url + 'retur_masuk/add_new_transaksi';
     txtAksi = 'Tambah Invoice';
     var alert = "Menambah";
     
@@ -154,7 +152,7 @@ const saveNewTransaksi = () => {
 }
 
 const ajax_send = (kode) => {
-  window.location.href = base_url+'retur_beli/add_transaksi_det?kode='+kode;
+  window.location.href = base_url+'retur_masuk/add_transaksi_det?kode='+kode;
 }
 
 const gunakanDataPenerimaan = (id) => {
@@ -228,16 +226,18 @@ const getSelectBarang = (obj) => {
   }
 }
 
-const getTable = () => {
-    let id = $('#span-id-retur').text();
-    $.ajax({
-        type: 'POST',
-        url: base_url + 'retur_beli/fetch',
-        data: {id:id},
-        success:function(response){
-            $('#tbody').html(response);
-        }
-    });
+function getTable(){
+  var id = $('#id').val();
+  var id_retur = $('#id_retur').val();
+  $.ajax({
+      type: 'POST',
+      url: base_url + 'retur_masuk/fetch',
+      data: {id:id, id_retur:id_retur},
+      success:function(response){
+          $('#tbody').html(response);
+          getTotal();
+      }
+  });
 }
 
 function hapus_trans_det(id)

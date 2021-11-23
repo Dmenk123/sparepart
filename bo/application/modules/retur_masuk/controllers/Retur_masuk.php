@@ -54,12 +54,10 @@ class Retur_masuk extends CI_Controller
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$bulan = ($this->input->post('bulan') == '') ? (int)$obj_date->format('m') : $this->input->post('bulan');
 		$tahun = ($this->input->post('tahun') == '') ? (int)$obj_date->format('Y') : $this->input->post('tahun');
-		$kategori = ($this->input->post('kategori') == '') ? 'all' : $this->input->post('kategori');
 
 		$paramdata = [
 			'bulan' => $bulan,
 			'tahun' => $tahun,
-			'kategori' => $kategori
 		];
 
 		$listData = $this->t_retur_masuk->get_datatable_transaksi($paramdata);
@@ -68,25 +66,25 @@ class Retur_masuk extends CI_Controller
 		foreach ($listData as $key => $value) {
 			$datas[$key][] = $i++;
 			$datas[$key][] = tanggal_indo($value->tanggal);
+			$datas[$key][] = $value->kode;
 			$datas[$key][] = $value->kode_retur;
 			$datas[$key][] = $value->nama_perusahaan;
-			$datas[$key][] = ($value->jenis_retur == '1') ? 'Ganti Barang' : 'Potong Nota';
 			$datas[$key][] = $value->nama_user;
 			$datas[$key][] = number_format($value->total_nilai_retur, 0, ',', '.');
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_transaksi(\'' . $value->kode_retur . '\',\'' . $value->id . '\')">
+						<button class="dropdown-item" onclick="edit_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
 							<i class="la la-pencil"></i> Edit Transaksi
 						</button>
-						<button class="dropdown-item" onclick="detail_transaksi(\'' . $value->kode_retur . '\',\'' . $value->id . '\')">
+						<button class="dropdown-item" onclick="detail_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
 							<i class="la la-desktop"></i> Lihat Detail
 						</button>
-						<button class="dropdown-item" onclick="delete_transaksi(\'' . $value->kode_retur . '\',\'' . $value->id . '\')">
+						<button class="dropdown-item" onclick="delete_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
 							<i class="la la-trash"></i> Hapus
 						</button>
-						<button class="dropdown-item" onclick="cetak_invoice(\'' . $value->kode_retur . '\',\'' . $value->id . '\')">
+						<button class="dropdown-item" onclick="cetak_invoice(\'' . $value->kode . '\',\'' . $value->id . '\')">
 							<i class="la la-print"></i> Cetak
 						</button>
 					</div>
@@ -112,11 +110,10 @@ class Retur_masuk extends CI_Controller
 		 */
 
 		$data = array(
-			'title' => 'Transaksi Retur Baru',
+			'title' => 'Tambah Penerimaan Retur',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
-			'arr_data' => [1 => 'Ganti Barang', 2 => 'Potong Nota'],
-			'data_penerimaan' => $this->m_global->getSelectedData('t_penerimaan', array('deleted_at' => null))->result(),
+			'data_retur' => $this->m_global->getSelectedData('t_retur_beli', array('deleted_at' => NULL, 'jenis_retur' => 1, 'is_terima_all' => NULL))->result(),
 			'mode'		=> 'add',
 		);
 
@@ -124,7 +121,7 @@ class Retur_masuk extends CI_Controller
 
 		if ($mode == 'edit') {
 			$kode = $this->input->get('kode');
-			$data_header = $this->m_global->getSelectedData('t_retur_beli', array('kode_retur' => $kode))->row();
+			$data_header = $this->m_global->getSelectedData('t_retur_masuk', array('kode' => $kode))->row();
 
 			if (!$data_header) {
 				return redirect($this->uri->segment(1));
@@ -132,11 +129,9 @@ class Retur_masuk extends CI_Controller
 
 			$data['old_data'] = $data_header;
 			$data['mode'] = $mode;
-			$data['title'] = "Edit Transaksi Retur";
+			$data['title'] = "Edit Penerimaan Retur";
 			$data['id_retur'] = $data_header->id;
-			$data['kode'] = $data_header->kode_retur;
-			$data['arr_data'] = [1 => 'Ganti Barang', 2 => 'Potong Nota'];
-			// $data['tgl_jatuh_tempo'] = date("d/m/Y", strtotime($invoice->tgl_jatuh_tempo));
+			$data['kode'] = $data_header->kode;
 		}
 		
 		/**
@@ -148,7 +143,7 @@ class Retur_masuk extends CI_Controller
 		$content = [
 			'css' 	=> null,
 			'modal' => null,
-			'js'	=> 'retur_beli.js',
+			'js'	=> 'retur_masuk.js',
 			'view'	=> 'view_new'
 		];
 
@@ -162,28 +157,19 @@ class Retur_masuk extends CI_Controller
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$tgl = $this->input->post('tanggal');
 		$tgl_fix = DateTime::createFromFormat('d/m/Y', $tgl)->format('Y-m-d');
-		$id_penerimaan = $this->input->post('id_penerimaan');
-		$jenis = $this->input->post('jenis');
+		$id_retur = $this->input->post('id_retur');
 		
-		$arr_valid = $this->rule_validasi(false);
+		$arr_valid = $this->rule_validasi();
 
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
 		}
 
-		$q_penerimaan = $this->m_global->single_row('*', ['id_penerimaan' => $id_penerimaan, 'deleted_at' => null], 't_penerimaan');
-		if(!$q_penerimaan) {
+		$q_retur = $this->m_global->single_row('*', ['id' => $id_retur, 'deleted_at' => null], 't_retur_beli');
+		if(!$q_retur) {
 			$retval['status'] = false;
 			$retval['pesan'] = 'Data Penerimaan Tidak Ditemukan';
-			echo json_encode($retval);
-			return;
-		}
-
-		$q_pembelian = $this->m_global->single_row('*', ['id_pembelian' => $q_penerimaan->id_pembelian, 'deleted_at' => null], 't_pembelian');
-		if (!$q_pembelian) {
-			$retval['status'] = false;
-			$retval['pesan'] = 'Data Pembelian Tidak Ditemukan';
 			echo json_encode($retval);
 			return;
 		}
@@ -191,7 +177,7 @@ class Retur_masuk extends CI_Controller
 		$is_update = false;
 
 		if ($this->input->post('index') != '') {
-			$cek = $this->t_retur_beli->get_by_id($this->input->post('id'));
+			$cek = $this->t_retur_masuk->get_by_id($this->input->post('id'));
 			if ($cek) {
 				$is_update = true;
 				$kode = $cek->kode;
@@ -205,20 +191,18 @@ class Retur_masuk extends CI_Controller
 		}
 
 		if (!$is_update) {
-			$counter_trans = $this->t_retur_beli->get_max_transaksi();
-			$kode = generate_kode_transaksi($tgl_fix, $counter_trans, strtoupper(strtolower('RTR')));
+			$counter_trans = $this->t_retur_masuk->get_max_transaksi();
+			$kode = generate_kode_transaksi($tgl_fix, $counter_trans, strtoupper(strtolower('RTM')));
 
-			$data['id_penerimaan'] = $id_penerimaan;
+			$data['id_retur_beli'] = $id_retur;
 			$data['tanggal'] = $tgl_fix;
 			$data['id_user'] = $this->session->userdata('id_user');
-			$data['jenis_retur'] = $jenis;	
-			$data['kode_retur'] = $kode;
-			$data['id_agen'] = $q_pembelian->id_agen;
+			$data['kode'] = $kode;
+			$data['id_agen'] = $q_retur->id_agen;
 			$data['total_nilai_retur'] = 0;
 			$data['created_at']	= $timestamp;
 		} else {
 			$data['id_user'] = $this->session->userdata('id_user');
-			$data['jenis_retur'] = $jenis;
 			$data['tanggal'] = $tgl_fix;
 			$data['updated_at']	= $timestamp;
 		}
@@ -226,9 +210,9 @@ class Retur_masuk extends CI_Controller
 		$this->db->trans_begin();
 
 		if ($is_update) {
-			$this->t_retur_beli->update(['id' => $id_transaksi_fix], $data);
+			$this->t_retur_masuk->update(['id' => $id_transaksi_fix], $data);
 		} else {
-			$insert = $this->t_retur_beli->save($data);
+			$insert = $this->t_retur_masuk->save($data);
 		}
 
 		if ($this->db->trans_status() === FALSE) {
@@ -252,28 +236,39 @@ class Retur_masuk extends CI_Controller
 		$data_user = $this->m_user->get_detail_user($id_user);
 		$data_role = $this->m_role->get_data_all(['aktif' => '1'], 'm_role');
 		$profil = $this->m_global->single_row('*', ['deleted_at' => null], 'm_profil');
-		// var_dump($diskon); die();
-
+		
 		/**
 		 * data passing ke halaman view content
 		 */
-		$cek_header = $this->t_retur_beli->getDataHeader($kode)->row();
+		$cek_header = $this->t_retur_masuk->getDataHeader($kode)->row();
 
 		if (!$cek_header) {
 			return redirect($this->uri->segment(1));
 		}
 
-		$data_detail = $this->t_retur_beli->getDataDetail($cek_header->id)->result();
-		$data_penerimaan = $this->t_retur_beli->getDetailPenerimaan($cek_header->id_penerimaan)->result();
+		$data_detail = $this->t_retur_masuk->getDataDetail($cek_header->id)->result();
+		// $data_penerimaan = $this->t_retur_masuk->getDetailPenerimaan($cek_header->id_penerimaan)->result();
+
+		
+		// echo "<pre>";
+		// print_r ($cek_header);
+		// echo "</pre>";
+
+		// echo "<pre>";
+		// print_r ($data_detail);
+		// echo "</pre>";
+
+		// exit;
+		
 		
 		$data = array(
-			'title' => 'Tambah Pengeluaran Lain-Lain',
+			'title' => 'Tambah Penerimaan Retur',
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
 			'profil' => $profil,
 			'data_header' => $cek_header,
 			'data_detail' => $data_detail,
-			'data_penerimaan' => $data_penerimaan
+			// 'data_penerimaan' => $data_penerimaan
 		);
 		
 		/**
@@ -285,7 +280,7 @@ class Retur_masuk extends CI_Controller
 		$content = [
 			'css' 	=> null,
 			'modal' => 'modal_detail',
-			'js'	=> 'retur_beli.js',
+			'js'	=> 'retur_masuk.js',
 			'view'	=> 'view_add'
 		];
 
@@ -399,7 +394,23 @@ class Retur_masuk extends CI_Controller
 	public function fetch()
 	{
 		$id = $this->input->post('id');
-		$data = $this->t_retur_beli->getDataDetail($id)->result();
+		$id_retur = $this->input->post('id_retur');
+
+		$flag_is_update = false;
+		$flag_has_transaksi = false;
+
+		$data_masuk = $this->t_retur_masuk->getDataDetail($id)->result();
+		
+		if($data_masuk == null) {			
+			### transaksi baru
+			$data = $this->t_retur_masuk->getPembelianDet($id)->result();
+			$flag_has_transaksi = true;
+		}else{
+			### transaksi update
+			$data = $data_masuk;
+			$flag_is_update = true;
+		}
+
 		foreach ($data as $key => $row) {
 		?>
 			<tr>
@@ -595,50 +606,25 @@ class Retur_masuk extends CI_Controller
 	}
 
 	// ===============================================
-	private function rule_validasi($detail_transaksi = false)
+	private function rule_validasi()
 	{
 		$data = array();
 		$data['error_string'] = array();
 		$data['inputerror'] = array();
 		$data['status'] = TRUE;
-		if($detail_transaksi == FALSE) {
-			### validasi transaksi header
-			if ($this->input->post('id_penerimaan') == '') {
-				$data['inputerror'][] = 'id_penerimaan';
-				$data['error_string'][] = 'Wajib Memilih Penerimaan';
-				$data['status'] = FALSE;
-			}
-			if ($this->input->post('jenis') == '') {
-				$data['inputerror'][] = 'jenis';
-				$data['error_string'][] = 'Wajib Memilih Jenis Retur';
-				$data['status'] = FALSE;
-			}
-			if ($this->input->post('tanggal') == '') {
-				$data['inputerror'][] = 'tanggal';
-				$data['error_string'][] = 'Wajib Memilih tanggal';
-				$data['status'] = FALSE;
-			}
-		}else{
-			### validasi transaksi detail
-			// if ($this->input->post('id_penerimaan') == '') {
-			// 	$data['inputerror'][] = 'id_penerimaan';
-			// 	$data['error_string'][] = 'Wajib Memilih Penerimaan';
-			// 	$data['status'] = FALSE;
-			// }
-			// if ($this->input->post('jenis') == '') {
-			// 	$data['inputerror'][] = 'jenis';
-			// 	$data['error_string'][] = 'Wajib Memilih Jenis Retur';
-			// 	$data['status'] = FALSE;
-			// }
-			// if ($this->input->post('tanggal') == '') {
-			// 	$data['inputerror'][] = 'tanggal';
-			// 	$data['error_string'][] = 'Wajib Memilih tanggal';
-			// 	$data['status'] = FALSE;
-			// }
+
+		### validasi transaksi header
+		if ($this->input->post('id_retur') == '') {
+			$data['inputerror'][] = 'id_retur';
+			$data['error_string'][] = 'Wajib Memilih Kode Retur';
+			$data['status'] = FALSE;
+		}
+		if ($this->input->post('tanggal') == '') {
+			$data['inputerror'][] = 'tanggal';
+			$data['error_string'][] = 'Wajib Memilih Tanggal Retur';
+			$data['status'] = FALSE;
 		}
 		
-
-
 		return $data;
 	}
 

@@ -15,7 +15,6 @@ class T_retur_masuk extends CI_Model
 	function get_datatable_transaksi($param)
 	{
 		$obj_date = new DateTime();
-		$is_filter_kategori = false;
 		$is_filter_tgl = false;
 		$is_filter_bln = false;
 		$is_filter_thn = false;
@@ -26,10 +25,6 @@ class T_retur_masuk extends CI_Model
 
 		if ($param['tahun'] != 'all') {
 			$is_filter_thn =  true;
-		}
-
-		if ($param['kategori'] != 'all') {
-			$is_filter_kategori = true;
 		}
 
 		if ($is_filter_bln && $is_filter_thn) {
@@ -52,24 +47,18 @@ class T_retur_masuk extends CI_Model
 			$is_filter_tgl = true;
 		}
 				
-
-		$this->db->select('tr.*, user.nama as nama_user, ma.nama_perusahaan');
-		$this->db->from('t_retur_beli tr');
-		$this->db->join('m_user user', 'tr.id_user = user.id', 'left');
-		$this->db->join('t_penerimaan tp', 'tr.id_penerimaan = tp.id_penerimaan');
-		$this->db->join('t_pembelian tpb', 'tp.id_pembelian = tpb.id_pembelian');
-		$this->db->join('m_agen ma', 'tpb.id_agen = ma.id_agen');
-
+		$this->db->select('rm.*, rb.kode_retur, user.nama as nama_user, ma.nama_perusahaan');
+		$this->db->from('t_retur_masuk rm');
+		$this->db->join('t_retur_beli rb', 'rm.id_retur_beli = rb.id');
+		$this->db->join('m_agen ma', 'rm.id_agen = ma.id_agen');
+		$this->db->join('m_user user', 'rm.id_user = user.id', 'left');
+		
 		if($is_filter_tgl) {
-			$this->db->where('tr.tanggal >=', $tgl_awal);
-			$this->db->where('tr.tanggal <=', $tgl_akhir);
+			$this->db->where('rm.tanggal >=', $tgl_awal);
+			$this->db->where('rm.tanggal <=', $tgl_akhir);
 		}
 
-		if($is_filter_kategori) {
-			$this->db->where('tr.jenis_retur', $param['kategori']);
-		}
-
-		$this->db->where('tr.deleted_at', null);
+		$this->db->where('rm.deleted_at', null);
 		
 		$query = $this->db->get();
 
@@ -114,19 +103,19 @@ class T_retur_masuk extends CI_Model
 	public function getDataHeader($kode)
 	{
 		$this->db->select('
-			rb.*,
-			tp.kode_penerimaan,
+			rm.*,
+			rb.kode_retur,
+			rb.tanggal as tanggal_retur,
 			ma.nama_perusahaan,
 			mu.username,
 			mu.nama as nama_user,
 		');
-		$this->db->from('t_retur_beli rb');
-		$this->db->join('t_penerimaan tp', 'rb.id_penerimaan = tp.id_penerimaan');
-		$this->db->join('t_pembelian tpb', 'tp.id_pembelian = tpb.id_pembelian');
-		$this->db->join('m_agen ma', 'tpb.id_agen = ma.id_agen');
-		$this->db->join('m_user mu', 'mu.id = rb.id_user');
-		$this->db->where('rb.kode_retur', $kode);
-		$this->db->where('rb.deleted_at', null);
+		$this->db->from('t_retur_masuk rm');
+		$this->db->join('t_retur_beli rb', 'rm.id_retur_beli = rb.id');
+		$this->db->join('m_agen ma', 'rm.id_agen = ma.id_agen');
+		$this->db->join('m_user mu', 'mu.id = rm.id_user');
+		$this->db->where('rm.kode', $kode);
+		$this->db->where('rm.deleted_at', null);
 		$q = $this->db->get();
 		return $q;
 	}
@@ -134,19 +123,20 @@ class T_retur_masuk extends CI_Model
 	function getDataDetail($id)
 	{
 		$this->db->select('
-			rd.*,
+			rmd.*,
 			mb.nama as nama_barang,
 			mb.id_barang,
 			mg.nama_gudang,
 			mg.id_gudang
 		');
-		$this->db->from('t_retur_beli_det rd');
-		$this->db->join('t_stok s', 'rd.id_stok = s.id_stok');
+		$this->db->from('t_retur_masuk_det rmd');
+		$this->db->join('t_retur_masuk rm', 'rmd.id_retur_masuk = rm.id', 'left');
+		$this->db->join('t_stok s', 'rmd.id_stok = s.id_stok');
 		$this->db->join('m_barang mb', 's.id_barang = mb.id_barang');
 		$this->db->join('m_gudang mg', 's.id_gudang = mg.id_gudang');
-		$this->db->where('rd.id_retur_beli', $id);
-		$this->db->where('rd.deleted_at', null);
-		$this->db->order_by('rd.created_at', 'ASC');
+		$this->db->where('rmd.id_retur_masuk', $id);
+		$this->db->where('rmd.deleted_at', null);
+		$this->db->order_by('rmd.created_at', 'ASC');
 		$q = $this->db->get();
 		return $q;
 	}

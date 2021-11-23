@@ -48,8 +48,8 @@
           <div class="kt-portlet__head-wrapper">
             <div class="row" style="text-align:left!important;">
               <h2><?php echo $title; ?> <?php if (isset($no_faktur)) {
-                                          echo '- Faktur : ' . $no_faktur;
-                                        } ?></h2>
+                echo '- Faktur : ' . $no_faktur;
+              } ?></h2>
             </div>
           </div>
         </div>
@@ -60,29 +60,19 @@
 
         <form id="form-user" name="form-user">
           <div class="row">
-            <div class="form-group col-sm-4">
+            <div class="form-group col-sm-6">
               <input type="hidden" class="form-control" id="id" name="id" value="<?php $value = (isset($id)) ? $id : ''; echo $value; ?>">
               <input type="hidden" class="form-control" id="mode" name="mode" value="<?php echo $mode; ?>">
-              <label for="lbl_username" class="form-control-label">Kode Penerimaan :</label>
-              <select name="id_penerimaan" id="id_penerimaan" class="form-control select2">
+              <label for="lbl_username" class="form-control-label">Kode Retur :</label>
+              <select name="id_retur" id="id_retur" class="form-control select2">
                   <option value="0">-PILIH-</option>
-                  <?php foreach($data_penerimaan as $row):?>
-                      <option value="<?php echo $row->id_penerimaan;?>"><?php echo $row->kode_penerimaan;?></option>
+                  <?php foreach($data_retur as $row):?>
+                      <option value="<?php echo $row->id;?>"><?php echo $row->kode_retur;?></option>
                   <?php endforeach;?>
               </select>
               <span class="help-block"></span>
             </div>
-            <div class="form-group col-sm-4">
-              <label for="lbl_username" class="form-control-label">Jenis:</label>
-              <select name="jenis" id="jenis" class="form-control select2">
-                <option value="0">-PILIH-</option>
-                <?php for ($i=1; $i <= count($arr_data); $i++) { ?>
-                  <option value="<?=$i;?>" <?php echo ((isset($old_data)) && ($old_data->jenis_retur == $i)) ? 'selected' : '' ?>><?=$arr_data[$i];?></option>
-                <?php } ?>
-              </select>
-              <span class="help-block"></span>
-            </div>
-            <div class="form-group col-sm-4">
+            <div class="form-group col-sm-6">
               <label for="lbl_namabarang" class="form-control-label">Tanggal :</label>
               <input type="text" class="form-control kt_datepicker" id="tanggal" readonly="" name="tanggal">
               <span class="help-block"></span>
