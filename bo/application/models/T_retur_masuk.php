@@ -124,6 +124,7 @@ class T_retur_masuk extends CI_Model
 	{
 		$this->db->select('
 			rmd.*,
+			rm.id_retur_beli,
 			mb.nama as nama_barang,
 			mb.id_barang,
 			mg.nama_gudang,

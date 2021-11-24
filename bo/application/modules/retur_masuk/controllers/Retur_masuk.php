@@ -520,61 +520,113 @@ class Retur_masuk extends CI_Controller
 	public function delete_transaksi()
 	{
 		try {
+			$obj_date = new DateTime();
+			$timestamp = $obj_date->format('Y-m-d H:i:s');
+			$tgl = $obj_date->format('Y-m-d');
+			$id_retur_masuk = $this->input->post('id');
+			$kode_retur_masuk = $this->input->post('kode');
+			
+			$cek_header = $this->m_global->single_row("*", ['id' => $id_retur_masuk, 'deleted_at' => null], 't_retur_masuk');
+
+			if(!$cek_header) {
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal hapus Penerimaan Retur';
+				echo json_encode($retval);
+				return;
+			}
+
 			$this->db->trans_begin();
-			$id = $this->input->post('id');
-			$kode = $this->input->post('kode');
 
-			$cek = $this->m_global->single_row('*', ['id' => $id, 'deleted_at' => null], 't_retur_beli');
-			$cek2 = $this->t_retur_beli->getDataDetail($id);
-			$cek2 = $cek2->result();
-
-			if ($cek2) {
-				$del = $this->m_global->soft_delete(['id' => $id], 't_retur_beli');
+			$data_detail = $this->t_retur_masuk->getDataDetail($cek_header->id)->result();
+			
+			$arr_temp_detail = null;
+			
+			if($data_detail) {
+				$arr_temp_detail = $data_detail;
 			}
+			
+			foreach ($arr_temp_detail as $key => $value) {
+				#### hapus stok mutasi
+				$mutasi = $this->lib_mutasi->hapusMutasiMasuk(
+					$value->id_barang, 
+					$value->qty, 
+					5,  
+					null, 
+					$cek_header->id_gudang, 
+					$cek_header->kode,
+				);
 
-			if ($cek2) {
-				$loop_data = $cek2;
-				foreach ($loop_data as $key => $value) {
-					// update data lap keuangan
-					$mutasi = $this->lib_mutasi->updateMutasi(
-						$value->id_barang, 
-						-abs($value->qty), 
-						6, 
-						$cek->kode_retur, 
-						$value->id_gudang
-					);
+				// rollback retur beli
+				$joni = [ 
+					['table' => 't_retur_beli', 'on' => 't_retur_beli_det.id_retur_beli = t_retur_beli.id'],
+				];
 
-					if ($mutasi) {
-						$this->db->trans_commit();
-					} else {
-						$this->db->trans_rollback();
-						$retval['status'] = false;
-						$retval['pesan'] = 'Gagal Hapus Data';
-						echo json_encode($retval);
-						return;
-					}
+				$cek_retur_beli_det = $this->m_global->single_row(
+					"t_retur_beli_det.*, t_retur_beli.kode_retur", 
+					['t_retur_beli_det.id_retur_beli' => $value->id_retur_beli, 't_retur_beli_det.id_stok' => $value->id_stok, 't_retur_beli_det.deleted_at' => null], 
+					't_retur_beli_det', 
+					$joni
+				);
+
+				if($cek_retur_beli_det) {
+					$where_update = ['id_retur_beli' => $value->id, 'id_stok' => $value->id_stok, 'deleted_at' => null];
+					$data_update['is_terima'] = null;
+					$data_update['qty_terima'] = $cek_retur_beli_det->qty_terima - $value->qty;
+
+					// $data_update['tgl_terima'] = $cek_pembelian_det->qty_terima - $value->qty;
+					// $data_update['reff_terima'] = $cek_pembelian_det->qty_terima - $value->qty;
+					
+					$update = $this->m_global->update('t_retur_beli_det', $data_update, $where_update);
 				}
-
-				$del2 = $this->m_global->soft_delete(['id_retur_beli' => $id], 't_retur_beli_det');
 			}
 
+			### soft_delete
+			$del = $this->m_global->soft_delete(['id' => $cek_header->id], 't_retur_masuk');
+			$del_det = $this->m_global->soft_delete(['id_retur_masuk' => $cek_header->id], 't_retur_masuk_det');
+			
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();
 				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal Hapus Data';
+				$retval['pesan'] = 'Gagal menghapus Penerimaan Retur';
 			} else {
 				$this->db->trans_commit();
+
+				$data_retur_beli_det = $this->m_global->multi_row('*', ['id_retur_beli' => $cek_header->id_retur_beli], 't_retur_beli_det');
+				$arr = [];
+
+				foreach ($data_retur_beli_det as $key => $value) {
+					if ($value->qty == $value->qty_terima) {
+						$txt = 'ok';
+					} else {
+						$txt = 'belum';
+					}
+
+					$arr[] = $txt;
+				}
+
+				### jika tidak ada yg belum
+				### update t_pembelian set flag is_terima_all = 1 where is_terima di masing-masing det not null
+				if (!in_array('belum', $arr)) {
+					$data_upd = ['is_terima_all' => 1];
+				}else{
+					$data_upd = ['is_terima_all' => null];
+				}
+
+				$data_where = ['id' => $cek_header->id_retur_beli];
+				$this->m_global->update('t_retur_beli', $data_upd, $data_where);
+
 				$retval['status'] = true;
-				$retval['pesan'] = 'Sukses Hapus Data ';
+				$retval['pesan'] = 'Sukses menghapus Penerimaan Retur';
 			}
 
-			echo json_encode($retval);
 		} catch (\Throwable $th) {
 			$this->db->trans_rollback();
 			$retval['status'] = false;
 			$retval['pesan'] = $th;
-			echo json_encode($retval);
 		}
+
+		echo json_encode($retval);
 	}
 
 	// ===============================================

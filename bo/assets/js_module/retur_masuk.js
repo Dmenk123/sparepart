@@ -372,7 +372,7 @@ const delete_transaksi = (kode, id) => {
     }).then((result) => {
       if (result.value) {
           $.ajax({
-              url : base_url + 'retur_beli/delete_transaksi',
+              url : base_url + 'retur_masuk/delete_transaksi',
               type: "POST",
               dataType: "JSON",
               data : {id:id, kode:kode},
