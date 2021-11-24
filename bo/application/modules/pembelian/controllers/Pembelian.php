@@ -239,6 +239,8 @@ class Pembelian extends CI_Controller {
 			$data['potongan_terpakai']  = $is_potongan_terpakai;
 		}
 
+		$data['is_ada_potongan'] = $is_ada_potongan;
+
 		/**
 		 * content data untuk template
 		 * param (css : link css pada direktori assets/css_module)

@@ -45,7 +45,7 @@ class Stok_barang extends CI_Controller {
 			'view'	=> 'view_stok_barang'
 		];
 
-		$data['barang'] = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_barang', NULL, 'nama');
+		$data['barang'] = $this->m_global->multi_row('*', ['deleted_at' => null, 'sku != ' => null], 'm_barang', NULL, 'nama');
 		$data['gudang'] = $this->m_global->multi_row('*', ['deleted_at' => null], 'm_gudang', NULL, 'nama_gudang');
 
 		$this->template_view->load_view($content, $data);

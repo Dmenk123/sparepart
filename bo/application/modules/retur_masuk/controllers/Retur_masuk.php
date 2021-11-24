@@ -75,9 +75,6 @@ class Retur_masuk extends CI_Controller
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
-							<i class="la la-pencil"></i> Edit Transaksi
-						</button>
 						<button class="dropdown-item" onclick="detail_transaksi(\'' . $value->kode . '\',\'' . $value->id . '\')">
 							<i class="la la-desktop"></i> Lihat Detail
 						</button>
@@ -290,103 +287,116 @@ class Retur_masuk extends CI_Controller
 		$this->template_view->load_view($content, $data);
 	}
 
-	public function pakai_data()
+	public function simpan_penerimaan_retur()
 	{
 		try {
 			$this->db->trans_begin();
+
 			$obj_date = new DateTime();
 			$timestamp = $obj_date->format('Y-m-d H:i:s');
-			$id = $this->input->post('id');
-			$id_retur = $this->input->post('id_retur');
-			$id_stok = $this->input->post('id_stok');
-			$qty = $this->input->post('qty');
-			$kode_retur = $this->input->post('kode_retur');
+			$tgl = $obj_date->format('Y-m-d');
 			
-			$select = "t_penerimaan_det.*, m_barang.nama as nama_barang, m_gudang.nama_gudang, m_gudang.id_gudang";
-			$join = [
-				['table' => 't_penerimaan', 'on' => 't_penerimaan_det.id_penerimaan = t_penerimaan.id_penerimaan'],
-				['table' => 'm_gudang', 'on' => 't_penerimaan.id_gudang = t_penerimaan.id_gudang'],
-				['table' => 'm_barang', 'on' => 't_penerimaan_det.id_barang = m_barang.id_barang'],
-			];
-			$data_where = ['t_penerimaan_det.id_penerimaan_det' => $id, 't_penerimaan_det.deleted_at' => null];
-			$cek_trans = $this->m_global->single_row($select, $data_where, 't_penerimaan_det', $join);
+			$id_retur_masuk = $this->input->post('id');
+			$id_retur_beli = $this->input->post('id_retur');
+			$kode_retur_masuk = $this->input->post('kode');
 			
-			if(!$cek_trans) {
-				echo json_encode([
-					'status' => false,
-					'pesan' => 'Data Penerimaan tidak ditemukan'
-				]);
-				return;
+			$cek_retur_masuk = $this->m_global->single_row("*", ['id' => $id_retur_masuk, 'deleted_at' => null], 't_retur_masuk');
+
+			$sum_harga_total = 0;
+			for ($i=0; $i < count($this->input->post('qty')); $i++) { 
+				$data_stok = $this->m_global->single_row("*", ['id_barang' => $this->input->post('id_barang')[$i], 'id_gudang' => $cek_retur_masuk->id_gudang, 'deleted_at' => null], 't_stok');
+				$sum_harga_total += $this->input->post('harga_total_raw')[$i];
+				
+				$joni = [ 
+					['table' => 't_retur_beli', 'on' => 't_retur_beli_det.id_retur_beli = t_retur_beli.id'],
+				];
+
+				$cek_retur_beli_det = $this->m_global->single_row(
+					"t_retur_beli_det.*, t_retur_beli.kode_retur", 
+					['t_retur_beli_det.id' => $this->input->post('retur_beli_det')[$i], 't_retur_beli_det.deleted_at' => null], 
+					't_retur_beli_det', 
+					$joni
+				);
+
+				// var_dump($cek_retur_beli_det);exit;
+
+				### insert retur masuk det
+				$arr_retur_masuk = [
+					'qty' => $this->input->post('qty')[$i],
+					'id_retur_masuk' => $id_retur_masuk,
+					'id_stok' => $data_stok->id_stok,
+					'harga' => $cek_retur_beli_det->harga,
+					'harga_total' => $this->input->post('harga_total_raw')[$i],
+					'created_at' => $timestamp,
+				];
+
+				$insert_det = $this->m_global->save($arr_retur_masuk, 't_retur_masuk_det');
+				
+				#### update retur_beli_det
+				$where_update = ['id' => $this->input->post('retur_beli_det')[$i]];
+				$data_update['qty_terima'] = $cek_retur_beli_det->qty_terima + $this->input->post('qty')[$i];
+
+				### cek qty tabel retur beli det, jika qty penerimaan / sum penerimaan sesuai jumlah, set flag is_terima
+				if($cek_retur_beli_det->qty == $this->t_retur_masuk->sum_barang_masuk_pertransaksi($data_stok->id_stok, $id_retur_beli)) {
+					$data_update['is_terima'] = 1;
+				} 
+
+				$update = $this->m_global->update('t_retur_beli_det', $data_update, $where_update);
+
+				#### mutasi
+				$mutasi = $this->lib_mutasi->mutasiMasuk(
+					$this->input->post('id_barang')[$i], 
+					$this->input->post('qty')[$i], 
+					null, 
+					5, 
+					null, 
+					$cek_retur_beli_det->harga, 
+					$cek_retur_masuk->id_gudang, 
+					$cek_retur_masuk->kode
+				);
+				
 			}
 
-			$cek_trans_retur = $this->m_global->single_row('*', ['id' => $id_retur, 'deleted_at' => null], 't_retur_beli');
-
-			if(!$cek_trans_retur) {
-				echo json_encode([
-					'status' => false,
-					'pesan' => 'Data Retur tidak ditemukan'
-				]);
-				return;
-			}
-
-			if($qty > $cek_trans->qty) {
-				echo json_encode([
-					'status' => false,
-					'pesan' => 'Qty Retur melebihi jumlah Penerimaan'
-				]);
-				return;
-			}
-
-			if($qty == "" || $qty <= 0) {
-				echo json_encode([
-					'status' => false,
-					'pesan' => 'Retur tidak boleh kosong'
-				]);
-				return;
-			}
-
-			$cek_trans_det = $this->m_global->single_row('*', ['id_retur_beli' => $id_retur, 'id_stok' => $id_stok, 'deleted_at' => null], 't_retur_beli_det');
-			if($cek_trans_det) {
-				echo json_encode([
-					'status' => false,
-					'pesan' => 'Maaf Barang yang dipilih sudah ada. Silahkan Hapus Terlebih dahulu'
-				]);
-				return;
-			}
-
-			$data = [
-				'id_retur_beli' => $id_retur,
-				'id_stok' => $id_stok,
-				'qty' => $qty,
-				'harga' => $cek_trans->harga,
-				'harga_total' => $qty * $cek_trans->harga,
-				'created_at' => $timestamp
-			];
-
-			$insert = $this->m_global->store($data, 't_retur_beli_det');
+			### update t_retur_masuk (total_harga)
+			$data_where = ['id' => $id_retur_masuk];
+			$this->m_global->update('t_retur_masuk', ['total_nilai_retur' => $sum_harga_total + $cek_retur_masuk->total_nilai_retur], $data_where);
 
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();
 				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal Hapus Data';
+				$retval['pesan'] = 'Gagal menambahkan Penerimaan Retur';
 			} else {
-				### update data header
-				$q_grand_total = $this->t_retur_beli->getTotalTransaksiDet($id_retur)->row();
-				$upd = $this->m_global->update('t_retur_beli', ['total_nilai_retur' => $q_grand_total->total, 'updated_at' => $timestamp], ['id' => $id_retur]);
-	
-				if ($upd) {
-					$mutasi = $this->lib_mutasi->simpan_mutasi($cek_trans->id_barang, $qty, 6, $kode_retur, $cek_trans->id_gudang);
-					$this->db->trans_commit();
-					$retval['status'] = true;
-					$retval['pesan'] = 'Sukses Menambahkan Data ';
-				} else {
-					$this->db->trans_rollback();
-					$retval['status'] = false;
-					$retval['pesan'] = 'Gagal Menambahkan Data';
+				$this->db->trans_commit();
+
+				$data_retur_beli_det = $this->m_global->multi_row('*', ['id_retur_beli' => $id_retur_beli], 't_retur_beli_det');
+				$arr = [];
+
+				foreach ($data_retur_beli_det as $key => $value) {
+					if($value->qty == $value->qty_terima) {
+						$txt = 'ok';	
+					}else{
+						$txt = 'belum';
+					}
+
+					$arr[] = $txt; 
 				}
+
+				### jika tidak ada yg belum
+				### update t_retur_beli_det set flag is_terima_all = 1 where is_terima di masing-masing det not null
+				if(!in_array('belum', $arr)) {
+					$data_where = ['id' => $id_retur_beli];
+					$this->m_global->update('t_retur_beli', ['is_terima_all' => 1], $data_where);
+				}
+				
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses menambahkan Penerimaan Retur';
 			}
+
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses menambahkan Penerimaan Retur';
+			
 		} catch (\Throwable $th) {
-			$this->db->trans_rollback();
+			// $this->db->trans_rollback();
 			$retval['status'] = false;
 			$retval['pesan'] = $th;
 		}
@@ -442,16 +452,9 @@ class Retur_masuk extends CI_Controller
                 <td style="vertical-align: middle;" id="harga_total_<?php echo $idx_row;?>"><?php echo 'Rp '.number_format($harga_total); ?></td>
 				<td style="vertical-align: middle;"><button type="button" class="btn-danger" alt="batalkan" onclick="hapus_trans_detail(this)"><i class="fa fa-times"></i></button></td>
             </tr>
-		<?php
-		}
+			<?php
+			}
 
-		$data_total = $this->total_tabel_trans($id);
-		?>
-		<tr>
-			<td style="vertical-align: middle;font-weight:bold;" colspan="3">Grand Total</td>
-			<td style="vertical-align: middle;font-weight:bold;font-size:16px;" colspan="2"><?php echo $data_total; ?></td>
-		</tr>
-		<?php
 		}
 	}
 
@@ -467,58 +470,6 @@ class Retur_masuk extends CI_Controller
 		}
 
 		return $data['total'];
-	}
-
-	public function hapus_trans_detail()
-	{
-		try {
-			$this->db->trans_begin();
-			$obj_date = new DateTime();
-			$timestamp = $obj_date->format('Y-m-d H:i:s');
-
-			$id = $this->input->post('id');
-			
-			$join = [
-				['table' => 't_retur_beli', 'on' => 't_retur_beli_det.id_retur_beli = t_retur_beli.id'],
-				['table' => 't_stok', 'on' => 't_retur_beli_det.id_stok = t_stok.id_stok'],
-			];
-
-			$data_where = ['t_retur_beli_det.id' => $id, 't_retur_beli_det.deleted_at' => null];
-			$cek_trans = $this->m_global->single_row('t_retur_beli_det.*, t_retur_beli.kode_retur, t_stok.id_gudang, t_stok.id_barang', $data_where, 't_retur_beli_det', $join);
-			
-			$del = $this->m_global->soft_delete($data_where, 't_retur_beli_det');
-
-			if ($this->db->trans_status() === FALSE) {
-				$this->db->trans_rollback();
-				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal Hapus Data';
-			} else {
-				### update data header
-				$q_grand_total = $this->t_retur_beli->getTotalTransaksiDet($cek_trans->id_retur_beli)->row();
-				$upd = $this->m_global->update('t_retur_beli', ['total_nilai_retur' => $q_grand_total->total, 'updated_at' => $timestamp], ['id' => $cek_trans->id_retur_beli]);
-	
-				if ($upd) {
-					$mutasi = $this->lib_mutasi->updateMutasi(
-						$cek_trans->id_barang, 
-						-abs($cek_trans->qty), 
-						6, 
-						$cek_trans->kode_retur, 
-						$cek_trans->id_gudang
-					);
-					$this->db->trans_commit();
-					$retval['status'] = true;
-					$retval['pesan'] = 'Sukses Menghapus Data ';
-				} else {
-					$this->db->trans_rollback();
-					$retval['status'] = false;
-					$retval['pesan'] = 'Gagal Menghapus Data';
-				}
-			}
-		} catch (\Throwable $th) {
-			//throw $th;
-		}
-
-		echo json_encode($retval);
 	}
 
 	public function get_detail_transaksi()
@@ -682,64 +633,57 @@ class Retur_masuk extends CI_Controller
 		$this->load->view('view_cetak_invoice_penjualan', $data);
 	}
 
-	/* public function change_qty()
-	{
-		$this->db->trans_begin();
-		$id_retur_beli_det = $this->input->post('id');
-		$qty = $this->input->post('qty');
-
-		$retur_beli_det = $this->m_global->getSelectedData('t_retur_beli_det', ['id' => $id_retur_beli_det])->row();
-		$subtotal = $retur_beli_det->harga * $qty;
-
-		$data =[
-			'qty' => $qty,
-			'harga_total' => $subtotal
-		];
-
-		$data_where = ['id' => $id_retur_beli_det];
-		$update = $this->m_global->update('t_retur_beli_det', $data, $data_where);
-		
-		if ($this->db->trans_status() === FALSE) {
-			$this->db->trans_rollback();
-			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal Mengubah Data';
-		} else {
-			$this->db->trans_commit();
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Mengubah Data ';
-			// $retval['order_id'] = $order_id;
-		}
-
-		echo json_encode($retval);
-	} */
-
 	public function change_qty()
 	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$tgl = $obj_date->format('Y-m-d');
+
 		$this->db->trans_begin();
 		$id_retur_beli_det = $this->input->post('id');
-		$qty = $this->input->post('qty');
+		$qty              = $this->input->post('qty');
+		$kodereff		  = $this->input->post('kodereff');
 
 		$retur_beli_det = $this->m_global->getSelectedData('t_retur_beli_det', ['id' => $id_retur_beli_det])->row();
-		$subtotal = $retur_beli_det->harga * $qty;
+		$retur_masuk = $this->m_global->getSelectedData('t_retur_masuk', ['id_retur_beli' => $retur_beli_det->id_retur_beli, 'kode' => $kodereff])->row();
+		$retur_masuk_det =  $this->m_global->getSelectedData('t_retur_masuk_det', array('id_retur_masuk' => $retur_masuk->id, 'id_stok' => $retur_beli_det->id_stok))->result();
 
-		$data = [
-				'qty' => $qty,
-				'harga_total' => $subtotal
-			];
-
-		$data_where = ['id' => $id_retur_beli_det];
-		$update = $this->m_global->update('t_retur_beli_det', $data, $data_where);
-
-		if ($this->db->trans_status() === FALSE) {
-			$this->db->trans_rollback();
-			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal Mengubah Data';
-		} else {
-			$this->db->trans_commit();
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses Mengubah Data ';
-			// $retval['order_id'] = $order_id;
+		$qty_in = 0;
+		
+		if($retur_masuk_det) {
+			foreach ($retur_masuk_det as $key => $value) {
+				$qty_in += $value->qty;
+			}
 		}
+
+		### jika qty inputan lebih besar dari seharusnya (bisa karena barang sudah diterima)
+		### return false
+		if(($qty > $qty_in) && ($qty_in > 0)) {
+			$this->db->trans_rollback();
+			$retval['qty'] = $qty_in;
+			$retval['harga_total'] = 'Rp '.number_format($retur_beli_det->harga * $qty_in);
+			$retval['harga_raw'] = $retur_beli_det->harga * $qty_in;
+			echo json_encode($retval);
+			return;
+		}
+
+		$qty_remaining = $retur_beli_det->qty - $qty_in;
+
+		### jika qty inputan lebih besar dari seharusnya (bisa karena barang sudah diterima)
+		### return false
+		if($qty > $qty_remaining) {
+			$retval['qty'] = $qty_remaining;
+			$retval['harga_total'] = 'Rp '.number_format($retur_beli_det->harga * $qty_remaining);
+			$retval['harga_raw'] = $retur_beli_det->harga * $qty_remaining;
+			echo json_encode($retval);
+			return;
+		}
+
+		$subtotal = $retur_beli_det->harga * $qty; 
+				
+		$retval['qty'] = $qty;
+		$retval['harga_total'] = 'Rp '.number_format($retur_beli_det->harga * $qty);
+		$retval['harga_raw'] = $retur_beli_det->harga * $qty;
 
 		echo json_encode($retval);
 	}

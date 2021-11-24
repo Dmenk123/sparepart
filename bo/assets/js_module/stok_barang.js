@@ -288,11 +288,7 @@ function reset_modal_form()
     $('.append-opt').remove(); 
     $('div.form-group').children().removeClass("is-invalid invalid-feedback");
     $('span.help-block').text('');
-    $('#div_pass_lama').css("display","none");
-    $('#div_preview_foto').css("display","none");
-    $('#div_skip_password').css("display", "none");
-    $('#label_foto').text('Pilih gambar yang akan diupload');
-    $('#username').attr('disabled', false);
+    $(".select2").val('0').trigger('change');
 }
 
 function reset_modal_form_import()

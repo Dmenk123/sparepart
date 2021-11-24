@@ -197,6 +197,17 @@ class T_retur_masuk extends CI_Model
 		return $this->db->update($this->table, $data, $where);
 	}
 
+	function sum_barang_masuk_pertransaksi($id_stok, $id_retur_beli)
+	{
+		$query = "
+			SELECT COALESCE(SUM(rmd.qty),0) as total_qty_masuk
+			FROM t_retur_masuk rm
+			LEFT JOIN t_retur_masuk_det rmd on rm.id = rmd.id_retur_masuk
+			WHERE rm.id_retur_beli = '$id_retur_beli' AND rmd.id_stok = '$id_stok' AND rmd.deleted_at is null
+		";
+		$q = $this->db->query($query)->row();
+		return $q->total_qty_masuk;
+	}
 	
 
 	

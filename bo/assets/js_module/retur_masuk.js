@@ -47,26 +47,77 @@ $(document).ready(function() {
 
     $('#regForm').submit(function(e){
       e.preventDefault();
-      // var url = '<?php echo base_url(); ?>';
-      var reg = $('#regForm').serialize();
-      $.ajax({
-          type: 'POST',
-          data: reg,
-          dataType: 'json',
-          url: base_url + 'retur_beli/save_trans_detail',
-          success: function(data)
-          {
-              swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
-              $('#regForm')[0].reset();
-              $("#id_barang").val(null).trigger('change');
-              getTable();
-          },
-          error: function (jqXHR, textStatus, errorThrown)
-          {
-              Swal.fire('Terjadi Kesalahan');
-          }
-        
+      $("#btnSaveAdd").prop("disabled", true);
+      $('#btnSaveAdd').text('Menyimpan Data ....');
+
+      var form = $('#regForm')[0];
+      var reg = new FormData(form);
+      let alert = "Menerima";
+
+      swalConfirm.fire({
+        title: 'Perhatian',
+        text: "Apakah Anda ingin "+alert+" Data ini ?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya !',
+        cancelButtonText: 'Tidak !',
+        reverseButtons: false
+      }).then((result) => {
+        if (result.value) {
+          $.ajax({
+              type: "POST",
+              enctype: 'multipart/form-data',
+              url: base_url + 'retur_masuk/simpan_penerimaan_retur',
+              data: reg,
+              dataType: "JSON",
+              processData: false, // false, it prevent jQuery form transforming the data into a query string
+              contentType: false, 
+              cache: false,
+              timeout: 600000,
+              success: function (data) {
+                  if(data.status) {
+                    swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
+                    $('#regForm')[0].reset();
+                    window.location.href = base_url +'retur_masuk';
+                  }else {
+                    for (var i = 0; i < data.inputerror.length; i++) 
+                    {
+                        if (data.inputerror[i] != 'pegawai') {
+                            $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
+                            $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
+                        }else{
+                            //ikut style global
+                            $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
+                        }
+                    }
+
+                    $("#btnSaveAdd").prop("disabled", false);
+                    $('#btnSaveAdd').text('Simpan');
+                  }
+              },
+              error: function (e) {
+                  console.log("ERROR : ", e);
+                  createAlert('Opps!','Terjadi Kesalahan','Coba Lagi nanti','danger',true,false,'pageMessages');
+                  $("#btnSaveAdd").prop("disabled", false);
+                  $('#btnSaveAdd').text('Simpan');
+              }
+          });
+        }else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        ) {
+          swalConfirm.fire(
+            'Dibatalkan',
+            'Aksi Dibatalakan',
+            'error'
+          );
+
+          $("#btnSaveAdd").prop("disabled", false);
+          $('#btnSaveAdd').text('Simpan');
+        }
       });
+
+      
     });
 });	
 
@@ -240,34 +291,34 @@ function getTable(){
   });
 }
 
-function hapus_trans_det(id)
+function getTotal(){
+  let result = 0;
+  
+  $('#tbody tr td input.kelas_htotal').each(function(){
+    result += parseFloat(this.value);
+  });
+  
+  $('td#total').html('Rp '+numberWithCommas(result));
+}
+
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function hapus_trans_detail(elem)
 {
   swalConfirmDelete.fire({
-    title: 'Apakah Anda Yakin ?',
-    text: "ingin menghapus daftar Transaksi ini ?",
-    icon: 'warning',
+    title: 'Hapus Data ?',
+    text: "Data Akan dihapus permanen ?",
+    type: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Ya !',
-    cancelButtonText: 'Tidak !',
+    confirmButtonText: 'Ya, Hapus Data !',
+    cancelButtonText: 'Tidak, Batalkan!',
     reverseButtons: true
   }).then((result) => {
     if (result.value) {
-        $.ajax({
-            url : base_url + 'retur_beli/hapus_trans_detail',
-            type: "POST",
-            dataType: "JSON",
-            data : {id : id},
-            success: function(data)
-            {
-                swalConfirm.fire('Berhasil !', data.pesan, 'success');
-                getTable();
-                
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
-                Swal.fire('Terjadi Kesalahan');
-            }
-        });
+        $(elem).closest('tr').remove();
+        getTotal();
     } else if (
       /* Read more about handling dismissals below */
       result.dismiss === Swal.DismissReason.cancel
@@ -355,14 +406,6 @@ function add_menu()
   save_method = 'add';
 	$('#modal_agen_form').modal('show');
 	$('#modal_title').text('Tambah Master Agen'); 
-}
-
-
-
-
-function edit_transaksi(kode, id)
-{
-  window.location.href = base_url +'retur_masuk/add_transaksi_det?index='+id+'&kode='+kode+'&mode=edit';
 }
 
 
@@ -564,26 +607,26 @@ function import_data_excel(){
     });
 }
 
-
- 
-
-
-
-
 function tes(id)
 {
   var tes = '#qty_order_'+id;
+  var row_harga = '#harga_total_'+id;
+  var row_harga_raw = '#harga_total_raw_'+id;
   var qty = $(tes).val();
+  var current_url = window.location.href;
+  var url = new URL(current_url);
+  var kodereff = url.searchParams.get("kode");
   $.ajax({
     url : base_url + 'retur_masuk/change_qty',
     type: "POST",
     dataType: "JSON",
-    data : {id : id, qty : qty},
+    data : {id : id, qty : qty, kodereff:kodereff},
     success: function(data)
     {
-        // swalConfirm.fire('Berhasil !', data.pesan, 'success');
-        getTable();
-        
+      $(tes).val(data.qty);
+      $(row_harga).text(data.harga_total);
+      $(row_harga_raw).val(data.harga_raw);
+      getTotal();
     },
     error: function (jqXHR, textStatus, errorThrown)
     {
