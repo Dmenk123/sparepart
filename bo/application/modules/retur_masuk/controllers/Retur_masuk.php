@@ -114,6 +114,7 @@ class Retur_masuk extends CI_Controller
 			'data_user' => $data_user,
 			'data_role'	=> $data_role,
 			'data_retur' => $this->m_global->getSelectedData('t_retur_beli', array('deleted_at' => NULL, 'jenis_retur' => 1, 'is_terima_all' => NULL))->result(),
+			'data_gudang' => $this->m_global->multi_row('*', ['deleted_at' => null], 'm_gudang', null, 'nama_gudang'),
 			'mode'		=> 'add',
 		);
 
@@ -158,6 +159,7 @@ class Retur_masuk extends CI_Controller
 		$tgl = $this->input->post('tanggal');
 		$tgl_fix = DateTime::createFromFormat('d/m/Y', $tgl)->format('Y-m-d');
 		$id_retur = $this->input->post('id_retur');
+		$id_gudang = $this->input->post('id_gudang');
 		
 		$arr_valid = $this->rule_validasi();
 
@@ -197,6 +199,7 @@ class Retur_masuk extends CI_Controller
 			$data['id_retur_beli'] = $id_retur;
 			$data['tanggal'] = $tgl_fix;
 			$data['id_user'] = $this->session->userdata('id_user');
+			$data['id_gudang'] = $id_gudang;
 			$data['kode'] = $kode;
 			$data['id_agen'] = $q_retur->id_agen;
 			$data['total_nilai_retur'] = 0;
@@ -403,7 +406,7 @@ class Retur_masuk extends CI_Controller
 		
 		if($data_masuk == null) {			
 			### transaksi baru
-			$data = $this->t_retur_masuk->getPembelianDet($id)->result();
+			$data = $this->t_retur_masuk->getDetailRetur($id_retur)->result();
 			$flag_has_transaksi = true;
 		}else{
 			### transaksi update
@@ -412,31 +415,49 @@ class Retur_masuk extends CI_Controller
 		}
 
 		foreach ($data as $key => $row) {
-		?>
+			$idx_row = ($flag_is_update) ? $row->id : $row->id;
+			$harga = ($flag_is_update) ? $row->harga : $row->harga;
+			$harga_total = ($flag_is_update) ? $row->harga_total : $row->harga_total;
+
+			if ($flag_has_transaksi) {
+				### qty retur - qty diterima (jika retur ini sudah pernah diterima)
+				$qty = $row->qty - $row->qty_terima;
+				### replace value harga_total
+				$harga_total = $qty * $harga;
+			} else {
+				$qty = $row->qty;
+			}
+			if(!$qty == 0) {  
+			?>
+
 			<tr>
-				<td style="vertical-align: middle;"><?php $key++; echo $key; ?></td>
-				<td style="vertical-align: middle;"><?php echo $row->nama_barang; ?></td>
-				<td style="vertical-align: middle;"><?php echo $row->nama_gudang; ?></td>
-				<td style="vertical-align: middle;"><?php echo $row->qty; ?></td>
-				<td style="vertical-align: middle;"><?php echo 'Rp ' . number_format($row->harga); ?></td>
-				<td style="vertical-align: middle;"><?php echo 'Rp ' . number_format($row->harga_total); ?></td>
-				<td style="vertical-align: middle;"><button class="btn-danger" alt="batalkan" onclick="hapus_trans_det(<?php echo $row->id; ?>)"><i class="fa fa-times"></i></button></td>
-			</tr>
+                <td width="10%">
+					<input type="number" min="1" max="<?=$qty;?>" class="form-control" width="5" id="qty_order_<?php echo $idx_row;?>" value="<?php echo $qty; ?>" onchange="tes(<?php echo $idx_row ?>)" name="qty[]">
+					<input type="hidden" class="form-control kelas_htotal" name="harga_total_raw[]" id="harga_total_raw_<?php echo $idx_row;?>" value="<?php echo $harga_total; ?>">
+					<input type="hidden" class="form-control" value="<?php echo $idx_row; ?>" name="retur_beli_det[]">
+					<input type="hidden" class="form-control" value="<?php echo $row->id_barang; ?>" name="id_barang[]">
+				</td>
+                <td style="vertical-align: middle;"><?php echo $row->nama_barang; ?></td>
+                <td style="vertical-align: middle;"><?php echo 'Rp '.number_format($harga); ?></td>
+                <td style="vertical-align: middle;" id="harga_total_<?php echo $idx_row;?>"><?php echo 'Rp '.number_format($harga_total); ?></td>
+				<td style="vertical-align: middle;"><button type="button" class="btn-danger" alt="batalkan" onclick="hapus_trans_detail(this)"><i class="fa fa-times"></i></button></td>
+            </tr>
 		<?php
 		}
 
 		$data_total = $this->total_tabel_trans($id);
 		?>
 		<tr>
-			<td style="vertical-align: middle;font-weight:bold;" colspan="5">Grand Total</td>
+			<td style="vertical-align: middle;font-weight:bold;" colspan="3">Grand Total</td>
 			<td style="vertical-align: middle;font-weight:bold;font-size:16px;" colspan="2"><?php echo $data_total; ?></td>
 		</tr>
 		<?php
+		}
 	}
 
 	public function total_tabel_trans($id)
 	{
-		$hasil = $this->t_retur_beli->getTotalTransaksiDet($id)->row();
+		$hasil = $this->t_retur_masuk->getTotalTransaksiDet($id)->row();
 		$data = array();
 		if (!empty($hasil)) {
 			// var_dump($data->total);
@@ -624,6 +645,11 @@ class Retur_masuk extends CI_Controller
 			$data['error_string'][] = 'Wajib Memilih Tanggal Retur';
 			$data['status'] = FALSE;
 		}
+		if ($this->input->post('id_gudang') == '') {
+			$data['inputerror'][] = 'id_gudang';
+			$data['error_string'][] = 'Wajib Memilih Gudang';
+			$data['status'] = FALSE;
+		}
 		
 		return $data;
 	}
@@ -656,24 +682,53 @@ class Retur_masuk extends CI_Controller
 		$this->load->view('view_cetak_invoice_penjualan', $data);
 	}
 
+	/* public function change_qty()
+	{
+		$this->db->trans_begin();
+		$id_retur_beli_det = $this->input->post('id');
+		$qty = $this->input->post('qty');
+
+		$retur_beli_det = $this->m_global->getSelectedData('t_retur_beli_det', ['id' => $id_retur_beli_det])->row();
+		$subtotal = $retur_beli_det->harga * $qty;
+
+		$data =[
+			'qty' => $qty,
+			'harga_total' => $subtotal
+		];
+
+		$data_where = ['id' => $id_retur_beli_det];
+		$update = $this->m_global->update('t_retur_beli_det', $data, $data_where);
+		
+		if ($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Mengubah Data';
+		} else {
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses Mengubah Data ';
+			// $retval['order_id'] = $order_id;
+		}
+
+		echo json_encode($retval);
+	} */
+
 	public function change_qty()
 	{
 		$this->db->trans_begin();
-		$id_penjualan_det = $this->input->post('id');
-		$qty              = $this->input->post('qty');
+		$id_retur_beli_det = $this->input->post('id');
+		$qty = $this->input->post('qty');
 
-		$penjualan_det     = $this->m_global->getSelectedData('t_penjualan_det', array('id_penjualan_det' => $id_penjualan_det))->row();
+		$retur_beli_det = $this->m_global->getSelectedData('t_retur_beli_det', ['id' => $id_retur_beli_det])->row();
+		$subtotal = $retur_beli_det->harga * $qty;
 
+		$data = [
+				'qty' => $qty,
+				'harga_total' => $subtotal
+			];
 
-
-		$subtotal = $penjualan_det->harga_diskon * $qty;
-		$data = array(
-			'qty' => $qty,
-			'sub_total' => $subtotal
-		);
-
-		$data_where = array('id_penjualan_det' => $id_penjualan_det);
-		$update = $this->m_penjualan->updatePenjualandet($data_where, $data);
+		$data_where = ['id' => $id_retur_beli_det];
+		$update = $this->m_global->update('t_retur_beli_det', $data, $data_where);
 
 		if ($this->db->trans_status() === FALSE) {
 			$this->db->trans_rollback();

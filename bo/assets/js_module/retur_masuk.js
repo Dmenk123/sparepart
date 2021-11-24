@@ -362,7 +362,7 @@ function add_menu()
 
 function edit_transaksi(kode, id)
 {
-  window.location.href = base_url +'retur_beli/add_transaksi_det?index='+id+'&kode='+kode+'&mode=edit';
+  window.location.href = base_url +'retur_masuk/add_transaksi_det?index='+id+'&kode='+kode+'&mode=edit';
 }
 
 
@@ -575,7 +575,7 @@ function tes(id)
   var tes = '#qty_order_'+id;
   var qty = $(tes).val();
   $.ajax({
-    url : base_url + 'penjualan/change_qty',
+    url : base_url + 'retur_masuk/change_qty',
     type: "POST",
     dataType: "JSON",
     data : {id : id, qty : qty},

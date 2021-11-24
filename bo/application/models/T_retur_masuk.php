@@ -141,24 +141,28 @@ class T_retur_masuk extends CI_Model
 		return $q;
 	}
 
-	function getDetailPenerimaan($id)
+	function getDetailRetur($id)
 	{
 		$this->db->select('
-			pd.*,
-			p.id_gudang,
+			rbd.*,
+			rb.kode_retur,
+			rb.total_nilai_retur,
 			mg.nama_gudang,
 			mb.nama as nama_barang,
-			ts.id_stok
+			ts.id_stok,
+			ts.id_gudang,
+			ts.id_barang
 		');
-		$this->db->from('t_penerimaan_det pd');
-		$this->db->join('t_penerimaan p', 'pd.id_penerimaan=p.id_penerimaan');
-		$this->db->join('m_gudang mg', 'p.id_gudang = mg.id_gudang');
-		$this->db->join('m_barang mb', 'mb.id_barang=pd.id_barang');
-		$this->db->join('t_stok ts', 'mb.id_barang = ts.id_barang and p.id_gudang = ts.id_gudang');
-		$this->db->where('pd.id_penerimaan', $id);
-		$this->db->where('pd.deleted_at', null);
+		$this->db->from('t_retur_beli_det rbd');
+		$this->db->join('t_retur_beli rb', 'rbd.id_retur_beli=rb.id');
+		$this->db->join('t_stok ts', 'rbd.id_stok = ts.id_stok');
+		$this->db->join('m_gudang mg', 'ts.id_gudang = mg.id_gudang');
+		$this->db->join('m_barang mb', 'ts.id_barang=mb.id_barang');
+	
+		$this->db->where('rbd.id_retur_beli', $id);
+		$this->db->where('rbd.deleted_at', null);
 		
-		$this->db->order_by('pd.id_penerimaan_det', 'ASC');
+		$this->db->order_by('rbd.id', 'ASC');
 		$q = $this->db->get();
 		return $q;
 	}
@@ -167,8 +171,8 @@ class T_retur_masuk extends CI_Model
 	{
 		$query = "
 			SELECT SUM(harga_total) as total
-			FROM t_retur_beli_det
-			WHERE id_retur_beli = $id and deleted_at is NULL
+			FROM t_retur_masuk_det
+			WHERE id_retur_masuk = $id and deleted_at is NULL
 		";
 		return $this->db->query($query);
 	}
