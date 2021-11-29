@@ -135,6 +135,8 @@ $(document).ready(function() {
             {
                 swalConfirm.fire('Berhasil Menambah Data!', data.pesan, 'success');
                 $('#regForm')[0].reset();
+                $("#id_gudang").val('0').trigger('change');
+                $("#id_barang").val('0').trigger('change');
                 getTable();
                 getTotal();
             },

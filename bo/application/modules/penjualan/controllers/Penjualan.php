@@ -534,7 +534,13 @@ class Penjualan extends CI_Controller {
 			return;
 		}
 
-		$datadet = $this->m_global->getSelectedData('t_penjualan_det', ['id_penjualan' => $id_penjualan, 'id_barang' => $id_barang, 'id_gudang' => $id_gudang])->row();
+		$datadet = $this->m_global->getSelectedData('t_penjualan_det', [
+			'id_penjualan' => $id_penjualan,
+			'id_barang' => $id_barang,
+			'id_gudang' => $id_gudang,
+			'deleted_at' => null
+		])->row();
+		
 		if($datadet) {
 			$retval['status'] = false;
 			$retval['pesan'] = 'Barang yang dipilih sudah ada, mohon memilih barang yang lain';
@@ -554,7 +560,8 @@ class Penjualan extends CI_Controller {
 			'besaran_diskon'=> $diskon,
 			'sub_total'     => $sub_total,
 			'id_gudang'		=> $id_gudang,
-			'qty'           => $qty
+			'qty'           => $qty,
+			'created_at'	=> $timestamp
 		];
 		
 		$insert = $this->m_global->save($data_order, 't_penjualan_det');
